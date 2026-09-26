@@ -1,0 +1,51 @@
+{
+  "target": {
+    "base_url": "http://localhost/",
+    "allowed_hosts": [
+      "localhost",
+      "127.0.0.1",
+      "host.docker.internal"
+    ]
+  },
+  "orchestrator": {
+    "max_iterations": 8,
+    "max_request_budget": 1500,
+    "marginal_gain_threshold": 0.03,
+    "max_llm_token_budget": 200000,
+    "compactor_max_endpoints": 60
+  },
+  "tools": {
+    "zap": {
+      "api_url": "http://127.0.0.1:18080",
+      "api_key": "changeme",
+      "spider_max_depth": 5,
+      "ajax_spider_timeout_sec": 120
+    },
+    "wapiti": {
+      "binary": "wapiti",
+      "scope": "domain",
+      "max_parameters": 100,
+      "max_scan_time": 300,
+      "timeout": 20,
+      "session_file": "output/temp/wapiti/session.db",
+      "report_file": "output/temp/wapiti/report.json",
+      "log_file": "output/logs/wapiti.log"
+    },
+    "firecrawl": {
+      "api_url": "https://api.firecrawl.dev/v2",
+      "model": "spark-1-pro",
+      "poll_timeout_seconds": 600,
+      "poll_interval_seconds": 10
+    }
+  },
+  "storage": {
+    "sqlite_db": "storage/orchestrator_state.db"
+  },
+  "ground_truth": {
+    "file_path": "ground_truth/avideo_routes.json"
+  },
+  "logging": {
+    "log_level": "INFO",
+    "log_file": "output/logs/orchestrator.log"
+  }
+}

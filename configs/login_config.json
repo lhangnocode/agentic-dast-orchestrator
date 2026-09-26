@@ -1,0 +1,25 @@
+{
+  "auth": {
+    "enabled": true,
+    "base_url": "http://localhost/",
+    "login_url": "http://localhost/user",
+    "login_paths": [
+      "/objects/login.json.php",
+      "/user"
+    ],
+    "username": "admin",
+    "password": "admin123",
+    "username_field": "user",
+    "password_field": "pass",
+    "extra_fields": {
+      "rememberme": true
+    },
+    "selectors": {
+      "username_selector": "#inputUser",
+      "password_selector": "#inputPassword",
+      "submit_selector": "#mainButton",
+      "success_selector": ""
+    },
+    "ttl_seconds": 3600
+  }
+}

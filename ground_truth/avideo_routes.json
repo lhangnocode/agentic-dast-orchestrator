@@ -1,0 +1,1404 @@
+[
+  {
+    "canonical_hash": "c767025d0edc7a064cf0003cc4d5a2f5f9e013c608f7a6909554afcdb1126fb2",
+    "canonical_key": "GET /",
+    "method": "GET",
+    "path_template": "/",
+    "query_params": [],
+    "normalized_url": "http://localhost/",
+    "raw_sample": "http://localhost/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "e3239f8eefe90f7d6efffd37b890f448e61988dfaf873ba2e2c37d8cf732ab68",
+    "canonical_key": "GET /?catName={catName}&created={created}&minViews={minViews}&search={search}&searchFieldsNames[]={searchFieldsNames[]}",
+    "method": "GET",
+    "path_template": "/",
+    "query_params": [
+      "catName",
+      "created",
+      "minViews",
+      "search",
+      "searchFieldsNames[]"
+    ],
+    "normalized_url": "http://localhost/?catName={catName}&created={created}&minViews={minViews}&search={search}&searchFieldsNames[]={searchFieldsNames[]}",
+    "raw_sample": "http://localhost/?catName={val}&created={val}&minViews={val}&search={val}&searchFieldsNames%5B%5D={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "2a3e702ffbea97b24a04c9201936ea8e2e2c79d859470bb391e1c2111056623e",
+    "canonical_key": "GET /?type={type}",
+    "method": "GET",
+    "path_template": "/",
+    "query_params": [
+      "type"
+    ],
+    "normalized_url": "http://localhost/?type={type}",
+    "raw_sample": "http://localhost/?type={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "2dbd2fe442402a989975d2b2006e6103fc9d74d536f284fd9cba02cad54f9463",
+    "canonical_key": "GET /Default",
+    "method": "GET",
+    "path_template": "/Default",
+    "query_params": [],
+    "normalized_url": "http://localhost/Default",
+    "raw_sample": "http://localhost/Default",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "b1cd7d45ed91347066485cc46b8b9d190c61484d3076678f5d0d582713c86941",
+    "canonical_key": "GET /Restream",
+    "method": "GET",
+    "path_template": "/Restream",
+    "query_params": [],
+    "normalized_url": "http://localhost/Restream",
+    "raw_sample": "http://localhost/Restream",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "ed3260aaa98024520d5672d15be1e3c5ce51013fe6e069081eecf6859a5d5afe",
+    "canonical_key": "GET /about",
+    "method": "GET",
+    "path_template": "/about",
+    "query_params": [],
+    "normalized_url": "http://localhost/about",
+    "raw_sample": "http://localhost/about",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "02b1c830d69ee8264a2278edccfc3a1c80e3689760df4b7d229f8fae837b8643",
+    "canonical_key": "GET /admin/",
+    "method": "GET",
+    "path_template": "/admin/",
+    "query_params": [],
+    "normalized_url": "http://localhost/admin/",
+    "raw_sample": "http://localhost/admin/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "30ee3d4ee98e711d489a8f92ff73d1000b071f098c31d8fae38286ca292e13d7",
+    "canonical_key": "GET /admin/?browse_page={browse_page}",
+    "method": "GET",
+    "path_template": "/admin/",
+    "query_params": [
+      "browse_page"
+    ],
+    "normalized_url": "http://localhost/admin/?browse_page={browse_page}",
+    "raw_sample": "http://localhost/admin/?browse_page={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "03e8d3464ed090ba1776045ed58f407952967d39fd28181a2c91c92d0390c75b",
+    "canonical_key": "GET /admin/?lang={lang}",
+    "method": "GET",
+    "path_template": "/admin/",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/admin/?lang={lang}",
+    "raw_sample": "http://localhost/admin/?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "acfeab8dc854a010cd0edd07a2f6854b6282504af19e87487f0cd81f05d7dcd9",
+    "canonical_key": "GET /audioOnly",
+    "method": "GET",
+    "path_template": "/audioOnly",
+    "query_params": [],
+    "normalized_url": "http://localhost/audioOnly",
+    "raw_sample": "http://localhost/audioOnly",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "c89ec845d06d76dc98a24372d40221ed8a28d5f20c54766a92fb0cd9bf66f63a",
+    "canonical_key": "GET /audio_wave/",
+    "method": "GET",
+    "path_template": "/audio_wave/",
+    "query_params": [],
+    "normalized_url": "http://localhost/audio_wave/",
+    "raw_sample": "http://localhost/audio_wave/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "79b92147cb2d9f385c8a7cadc21933798dd0530071bd67df8e24e9ac15152be1",
+    "canonical_key": "GET /categories",
+    "method": "GET",
+    "path_template": "/categories",
+    "query_params": [],
+    "normalized_url": "http://localhost/categories",
+    "raw_sample": "http://localhost/categories",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "d563b5f89f37f8736a9cdacf383ca9d3d2367c464d404dc42081a789793f8cdd",
+    "canonical_key": "GET /channel",
+    "method": "GET",
+    "path_template": "/channel",
+    "query_params": [],
+    "normalized_url": "http://localhost/channel",
+    "raw_sample": "http://localhost/channel",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "b75fe6e7258491652d5fd12ac7f14631b4d36081e3c69ddbf250ffad3904b492",
+    "canonical_key": "GET /channel/admin/mrss",
+    "method": "GET",
+    "path_template": "/channel/admin/mrss",
+    "query_params": [],
+    "normalized_url": "http://localhost/channel/admin/mrss",
+    "raw_sample": "http://localhost/channel/admin/mrss",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "2162877136ce5dab2a5d40dc014e09bcdb69beebab64353b23607362764d419b",
+    "canonical_key": "GET /channel/admin/rss",
+    "method": "GET",
+    "path_template": "/channel/admin/rss",
+    "query_params": [],
+    "normalized_url": "http://localhost/channel/admin/rss",
+    "raw_sample": "http://localhost/channel/admin/rss",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "8eb2f08c94bd3cc5ecec160f51e641f9b7239fe6c903fb778b3610cc885d7624",
+    "canonical_key": "GET /channel/{user}",
+    "method": "GET",
+    "path_template": "/channel/{user}",
+    "query_params": [],
+    "normalized_url": "http://localhost/channel/{user}",
+    "raw_sample": "http://localhost/channel/admin",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "92c4bc7e9513e44048b8760dc0e2fff86dda66765f91c0d8055a84b003aede1b",
+    "canonical_key": "GET /channel/{user}/roku.json",
+    "method": "GET",
+    "path_template": "/channel/{user}/roku.json",
+    "query_params": [],
+    "normalized_url": "http://localhost/channel/{user}/roku.json",
+    "raw_sample": "http://localhost/channel/admin/roku.json",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "8d7ca04227ba3c59ed0f1ca691e3cf7b559e2bd622f7e010554de9319219b2b9",
+    "canonical_key": "GET /channels",
+    "method": "GET",
+    "path_template": "/channels",
+    "query_params": [],
+    "normalized_url": "http://localhost/channels",
+    "raw_sample": "http://localhost/channels",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "35a827911c0d95a122b6d68771bd865d391cba26fb1fce91dc2228ec788a2bd8",
+    "canonical_key": "GET /charts",
+    "method": "GET",
+    "path_template": "/charts",
+    "query_params": [],
+    "normalized_url": "http://localhost/charts",
+    "raw_sample": "http://localhost/charts",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "245ae03320bc54e033fb46e7e2ece6633c7e9f748decd416661400707e8dcdaa",
+    "canonical_key": "GET /comments",
+    "method": "GET",
+    "path_template": "/comments",
+    "query_params": [],
+    "normalized_url": "http://localhost/comments",
+    "raw_sample": "http://localhost/comments",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "3bd927d969210627654328ca2e26a929e1753351828c1f9dfaa8c2c38064014d",
+    "canonical_key": "GET /contact",
+    "method": "GET",
+    "path_template": "/contact",
+    "query_params": [],
+    "normalized_url": "http://localhost/contact",
+    "raw_sample": "http://localhost/contact",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "c075af81d09e8b5251dfead012173942ce24bba3ecbb469c86c3fff030677558",
+    "canonical_key": "GET /favorite",
+    "method": "GET",
+    "path_template": "/favorite",
+    "query_params": [],
+    "normalized_url": "http://localhost/favorite",
+    "raw_sample": "http://localhost/favorite",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "4b1c48adb7d2d49521f8d2bf077b4857a464fd4d41ace5cb260866ae8ddf8fcf",
+    "canonical_key": "GET /help",
+    "method": "GET",
+    "path_template": "/help",
+    "query_params": [],
+    "normalized_url": "http://localhost/help",
+    "raw_sample": "http://localhost/help",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "1377d2755ae87cb9b3cf757d93837baf90e9b62daf1e9778611e38d2824e3af8",
+    "canonical_key": "GET /i/log",
+    "method": "GET",
+    "path_template": "/i/log",
+    "query_params": [],
+    "normalized_url": "http://localhost/i/log",
+    "raw_sample": "http://localhost/i/log",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "0e17923dc533a1ce638a2bd9d534d3b60c244980e092dcf0238962502a4e4b26",
+    "canonical_key": "GET /listCategories",
+    "method": "GET",
+    "path_template": "/listCategories",
+    "query_params": [],
+    "normalized_url": "http://localhost/listCategories",
+    "raw_sample": "http://localhost/listCategories",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "991dd4139b9f929f495f0416b7ad8eda52347275ed5d1d3532da2a5e3cd6cfc9",
+    "canonical_key": "GET /locale/",
+    "method": "GET",
+    "path_template": "/locale/",
+    "query_params": [],
+    "normalized_url": "http://localhost/locale/",
+    "raw_sample": "http://localhost/locale/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "891d437c9044a3541d14ee558e1b3a88a5dd28215d82c3831437deb605051f37",
+    "canonical_key": "GET /locale/?lang={lang}",
+    "method": "GET",
+    "path_template": "/locale/",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/locale/?lang={lang}",
+    "raw_sample": "http://localhost/locale/?lang={lang}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "874fe972d4e2a4eefba7cc4d2afd7707bb26a7c2f2a4e9ff59182b3f3c99daf6",
+    "canonical_key": "GET /mvideos",
+    "method": "GET",
+    "path_template": "/mvideos",
+    "query_params": [],
+    "normalized_url": "http://localhost/mvideos",
+    "raw_sample": "http://localhost/mvideos",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "fcbd4c1b794552752b4524ab8bb02a3ad2928ab2144ef8866b5421f44e942da9",
+    "canonical_key": "GET /mvideos?link={link}",
+    "method": "GET",
+    "path_template": "/mvideos",
+    "query_params": [
+      "link"
+    ],
+    "normalized_url": "http://localhost/mvideos?link={link}",
+    "raw_sample": "http://localhost/mvideos?link={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "596d79e14469fd725aadf457ca6f666e6920ef780e0534db5c8337e40bc5beff",
+    "canonical_key": "GET /objects/",
+    "method": "GET",
+    "path_template": "/objects/",
+    "query_params": [],
+    "normalized_url": "http://localhost/objects/",
+    "raw_sample": "http://localhost/objects/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "88260757588a97a7c09deaef74ff530d2fcc3312de3b9c1becc8be86bc742ebe",
+    "canonical_key": "GET /objects/getAllEmails.csv.php",
+    "method": "GET",
+    "path_template": "/objects/getAllEmails.csv.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/objects/getAllEmails.csv.php",
+    "raw_sample": "http://localhost/objects/getAllEmails.csv.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "dba3f239a047734053fc9534d08b63720db8567cb60aaa713927472d0651c8eb",
+    "canonical_key": "GET /objects/videos.txt.php",
+    "method": "GET",
+    "path_template": "/objects/videos.txt.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/objects/videos.txt.php",
+    "raw_sample": "http://localhost/objects/videos.txt.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "86ab9fb3d56580cf1cbab0380e6748644f0455f405f0ae6372707a286e78d60b",
+    "canonical_key": "GET /objects/videos.txt.php?type={type}",
+    "method": "GET",
+    "path_template": "/objects/videos.txt.php",
+    "query_params": [
+      "type"
+    ],
+    "normalized_url": "http://localhost/objects/videos.txt.php?type={type}",
+    "raw_sample": "http://localhost/objects/videos.txt.php?type={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "955b9480bc63ca688c1488820d95a7315cfdd9ac95a30e0cc7ff4714fe4463f0",
+    "canonical_key": "GET /page/{page}/",
+    "method": "GET",
+    "path_template": "/page/{page}/",
+    "query_params": [],
+    "normalized_url": "http://localhost/page/{page}/",
+    "raw_sample": "http://localhost/page/{page}/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "1684a3329ce594248c330a8a36510136e7fd2a1f85560f82ec2cf9ed63c3efc9",
+    "canonical_key": "GET /playLink",
+    "method": "GET",
+    "path_template": "/playLink",
+    "query_params": [],
+    "normalized_url": "http://localhost/playLink",
+    "raw_sample": "http://localhost/playLink",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "507eba72ef1d3111a9e470050da7d1c69e6a144f3a8f6751963a7930134e9908",
+    "canonical_key": "GET /plugin/",
+    "method": "GET",
+    "path_template": "/plugin/",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/",
+    "raw_sample": "http://localhost/plugin/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "41320303989a3dc8be4603c89b69f2d5b171fe7d6582ffdbc6ad7624668e5383",
+    "canonical_key": "GET /plugin/AD_Server/",
+    "method": "GET",
+    "path_template": "/plugin/AD_Server/",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/AD_Server/",
+    "raw_sample": "http://localhost/plugin/AD_Server/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "e93cf2c0f888ca1f2ad8bf5a7403ed8dc4e155e17df6713ff238d3fef5c7e376",
+    "canonical_key": "GET /plugin/Gallery",
+    "method": "GET",
+    "path_template": "/plugin/Gallery",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/Gallery",
+    "raw_sample": "http://localhost/plugin/Gallery",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "f6f789a2269f3d741454eab2b732f686a416e078231364c5ea45b52e752ac12b",
+    "canonical_key": "GET /plugin/Live/",
+    "method": "GET",
+    "path_template": "/plugin/Live/",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/Live/",
+    "raw_sample": "http://localhost/plugin/Live/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "b18724b3578c5a5f8e0ff2c2ea3ce55524b592237d0d2c1652d45f469805f51e",
+    "canonical_key": "GET /plugin/Live/?id={id}&lang={lang}&name={name}&parameters={parameters}&status={status}&stream_key={stream_key}&stream_url={stream_url}",
+    "method": "GET",
+    "path_template": "/plugin/Live/",
+    "query_params": [
+      "id",
+      "lang",
+      "name",
+      "parameters",
+      "status",
+      "stream_key",
+      "stream_url"
+    ],
+    "normalized_url": "http://localhost/plugin/Live/?id={id}&lang={lang}&name={name}&parameters={parameters}&status={status}&stream_key={stream_key}&stream_url={stream_url}",
+    "raw_sample": "http://localhost/plugin/Live/?id={id}&lang={lang}&name={name}&parameters={parameters}&status={status}&stream_key={stream_key}&stream_url={stream_url}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "7fb8b285672332e888baf4593883b9bcf6eea189514d53d92f0e27261e81274b",
+    "canonical_key": "GET /plugin/Live/?id={id}&name={name}&parameters={parameters}&status={status}&stream_key={stream_key}&stream_url={stream_url}",
+    "method": "GET",
+    "path_template": "/plugin/Live/",
+    "query_params": [
+      "id",
+      "name",
+      "parameters",
+      "status",
+      "stream_key",
+      "stream_url"
+    ],
+    "normalized_url": "http://localhost/plugin/Live/?id={id}&name={name}&parameters={parameters}&status={status}&stream_key={stream_key}&stream_url={stream_url}",
+    "raw_sample": "http://localhost/plugin/Live/?id={id}&name={name}&parameters={parameters}&status={status}&stream_key={stream_key}&stream_url={stream_url}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "b9bef356320a8352b4ab42ccf978d624dc7212b5b3e3238733f8dce03be64a14",
+    "canonical_key": "GET /plugin/Live/?lang={lang}",
+    "method": "GET",
+    "path_template": "/plugin/Live/",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/plugin/Live/?lang={lang}",
+    "raw_sample": "http://localhost/plugin/Live/?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "83da31623d39905f3e9db057e7a19dc1e5f418d5328ee8932644633a8a85601f",
+    "canonical_key": "GET /plugin/Live/?live_servers_id={live_servers_id}",
+    "method": "GET",
+    "path_template": "/plugin/Live/",
+    "query_params": [
+      "live_servers_id"
+    ],
+    "normalized_url": "http://localhost/plugin/Live/?live_servers_id={live_servers_id}",
+    "raw_sample": "http://localhost/plugin/Live/?live_servers_id={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "221634b76bd00bfe0f4d9650171bd60ba51e28873f55c502dcd22b477e4ea6c2",
+    "canonical_key": "GET /plugin/Live/?resetKey={resetKey}",
+    "method": "GET",
+    "path_template": "/plugin/Live/",
+    "query_params": [
+      "resetKey"
+    ],
+    "normalized_url": "http://localhost/plugin/Live/?resetKey={resetKey}",
+    "raw_sample": "http://localhost/plugin/Live/?resetKey={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "dd704e490de1499ff3261ba7f2410022a203b3e6c0aaaf0fcc174586915a5619",
+    "canonical_key": "GET /plugin/Live/view/Live_schedule/panelIndex.php",
+    "method": "GET",
+    "path_template": "/plugin/Live/view/Live_schedule/panelIndex.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/Live/view/Live_schedule/panelIndex.php",
+    "raw_sample": "http://localhost/plugin/Live/view/Live_schedule/panelIndex.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "4254303f79831fedd43350d645bd2b4d4a286ae1eb6d98c981833909bc7cf516",
+    "canonical_key": "GET /plugin/Live/view/Live_schedule/panelIndex.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/plugin/Live/view/Live_schedule/panelIndex.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/plugin/Live/view/Live_schedule/panelIndex.php?lang={lang}",
+    "raw_sample": "http://localhost/plugin/Live/view/Live_schedule/panelIndex.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "aab6ba8bb10d9871fa72a52cee95f842d81af2cf949a2280d6607f9ef6dc576a",
+    "canonical_key": "GET /plugin/LiveLink/",
+    "method": "GET",
+    "path_template": "/plugin/LiveLink/",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/LiveLink/",
+    "raw_sample": "http://localhost/plugin/LiveLink/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "2b35b68f46a845d20f444ebdbea9cced59207622d3d934a52d9a589fb391221f",
+    "canonical_key": "GET /plugin/Meet",
+    "method": "GET",
+    "path_template": "/plugin/Meet",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/Meet",
+    "raw_sample": "http://localhost/plugin/Meet",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "12348fba838473f6f9c850906965db4f76f95e4a95fca16308c0c0fd2cfb4b38",
+    "canonical_key": "GET /plugin/Meet/",
+    "method": "GET",
+    "path_template": "/plugin/Meet/",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/Meet/",
+    "raw_sample": "http://localhost/plugin/Meet/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "dc073de67df5d39389530c17bb66a82f9688dfd3df3cfa1d58c99c974a88fb92",
+    "canonical_key": "GET /plugin/Meet/?lang={lang}",
+    "method": "GET",
+    "path_template": "/plugin/Meet/",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/plugin/Meet/?lang={lang}",
+    "raw_sample": "http://localhost/plugin/Meet/?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "1bbe547a05ce258134a1aa25c952b3a676b3cd12bae0370cfad1d9e3bc1953c4",
+    "canonical_key": "GET /plugin/PlayLists",
+    "method": "GET",
+    "path_template": "/plugin/PlayLists",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/PlayLists",
+    "raw_sample": "http://localhost/plugin/PlayLists",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "8dd11c24942f456039036a8375e58ef0aa8d33943274c3451d07cac5fe9924d4",
+    "canonical_key": "GET /plugin/PlayLists/managerPlaylists.php",
+    "method": "GET",
+    "path_template": "/plugin/PlayLists/managerPlaylists.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/PlayLists/managerPlaylists.php",
+    "raw_sample": "http://localhost/plugin/PlayLists/managerPlaylists.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "2d732d6a5dd2c3e12f398a1cbdc33773d2a79d45b3d535575aeb011e6de76f54",
+    "canonical_key": "GET /plugin/SubtitleSwitcher",
+    "method": "GET",
+    "path_template": "/plugin/SubtitleSwitcher",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/SubtitleSwitcher",
+    "raw_sample": "http://localhost/plugin/SubtitleSwitcher",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "270c68a083d621a0cfe14a3bb473c44d09d21c2f5890386a6ad0031a68762dcd",
+    "canonical_key": "GET /plugin/TopMenu",
+    "method": "GET",
+    "path_template": "/plugin/TopMenu",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/TopMenu",
+    "raw_sample": "http://localhost/plugin/TopMenu",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "8358e4987da10339b3fe8d85e19e02cec6a7847a1ca192212c6e7b93625edd09",
+    "canonical_key": "GET /plugin/WebRTC/",
+    "method": "GET",
+    "path_template": "/plugin/WebRTC/",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/WebRTC/",
+    "raw_sample": "http://localhost/plugin/WebRTC/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "cc4f4e727744f4a2f3390b1268b16e7cc0c613ac07abf7a01cc3ca280d04cf43",
+    "canonical_key": "GET /plugin/YouPHPFlix2",
+    "method": "GET",
+    "path_template": "/plugin/YouPHPFlix2",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugin/YouPHPFlix2",
+    "raw_sample": "http://localhost/plugin/YouPHPFlix2",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "9ea29e86f448a8b74ecad7b79607b1f349f7b9e6b8f5f080133a8c1359cdf468",
+    "canonical_key": "GET /plugins",
+    "method": "GET",
+    "path_template": "/plugins",
+    "query_params": [],
+    "normalized_url": "http://localhost/plugins",
+    "raw_sample": "http://localhost/plugins",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "deae90bdcf4d6dfac958411d69b7e9e78405006dff27e601261fe4218691d25b",
+    "canonical_key": "GET /robots.txt",
+    "method": "GET",
+    "path_template": "/robots.txt",
+    "query_params": [],
+    "normalized_url": "http://localhost/robots.txt",
+    "raw_sample": "http://localhost/robots.txt",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "d1bb550249cfdcc3996880599b876040bbf1f58667383ba2037b87d017ff1050",
+    "canonical_key": "GET /siteConfigurations",
+    "method": "GET",
+    "path_template": "/siteConfigurations",
+    "query_params": [],
+    "normalized_url": "http://localhost/siteConfigurations",
+    "raw_sample": "http://localhost/siteConfigurations",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "5782417bf9395af3e4f449fb5aa2b493d810cdc271ef21facb39fcf9a5c08511",
+    "canonical_key": "GET /subscribes",
+    "method": "GET",
+    "path_template": "/subscribes",
+    "query_params": [],
+    "normalized_url": "http://localhost/subscribes",
+    "raw_sample": "http://localhost/subscribes",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "568dbc00fe6611c0c9681e0724e11cfa4c26353706f79fda5dbdaa594405a2e0",
+    "canonical_key": "GET /trending",
+    "method": "GET",
+    "path_template": "/trending",
+    "query_params": [],
+    "normalized_url": "http://localhost/trending",
+    "raw_sample": "http://localhost/trending",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "64c0bc0f96574f0bc200471e6ad32e9cfab9b21f95b0cbdc015d1116daf20fd8",
+    "canonical_key": "GET /update",
+    "method": "GET",
+    "path_template": "/update",
+    "query_params": [],
+    "normalized_url": "http://localhost/update",
+    "raw_sample": "http://localhost/update",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "47cd921fd1389a5d674f2cfc8b69743e3d8345418d79cddbac16f8e6c07c57c4",
+    "canonical_key": "GET /upload",
+    "method": "GET",
+    "path_template": "/upload",
+    "query_params": [],
+    "normalized_url": "http://localhost/upload",
+    "raw_sample": "http://localhost/upload",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "5184b90863d9f582b47d3971dabc63138de7d84b19910e76fed2a2eb1b8e5398",
+    "canonical_key": "GET /user",
+    "method": "GET",
+    "path_template": "/user",
+    "query_params": [],
+    "normalized_url": "http://localhost/user",
+    "raw_sample": "http://localhost/user",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "bcd5c3582f4666160c0eec449d496f6298d846dfe009b88963b1eddfe063ca81",
+    "canonical_key": "GET /user?inputPassword={inputPassword}&inputPasswordConfirm={inputPasswordConfirm}",
+    "method": "GET",
+    "path_template": "/user",
+    "query_params": [
+      "inputPassword",
+      "inputPasswordConfirm"
+    ],
+    "normalized_url": "http://localhost/user?inputPassword={inputPassword}&inputPasswordConfirm={inputPasswordConfirm}",
+    "raw_sample": "http://localhost/user?inputPassword={inputPassword}&inputPasswordConfirm={inputPasswordConfirm}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "ca0e1629bee9063387b842608d74ee1a9203a3b952d68efcbcf639f8498f8f95",
+    "canonical_key": "GET /users",
+    "method": "GET",
+    "path_template": "/users",
+    "query_params": [],
+    "normalized_url": "http://localhost/users",
+    "raw_sample": "http://localhost/users",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "61205fc2a2073a0e29877dbe0aad5a3727becfbf37245258dbcb6e0071f8f15a",
+    "canonical_key": "GET /usersGroups",
+    "method": "GET",
+    "path_template": "/usersGroups",
+    "query_params": [],
+    "normalized_url": "http://localhost/usersGroups",
+    "raw_sample": "http://localhost/usersGroups",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "1adadc6dc18622072a6ad9d30c9ef4c493bd0fb8aec300f994f75c7ae9897f63",
+    "canonical_key": "GET /usersGroups?group_name={group_name}&id={id}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "method": "GET",
+    "path_template": "/usersGroups",
+    "query_params": [
+      "group_name",
+      "id",
+      "permissions[Live][]",
+      "permissions[Meet][]",
+      "permissions[Permissions][]",
+      "permissions[PlayLists][]"
+    ],
+    "normalized_url": "http://localhost/usersGroups?group_name={group_name}&id={id}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "raw_sample": "http://localhost/usersGroups?group_name={group_name}&id={id}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "d04282315e6857de0977fb6ddc55ff46e2da05b6678eee814321e4748d21b2b1",
+    "canonical_key": "GET /videoOnly",
+    "method": "GET",
+    "path_template": "/videoOnly",
+    "query_params": [],
+    "normalized_url": "http://localhost/videoOnly",
+    "raw_sample": "http://localhost/videoOnly",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "81f0aec2e98e621c7e104c1b23bc338b358fee3cdde4592bb9ff6e295bc63b13",
+    "canonical_key": "GET /view/",
+    "method": "GET",
+    "path_template": "/view/",
+    "query_params": [],
+    "normalized_url": "http://localhost/view/",
+    "raw_sample": "http://localhost/view/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "886b99b3bb1e0aa4fa5eaf0c5e1a560add693b0e882fe6e2272aaa0239db7a4a",
+    "canonical_key": "GET /view/?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/?lang={lang}",
+    "raw_sample": "http://localhost/view/?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "ef3822aa5274b682742b6c932ca45d6d111e70b94fa37fd6dc1f7b940af54734",
+    "canonical_key": "GET /view/?lang={lang}&type={type}",
+    "method": "GET",
+    "path_template": "/view/",
+    "query_params": [
+      "lang",
+      "type"
+    ],
+    "normalized_url": "http://localhost/view/?lang={lang}&type={type}",
+    "raw_sample": "http://localhost/view/?lang={val}&type={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "1444e0d57c48a30320ae322712ceb3c858eb8d67eb5ba096a9e841f477c5527a",
+    "canonical_key": "GET /view/about.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/about.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/about.php?lang={lang}",
+    "raw_sample": "http://localhost/view/about.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "e263460cb8eaee3f45553152a1b15daa8d51017234e442cdca40657119c1c6d8",
+    "canonical_key": "GET /view/channel.php",
+    "method": "GET",
+    "path_template": "/view/channel.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/view/channel.php",
+    "raw_sample": "http://localhost/view/channel.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "b39377616831b999c27a53e4171f23a244312eadd29f0a888620b1f838d38bc8",
+    "canonical_key": "GET /view/channel.php?channelName={user}",
+    "method": "GET",
+    "path_template": "/view/channel.php",
+    "query_params": [
+      "channelName"
+    ],
+    "normalized_url": "http://localhost/view/channel.php?channelName={user}",
+    "raw_sample": "http://localhost/view/channel.php?channelName={user}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "00a14be0b319256e5c20be38c31289fa1f13640c549763bca26356b2e564a3ff",
+    "canonical_key": "GET /view/channel.php?channelName={user}&lang={lang}",
+    "method": "GET",
+    "path_template": "/view/channel.php",
+    "query_params": [
+      "channelName",
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/channel.php?channelName={user}&lang={lang}",
+    "raw_sample": "http://localhost/view/channel.php?channelName={val}&lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "d126b0cdbae92c9e75c8ef947ee614f207554e7897bc1e27bd0537a46b3c9d0b",
+    "canonical_key": "GET /view/channel.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/channel.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/channel.php?lang={lang}",
+    "raw_sample": "http://localhost/view/channel.php?lang={lang}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "36c816653f0c8cf9baefcd3ce5c2e5e5a83d76bfd6734696ef9038aab8dc9362",
+    "canonical_key": "GET /view/channels.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/channels.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/channels.php?lang={lang}",
+    "raw_sample": "http://localhost/view/channels.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "248fad4f3e0fc0d5fb7b650576a2a69785c28c6020a48dca59ab35d10d84fe29",
+    "canonical_key": "GET /view/charts.php",
+    "method": "GET",
+    "path_template": "/view/charts.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/view/charts.php",
+    "raw_sample": "http://localhost/view/charts.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "fa8f64288df8e38990476d69a4f7b07e1e97a65ea09ee2666371915f75a30df0",
+    "canonical_key": "GET /view/charts.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/charts.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/charts.php?lang={lang}",
+    "raw_sample": "http://localhost/view/charts.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "c1d223764c3f8ccfb79a66968fc87f636dd89c4bba5b640efe0c627637e1d0d1",
+    "canonical_key": "GET /view/configurations.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/configurations.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/configurations.php?lang={lang}",
+    "raw_sample": "http://localhost/view/configurations.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "fb4f06a0d82549f5cf3f68af0fa51d813586e414c58f2d0fbec10b07c7628eac",
+    "canonical_key": "GET /view/contact.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/contact.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/contact.php?lang={lang}",
+    "raw_sample": "http://localhost/view/contact.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "4b6e2bb14569b8dab526f72c9e2ac9170e80f1783c365061dc1ce332ea2c1ec1",
+    "canonical_key": "GET /view/help.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/help.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/help.php?lang={lang}",
+    "raw_sample": "http://localhost/view/help.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "e74031cf35ba40f28c9be513a330d98dc1b17aa1cbda98718f9facedc7f50d0f",
+    "canonical_key": "GET /view/iframe.php?lang={lang}&type={type}",
+    "method": "GET",
+    "path_template": "/view/iframe.php",
+    "query_params": [
+      "lang",
+      "type"
+    ],
+    "normalized_url": "http://localhost/view/iframe.php?lang={lang}&type={type}",
+    "raw_sample": "http://localhost/view/iframe.php?lang={val}&type={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "cc49c344482d3e040a8f4f87d39f412abc756089c4214485179df6f88586c1e4",
+    "canonical_key": "GET /view/listCategories.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/listCategories.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/listCategories.php?lang={lang}",
+    "raw_sample": "http://localhost/view/listCategories.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "3a134f4fc68c36488d68036fe37220484f10f30486f492fef565d4680647920f",
+    "canonical_key": "GET /view/managerCategories.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/managerCategories.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/managerCategories.php?lang={lang}",
+    "raw_sample": "http://localhost/view/managerCategories.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "369bbfba6364c4e0efd163bfb20bf63910158d33d9232137e20196dcd904a658",
+    "canonical_key": "GET /view/managerComments.php",
+    "method": "GET",
+    "path_template": "/view/managerComments.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/view/managerComments.php",
+    "raw_sample": "http://localhost/view/managerComments.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "e691d381b1363f0c3e0516319f1684cacb0588ff0fcc77732bcafec42aabb614",
+    "canonical_key": "GET /view/managerComments.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/managerComments.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/managerComments.php?lang={lang}",
+    "raw_sample": "http://localhost/view/managerComments.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "8f0224200a76ea6128f7004a0a406e6860259ba35ef09ac8debe04540c494baf",
+    "canonical_key": "GET /view/managerPlugins.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/managerPlugins.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/managerPlugins.php?lang={lang}",
+    "raw_sample": "http://localhost/view/managerPlugins.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "8c8815058731eb5385d6197b915ea95723d0f285f046b910cf91942347c8e630",
+    "canonical_key": "GET /view/managerSubscribes.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/managerSubscribes.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/managerSubscribes.php?lang={lang}",
+    "raw_sample": "http://localhost/view/managerSubscribes.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "e34a3419555f42b0b85fc711d20f82d5f0abfed48fb414348c801531e14551e6",
+    "canonical_key": "GET /view/managerUsers.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/managerUsers.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/managerUsers.php?lang={lang}",
+    "raw_sample": "http://localhost/view/managerUsers.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "2d3b4bbdb387dd6f9ef51631e09a29652bd17617a91e818bba217b73b707f59d",
+    "canonical_key": "GET /view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions={permissions}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "group_name",
+      "id",
+      "lang",
+      "permissions"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions={permissions}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions={permissions}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "839cb826e7132efa387e02f60749fcab24e98728a23483450479a5e5ca85cf59",
+    "canonical_key": "GET /view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions={permissions}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "group_name",
+      "id",
+      "lang",
+      "permissions",
+      "permissions[Live][]",
+      "permissions[Meet][]",
+      "permissions[Permissions][]",
+      "permissions[PlayLists][]"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions={permissions}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions={permissions}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "0b65d4a1bf34b74f001b81e938b37f6f91430674c6695b85283ad2790a38e746",
+    "canonical_key": "GET /view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][0]={permissions[Live][0]}&permissions[Live][]={permissions[Live][]}&permissions[Meet][0]={permissions[Meet][0]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][0]={permissions[Permissions][0]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][0]={permissions[PlayLists][0]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "group_name",
+      "id",
+      "lang",
+      "permissions[Live][0]",
+      "permissions[Live][]",
+      "permissions[Meet][0]",
+      "permissions[Meet][]",
+      "permissions[Permissions][0]",
+      "permissions[Permissions][]",
+      "permissions[PlayLists][0]",
+      "permissions[PlayLists][]"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][0]={permissions[Live][0]}&permissions[Live][]={permissions[Live][]}&permissions[Meet][0]={permissions[Meet][0]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][0]={permissions[Permissions][0]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][0]={permissions[PlayLists][0]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][0]={permissions[Live][0]}&permissions[Live][]={permissions[Live][]}&permissions[Meet][0]={permissions[Meet][0]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][0]={permissions[Permissions][0]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][0]={permissions[PlayLists][0]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "3dc5957e69c0315a983433f6c59a8be8e650075dbf362574531439e26755411e",
+    "canonical_key": "GET /view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][0]={permissions[Live][0]}&permissions[Meet][0]={permissions[Meet][0]}&permissions[Permissions][0]={permissions[Permissions][0]}&permissions[PlayLists][0]={permissions[PlayLists][0]}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "group_name",
+      "id",
+      "lang",
+      "permissions[Live][0]",
+      "permissions[Meet][0]",
+      "permissions[Permissions][0]",
+      "permissions[PlayLists][0]"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][0]={permissions[Live][0]}&permissions[Meet][0]={permissions[Meet][0]}&permissions[Permissions][0]={permissions[Permissions][0]}&permissions[PlayLists][0]={permissions[PlayLists][0]}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][0]={permissions[Live][0]}&permissions[Meet][0]={permissions[Meet][0]}&permissions[Permissions][0]={permissions[Permissions][0]}&permissions[PlayLists][0]={permissions[PlayLists][0]}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "6dbc34ec1d38cc8973908d77e8e351700c023d52fcab31a8553f3533689d9471",
+    "canonical_key": "GET /view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "group_name",
+      "id",
+      "lang",
+      "permissions[Live][]",
+      "permissions[Meet][]",
+      "permissions[Permissions][]",
+      "permissions[PlayLists][]"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&lang={lang}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "748daf59bdf34495d3f00d53be113f9c82a2504e4281085f41bcafe01a9c7cf5",
+    "canonical_key": "GET /view/managerUsersGroups.php?group_name={group_name}&id={id}&permissions={permissions}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "group_name",
+      "id",
+      "permissions"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&permissions={permissions}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&permissions={permissions}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "096782a353847371f2f965abebe3f2766706760ccf2d3f8f1e97de6d37045074",
+    "canonical_key": "GET /view/managerUsersGroups.php?group_name={group_name}&id={id}&permissions={permissions}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "group_name",
+      "id",
+      "permissions",
+      "permissions[Live][]",
+      "permissions[Meet][]",
+      "permissions[Permissions][]",
+      "permissions[PlayLists][]"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&permissions={permissions}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?group_name={group_name}&id={id}&permissions={permissions}&permissions[Live][]={permissions[Live][]}&permissions[Meet][]={permissions[Meet][]}&permissions[Permissions][]={permissions[Permissions][]}&permissions[PlayLists][]={permissions[PlayLists][]}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "386593034be941e7539a5cca4e5e124749f88577826598eedd9635fabae96bba",
+    "canonical_key": "GET /view/managerUsersGroups.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/managerUsersGroups.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/managerUsersGroups.php?lang={lang}",
+    "raw_sample": "http://localhost/view/managerUsersGroups.php?lang={lang}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "f56a670e0a918937732380455411941dbbf82109adc84d00a645f5e7196030e2",
+    "canonical_key": "GET /view/managerVideos.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/managerVideos.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/managerVideos.php?lang={lang}",
+    "raw_sample": "http://localhost/view/managerVideos.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "cb17c933401a13d52afa317222f0f941f230eedadb0e25a682e086fc17622208",
+    "canonical_key": "GET /view/managerVideos.php?lang={lang}&link={link}",
+    "method": "GET",
+    "path_template": "/view/managerVideos.php",
+    "query_params": [
+      "lang",
+      "link"
+    ],
+    "normalized_url": "http://localhost/view/managerVideos.php?lang={lang}&link={link}",
+    "raw_sample": "http://localhost/view/managerVideos.php?lang={val}&link={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "c5087094454ef0713fadef51d642b5bbba5ab54b0e565e8b9ccc848f86e8bd2d",
+    "canonical_key": "GET /view/managerVideosOrganize.php",
+    "method": "GET",
+    "path_template": "/view/managerVideosOrganize.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/view/managerVideosOrganize.php",
+    "raw_sample": "http://localhost/view/managerVideosOrganize.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "d1292467e584cd86edb78b9981fb8ee587aa28abda05dcff011df7547f917f61",
+    "canonical_key": "GET /view/mini-upload-form/",
+    "method": "GET",
+    "path_template": "/view/mini-upload-form/",
+    "query_params": [],
+    "normalized_url": "http://localhost/view/mini-upload-form/",
+    "raw_sample": "http://localhost/view/mini-upload-form/",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "acc0b26414644f221d9262c0f2b7a210058e7e08e2d0158dba3fa07631ccb9a7",
+    "canonical_key": "GET /view/mini-upload-form/?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/mini-upload-form/",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/mini-upload-form/?lang={lang}",
+    "raw_sample": "http://localhost/view/mini-upload-form/?lang={lang}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "56e1165dbad2b6fd9bdbccd2c20ea2baaf8bf77a63f40a9c441dd2bfbe17203c",
+    "canonical_key": "GET /view/mini-upload-form/upload.php",
+    "method": "GET",
+    "path_template": "/view/mini-upload-form/upload.php",
+    "query_params": [],
+    "normalized_url": "http://localhost/view/mini-upload-form/upload.php",
+    "raw_sample": "http://localhost/view/mini-upload-form/upload.php",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "3765802a49a77caaa3c0927db9effa6c654b9e05c27e4e717b789b99a509d771",
+    "canonical_key": "GET /view/modePlayLink.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/modePlayLink.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/modePlayLink.php?lang={lang}",
+    "raw_sample": "http://localhost/view/modePlayLink.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "72db5149d758b0793f94ccf931232b12ae5e7c732fda1fb753691afdf3d4a9a0",
+    "canonical_key": "GET /view/modeYoutube.php?lang={lang}&playlist_name={playlist_name}",
+    "method": "GET",
+    "path_template": "/view/modeYoutube.php",
+    "query_params": [
+      "lang",
+      "playlist_name"
+    ],
+    "normalized_url": "http://localhost/view/modeYoutube.php?lang={lang}&playlist_name={playlist_name}",
+    "raw_sample": "http://localhost/view/modeYoutube.php?lang={val}&playlist_name={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "38fce0f213986c5060309b031c3d9a1dbcd9e243275eaed7b9a24ccd1acd5535",
+    "canonical_key": "GET /view/trending.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/trending.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/trending.php?lang={lang}",
+    "raw_sample": "http://localhost/view/trending.php?lang={val}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "e05a98217d5d98b6bb6a53129958752de829184ca3f1a1acae531f507b2cedfb",
+    "canonical_key": "GET /view/update.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/update.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/update.php?lang={lang}",
+    "raw_sample": "http://localhost/view/update.php?lang={lang}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "829878ae8de28f4a1aba5eaca709d78be3f2ed81462828297404c9c9959182c7",
+    "canonical_key": "GET /view/user.php?inputPassword={inputPassword}&inputPasswordConfirm={inputPasswordConfirm}&lang={lang}",
+    "method": "GET",
+    "path_template": "/view/user.php",
+    "query_params": [
+      "inputPassword",
+      "inputPasswordConfirm",
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/user.php?inputPassword={inputPassword}&inputPasswordConfirm={inputPasswordConfirm}&lang={lang}",
+    "raw_sample": "http://localhost/view/user.php?inputPassword={inputPassword}&inputPasswordConfirm={inputPasswordConfirm}&lang={lang}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "4d4aee6235127048c500933ed779dfed6882333b7b4035c34cc51d4deea1b3b7",
+    "canonical_key": "GET /view/user.php?lang={lang}",
+    "method": "GET",
+    "path_template": "/view/user.php",
+    "query_params": [
+      "lang"
+    ],
+    "normalized_url": "http://localhost/view/user.php?lang={lang}",
+    "raw_sample": "http://localhost/view/user.php?lang={lang}",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  },
+  {
+    "canonical_hash": "a76578c611c7b7eb7cb47d904c432518ccbe273e1352050290fff4ac6f74982e",
+    "canonical_key": "GET /watch-later",
+    "method": "GET",
+    "path_template": "/watch-later",
+    "query_params": [],
+    "normalized_url": "http://localhost/watch-later",
+    "raw_sample": "http://localhost/watch-later",
+    "source_tool": "ground_truth",
+    "status_code": 200
+  }
+]

@@ -38,7 +38,8 @@ class FirecrawlClient:
         model: str = "spark-1-pro",
         poll_timeout_seconds: int = 600,
         poll_interval_seconds: int = 10,
-        mock_fallback: bool = True
+        mock_fallback: bool = True,
+        public_tunnel_url: Optional[str] = None
     ):
         self.api_key = api_key or os.getenv("FIRECRAWL_API_KEY", "")
         self.api_url = api_url.rstrip("/")
@@ -47,6 +48,7 @@ class FirecrawlClient:
         self.poll_timeout_seconds = poll_timeout_seconds
         self.poll_interval_seconds = poll_interval_seconds
         self.mock_fallback = mock_fallback
+        self.public_tunnel_url = (public_tunnel_url or os.getenv("PUBLIC_TUNNEL_URL", "")).rstrip("/")
         self.session = self._create_session()
 
     def _create_session(self) -> requests.Session:
@@ -88,17 +90,32 @@ class FirecrawlClient:
             else:
                 raise ValueError("Firecrawl API key is required but not configured.")
 
+        # Handle localhost target for Firecrawl Cloud
+        cloud_target_url = target_url
+        is_local = any(h in target_url for h in ("localhost", "127.0.0.1"))
+        if is_local:
+            if self.public_tunnel_url:
+                cloud_target_url = target_url.replace("http://localhost", self.public_tunnel_url).replace("http://127.0.0.1", self.public_tunnel_url)
+                logger.info(f"[FIRECRAWL] Mapped local target {target_url} -> public tunnel {cloud_target_url}")
+            elif self.mock_fallback:
+                logger.warning(
+                    "[FIRECRAWL] Target URL is localhost and no PUBLIC_TUNNEL_URL is configured in .env. "
+                    "Firecrawl Cloud cannot reach localhost directly without a tunnel. "
+                    "Using verified AVideo routes for simulation (to run live on Cloud, set PUBLIC_TUNNEL_URL)."
+                )
+                return self._get_fallback_routes()
+
         agent_prompt = prompt or DEFAULT_AGENT_PROMPT
         agent_schema = schema or DiscoveredLinksSchema.model_json_schema()
 
         payload = {
-            "urls": [target_url],
+            "urls": [cloud_target_url],
             "prompt": agent_prompt,
             "model": self.model,
             "schema": agent_schema
         }
 
-        logger.info(f"[FIRECRAWL] Submitting Agent exploration task on {target_url}...")
+        logger.info(f"[FIRECRAWL] Submitting Agent exploration task on {cloud_target_url}...")
         try:
             resp = self.session.post(
                 self.agent_endpoint,
@@ -142,7 +159,13 @@ class FirecrawlClient:
                         result_data = data.get("data") or {}
                         links = result_data.get("links", [])
                         logger.info(f"[FIRECRAWL] Job completed successfully! Found {len(links)} links.")
-                        return [{"url": link, "method": "GET", "source": "firecrawl", "status_code": 200} for link in links]
+                        # Map tunnel URLs back to localhost if tunnel was used
+                        normalized_links = []
+                        for link in links:
+                            if self.public_tunnel_url and self.public_tunnel_url in link:
+                                link = link.replace(self.public_tunnel_url, "http://localhost")
+                            normalized_links.append(link)
+                        return [{"url": link, "method": "GET", "source": "firecrawl", "status_code": 200} for link in normalized_links]
 
                     if status in ("failed", "cancelled"):
                         logger.warning(f"[FIRECRAWL] Job ended with status: {status}")

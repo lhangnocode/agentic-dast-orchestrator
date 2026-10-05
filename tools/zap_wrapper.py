@@ -61,7 +61,8 @@ class ZapWrapper:
 
         for seed in seeds:
             try:
-                scan_id = self.client.spider.scan(seed, recurse=True)
+                zap_seed = seed.replace("://localhost", "://host.docker.internal").replace("://127.0.0.1", "://host.docker.internal")
+                scan_id = self.client.spider.scan(zap_seed, recurse=True)
                 if not str(scan_id).isdigit():
                     logger.warning(f"[ZAP] Spider returned non-numeric scan ID: {scan_id}")
                     continue
@@ -100,7 +101,8 @@ class ZapWrapper:
         logger.info(f"[ZAP] Starting Ajax Spider with {len(seeds)} seeds...")
         for seed in seeds:
             try:
-                self.client.ajaxSpider.scan(seed)
+                zap_seed = seed.replace("://localhost", "://host.docker.internal").replace("://127.0.0.1", "://host.docker.internal")
+                self.client.ajaxSpider.scan(zap_seed)
                 start_time = time.time()
                 while time.time() - start_time < timeout_sec:
                     status = str(self.client.ajaxSpider.status).lower()
@@ -157,7 +159,7 @@ class ZapWrapper:
                     if len(parts) < 2:
                         continue
                     method = parts[0].upper()
-                    url = parts[1]
+                    url = parts[1].replace("://host.docker.internal", "://localhost")
 
                     # Parse response status
                     status_code = 200

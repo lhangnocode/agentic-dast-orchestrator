@@ -43,10 +43,10 @@ class StateCompactor:
             }
 
         context_dict = {
-            "mission": "DAST Adaptive Attack Surface & Endpoint Discovery",
+            "mission": "Adaptive Web Application Route & Feature Discovery",
             "target": base_url,
             "iteration": f"{current_iteration}/{max_iterations}",
-            "attack_surface_metrics": {
+            "route_coverage_metrics": {
                 "total_canonical_endpoints": total_endpoints,
                 "tool_provenance": provenance,
             },

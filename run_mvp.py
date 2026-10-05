@@ -90,7 +90,7 @@ def run_standalone_firecrawl(config: dict) -> dict:
     base_url = config.get("target", {}).get("base_url", "http://localhost/")
     firecrawl = FirecrawlClient(
         api_url=firecrawl_cfg.get("api_url", "https://api.firecrawl.dev/v2"),
-        model=firecrawl_cfg.get("model", "spark-1-pro"),
+        model=firecrawl_cfg.get("model", "spark-2"),
         mock_fallback=True
     )
 

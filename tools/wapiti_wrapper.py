@@ -57,7 +57,11 @@ class WapitiWrapper:
         """
         if flush_session and self.session_db_path.exists():
             try:
-                self.session_db_path.unlink()
+                if self.session_db_path.is_dir():
+                    import shutil
+                    shutil.rmtree(self.session_db_path)
+                else:
+                    self.session_db_path.unlink()
             except Exception as e:
                 logger.warning(f"Could not delete old session DB: {e}")
 

@@ -21,6 +21,9 @@ def test_adaptive_orchestrator_end_to_end():
                 "marginal_gain_threshold": 0.01,
                 "compactor_max_endpoints": 20
             },
+            "llm": {
+                "api_key": ""
+            },
             "tools": {
                 "zap": {
                     "api_url": "http://127.0.0.1:59999",  # Safe mock/unreachable
@@ -34,8 +37,9 @@ def test_adaptive_orchestrator_end_to_end():
                     "log_file": str(tmp_path / "wapiti.log")
                 },
                 "firecrawl": {
+                    "api_key": "",
                     "api_url": "https://api.firecrawl.dev/v2",
-                    "model": "spark-1-pro"
+                    "model": "spark-2"
                 }
             },
             "storage": {

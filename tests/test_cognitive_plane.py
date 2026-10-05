@@ -61,7 +61,7 @@ def test_compactor_and_heuristic_decision():
             max_iterations=5,
             base_url="http://localhost/"
         )
-        assert "DAST Adaptive Attack Surface" in context_yaml
+        assert "Adaptive Web Application Route" in context_yaml
         assert "http://localhost/" in context_yaml
 
         # Check heuristic decisions

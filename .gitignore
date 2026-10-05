@@ -39,3 +39,7 @@ output/experiments/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Text files
+*.txt
+!requirements.txt

@@ -7,24 +7,26 @@ import json
 import logging
 import os
 from typing import Optional, Tuple
+from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import ValidationError
 
 from orchestrator.decision_schema import OrchestratorDecision, ToolActionEnum
 from storage.state_store import StateStore
 
+load_dotenv()
 logger = logging.getLogger("orchestrator.qwen")
 
 SYSTEM_ORCHESTRATOR_PROMPT = """
-You are the Chief DAST Crawling & Discovery Orchestrator.
-Your goal is to maximize the discovery of unique, authenticated attack surfaces, endpoints,
+You are an intelligent Web Crawling & Route Discovery Orchestrator.
+Your goal is to maximize the discovery of unique, authenticated pages, application routes,
 and parameter configurations on the target application while avoiding redundant HTTP requests.
 
 Available Specialized Tools:
 1. `firecrawl_navigate`: Best for semantic UI exploration, expanding administrative dropdowns, modals, and client routes.
 2. `zap_traditional_spider`: High-speed link crawling through HTML anchors and sitemaps.
 3. `zap_ajax_spider`: Headless browser spidering dynamic single-page applications and DOM events.
-4. `wapiti_form_crawl`: Form structure extraction and parameter discovery/reflection without attack payloads.
+4. `wapiti_form_crawl`: Form structure extraction and parameter discovery/reflection without test payloads.
 5. `terminate`: Terminate the crawl when all valuable frontiers are saturated or marginal gain drops to near zero.
 
 Strategy Guidelines:
@@ -43,7 +45,7 @@ class QwenClient:
         base_url: Optional[str] = None,
         model: Optional[str] = None,
     ):
-        self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY", "")
+        self.api_key = os.getenv("DASHSCOPE_API_KEY", "") if api_key is None else api_key
         self.base_url = base_url or os.getenv(
             "DASHSCOPE_BASE_URL",
             "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"

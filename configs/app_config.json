@@ -1,6 +1,6 @@
 {
   "target": {
-    "base_url": "http://localhost/",
+    "base_url": "http://localhost:3000/",
     "allowed_hosts": [
       "localhost",
       "127.0.0.1",
@@ -33,7 +33,7 @@
     },
     "firecrawl": {
       "api_url": "https://api.firecrawl.dev/v2",
-      "model": "spark-1-pro",
+      "model": "spark-2",
       "poll_timeout_seconds": 600,
       "poll_interval_seconds": 10
     }

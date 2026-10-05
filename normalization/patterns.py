@@ -21,7 +21,7 @@ JUNK_TAGS = {
 
 # Server filesystem leak prefixes erroneously extracted from stack traces or comments
 FS_PREFIXES = {
-    "/var", "/var/www", "/var/www/html", "/var/www/html/AVideo"
+    "/var", "/var/www", "/var/www/html", "/var/www/html/AVideo", "/etc", "/usr", "/home"
 }
 
 # Known directory endpoints requiring standardized trailing slashes
@@ -33,13 +33,13 @@ DIR_ENDPOINTS = {
 
 # Regex for unrendered client-side JS template variables
 UNRENDERED_VARS_REGEX = re.compile(
-    r"(%7B|\{)(videoLink|photo|placeholder|channelLink)(%7D|\})",
+    r"(%7B|\{)(videoLink|photo|placeholder|channelLink|[^/\}]+Link)(%7D|\})|%\{[a-zA-Z0-9_]+\}%|\$\{[a-zA-Z0-9_]+\}",
     re.IGNORECASE
 )
 
 # Broken JS concatenation markers
 JS_CONCAT_MARKERS = [
-    "webSiteRootURL", "item.", "row.", "downloadhighest",
+    "webSiteRootURL", "item.", "item.id", "row.", "downloadhighest",
     "%20+%20", '"', "'", "<", ">", "+"
 ]
 

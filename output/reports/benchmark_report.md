@@ -9,7 +9,7 @@
 
 | Experiment / Architecture | Total Discovered | True Positives | Recall ($R_{EP}$) | Precision ($P_{EP}$) | $F_1$ Score | Efficiency ($E_{REQ}$) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Adaptive Orchestrator Run** | 17 | 15 | 13.4% | 88.2% | 0.233 | 0.0000 |
+| **Adaptive Orchestrator Run** | 107 | 75 | 67.0% | 70.1% | 0.685 | 0.0000 |
 
 ## 3. Analysis & Key Insights
 

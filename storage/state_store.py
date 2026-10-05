@@ -69,7 +69,8 @@ class StateStore:
             # 4. Iteration and Decision History
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS execution_history (
-                    iteration INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    iteration INTEGER NOT NULL,
                     chosen_tool TEXT NOT NULL,
                     reasoning TEXT,
                     target_seeds TEXT,
@@ -83,6 +84,40 @@ class StateStore:
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+
+            # Migration check: if execution_history has iteration as primary key, migrate it
+            cursor.execute("PRAGMA table_info(execution_history);")
+            cols = {row[1]: row for row in cursor.fetchall()}
+            if "id" not in cols and "iteration" in cols and cols["iteration"][5] == 1:
+                cursor.execute("ALTER TABLE execution_history RENAME TO execution_history_old;")
+                cursor.execute("""
+                    CREATE TABLE execution_history (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        iteration INTEGER NOT NULL,
+                        chosen_tool TEXT NOT NULL,
+                        reasoning TEXT,
+                        target_seeds TEXT,
+                        endpoints_before INTEGER NOT NULL,
+                        endpoints_after INTEGER NOT NULL,
+                        new_endpoints_discovered INTEGER NOT NULL,
+                        marginal_gain REAL NOT NULL,
+                        tool_duration_seconds REAL DEFAULT 0.0,
+                        llm_prompt_tokens INTEGER DEFAULT 0,
+                        llm_completion_tokens INTEGER DEFAULT 0,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                """)
+                cursor.execute("""
+                    INSERT INTO execution_history (
+                        iteration, chosen_tool, reasoning, target_seeds,
+                        endpoints_before, endpoints_after, new_endpoints_discovered,
+                        marginal_gain, tool_duration_seconds, llm_prompt_tokens, llm_completion_tokens, timestamp
+                    ) SELECT iteration, chosen_tool, reasoning, target_seeds,
+                        endpoints_before, endpoints_after, new_endpoints_discovered,
+                        marginal_gain, tool_duration_seconds, llm_prompt_tokens, llm_completion_tokens, timestamp
+                    FROM execution_history_old;
+                """)
+                cursor.execute("DROP TABLE execution_history_old;")
 
             # Indices for rapid querying
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_endpoints_path ON endpoints(path_template);")
@@ -121,12 +156,20 @@ class StateStore:
                 """, (canonical_hash, canonical_key, method, path_template, query_params, normalized_url, status_code, current_iteration))
 
                 # Initialize coverage matrix for standard tools as PENDING
+                mapped_tool = source_tool
+                if source_tool == "firecrawl":
+                    mapped_tool = "firecrawl_navigate"
+                elif source_tool == "zap":
+                    mapped_tool = "zap_traditional_spider"
+                elif source_tool == "wapiti":
+                    mapped_tool = "wapiti_form_crawl"
+
                 for t in ["zap_traditional_spider", "zap_ajax_spider", "wapiti_form_crawl", "firecrawl_navigate"]:
-                    init_status = "PROCESSED" if t == source_tool else "PENDING"
+                    init_status = "PROCESSED" if t == mapped_tool else "PENDING"
                     cursor.execute("""
                         INSERT INTO tool_coverage (canonical_hash, tool_name, status, last_attempt_iteration)
                         VALUES (?, ?, ?, ?)
-                    """, (canonical_hash, t, init_status, current_iteration if t == source_tool else 0))
+                    """, (canonical_hash, t, init_status, current_iteration if t == mapped_tool else 0))
             else:
                 # Update status code if transitioning to 200 OK
                 if status_code == 200 and row["status_code"] != 200:
@@ -273,7 +316,7 @@ class StateStore:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO execution_history (
+                INSERT OR REPLACE INTO execution_history (
                     iteration, chosen_tool, reasoning, target_seeds,
                     endpoints_before, endpoints_after, new_endpoints_discovered,
                     marginal_gain, tool_duration_seconds, llm_prompt_tokens, llm_completion_tokens

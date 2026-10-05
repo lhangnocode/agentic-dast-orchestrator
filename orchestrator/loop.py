@@ -6,6 +6,7 @@ deterministic tool wrappers (ZAP, Wapiti, Firecrawl), and SQLite state matrix.
 
 import json
 import logging
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -28,7 +29,16 @@ class AdaptiveOrchestrator:
         self.config = config
         self.target_config = config.get("target", {})
         self.base_url = self.target_config.get("base_url", "http://localhost/")
-        self.allowed_hosts = self.target_config.get("allowed_hosts", ["localhost", "127.0.0.1"])
+        self.allowed_hosts = list(self.target_config.get("allowed_hosts", ["localhost", "127.0.0.1"]))
+        
+        # Tunnel integration for Firecrawl Cloud
+        self.public_tunnel_url = (os.getenv("PUBLIC_TUNNEL_URL") or self.target_config.get("public_tunnel_url") or "").rstrip("/")
+        if self.public_tunnel_url:
+            from urllib.parse import urlparse
+            p_tun = urlparse(self.public_tunnel_url)
+            if p_tun.hostname and p_tun.hostname not in self.allowed_hosts:
+                self.allowed_hosts.append(p_tun.hostname)
+                logger.info(f"[INIT] Added public tunnel host to firewall allowed scope: {p_tun.hostname}")
 
         self.orch_config = config.get("orchestrator", {})
         self.max_iterations = self.orch_config.get("max_iterations", 8)
@@ -43,7 +53,12 @@ class AdaptiveOrchestrator:
         self.compactor = StateCompactor(max_sample_endpoints=self.orch_config.get("compactor_max_endpoints", 30))
 
         # LLM Client
-        self.qwen_client = QwenClient()
+        llm_cfg = config.get("llm", {})
+        self.qwen_client = QwenClient(
+            api_key=llm_cfg.get("api_key"),
+            base_url=llm_cfg.get("base_url"),
+            model=llm_cfg.get("model")
+        )
 
         # Tools
         tools_cfg = config.get("tools", {})
@@ -67,17 +82,19 @@ class AdaptiveOrchestrator:
 
         firecrawl_cfg = tools_cfg.get("firecrawl", {})
         self.firecrawl = FirecrawlClient(
+            api_key=firecrawl_cfg.get("api_key"),
             api_url=firecrawl_cfg.get("api_url", "https://api.firecrawl.dev/v2"),
-            model=firecrawl_cfg.get("model", "spark-1-pro"),
+            model=firecrawl_cfg.get("model", "spark-2"),
             poll_timeout_seconds=firecrawl_cfg.get("poll_timeout_seconds", 600),
             poll_interval_seconds=firecrawl_cfg.get("poll_interval_seconds", 10),
-            mock_fallback=True
+            mock_fallback=True,
+            public_tunnel_url=self.public_tunnel_url
         )
 
     def seed_initial_target(self) -> None:
         """Seeds the root target URL into state store if store is empty."""
         if self.store.get_total_endpoints_count() == 0:
-            root_ep = normalize_endpoint(self.base_url, method="GET", source_tool="initial_seed")
+            root_ep = normalize_endpoint(self.base_url, method="GET", source_tool="initial_seed", target_base=self.base_url)
             if root_ep:
                 self.store.insert_or_update_endpoint(root_ep, current_iteration=0)
                 logger.info(f"[INIT] Seeded target base URL: {self.base_url}")
@@ -141,7 +158,7 @@ class AdaptiveOrchestrator:
                 status = item.get("status_code", 200)
                 src = item.get("source", decision.action.value)
 
-                norm = normalize_endpoint(raw_url, method=method, source_tool=src, status_code=status)
+                norm = normalize_endpoint(raw_url, method=method, source_tool=src, status_code=status, target_base=self.base_url)
                 if norm:
                     is_fresh = self.store.insert_or_update_endpoint(norm, current_iteration=iteration)
                     if is_fresh:
@@ -219,23 +236,29 @@ class AdaptiveOrchestrator:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         txt_file = output_dir / "normalized_discovered_urls.txt"
+        txt_v2_file = output_dir / "normalized_discovered_urls_v2.txt"
         json_file = output_dir / "normalized_endpoints.json"
+        json_v2_file = output_dir / "normalized_endpoints_v2.json"
 
         # Unique normalized URLs
         unique_urls = sorted(list(dict.fromkeys(ep["normalized_url"] for ep in endpoints)))
-        with open(txt_file, "w", encoding="utf-8") as f:
-            for u in unique_urls:
-                f.write(f"{u}\n")
+        for target_txt in (txt_file, txt_v2_file):
+            with open(target_txt, "w", encoding="utf-8") as f:
+                for u in unique_urls:
+                    f.write(f"{u}\n")
 
-        with open(json_file, "w", encoding="utf-8") as f:
-            json.dump(endpoints, f, indent=2)
+        for target_json in (json_file, json_v2_file):
+            with open(target_json, "w", encoding="utf-8") as f:
+                json.dump(endpoints, f, indent=2)
 
         summary = {
             "total_canonical_endpoints": len(endpoints),
             "unique_normalized_urls": len(unique_urls),
             "tool_provenance": self.store.get_provenance_summary(),
             "output_txt": str(txt_file),
+            "output_txt_v2": str(txt_v2_file),
             "output_json": str(json_file),
+            "output_json_v2": str(json_v2_file),
         }
-        logger.info(f"[EXPORT] Crawl complete! Saved {len(endpoints)} canonical endpoints to {txt_file}")
+        logger.info(f"[EXPORT] Crawl complete! Saved {len(endpoints)} canonical endpoints to {txt_file} and {txt_v2_file}")
         return summary

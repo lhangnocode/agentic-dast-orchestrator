@@ -8,11 +8,14 @@ import logging
 import os
 import time
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse, urlunparse
+from dotenv import load_dotenv
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from pydantic import BaseModel, Field
 
+load_dotenv()
 logger = logging.getLogger("orchestrator.firecrawl")
 
 
@@ -22,11 +25,41 @@ class DiscoveredLinksSchema(BaseModel):
 
 
 DEFAULT_AGENT_PROMPT = """
-You are a web application security discovery specialist. Explore the target web platform
-to discover as many distinct routes, navigation links, and administrative panels as possible.
-1. Authenticate if a login form is visible (/user) with admin / admin123.
-2. Click through dropdown menus (user avatar, site settings, configurations, plugins, playlists).
-3. Record all observed endpoints and URL routes.
+You are a web application security discovery expert. Your goal is to explore
+the target web platform to reveal as many distinct endpoints, routes, and
+interaction points as possible (GET navigation links and POST/PUT/DELETE actions).
+
+Priority execution order:
+1. AUTHENTICATION (MANDATORY FIRST STEP):
+   Navigate directly to the login page (e.g., /#/login, /login, or /user). Log in using
+   the administrative credentials:
+   - Username/Email: admin@juice-sh.op (or admin)
+   - Password: admin123
+   Submit the login form and ensure you are fully authenticated.
+
+2. USER & ADMIN MENU DISCOVERY:
+   Once logged in, click on the user profile/avatar/account menu dropdown (usually in the
+   top-right corner or sidebar) to expand dynamic items. Open and visit each link
+   inside it (e.g., Orders & Payment, Privacy & Security, Administration, Score Board,
+   Basket, User Profile, Configurations/Site Settings).
+
+3. STATE-CHANGING ACTIONS & FORMS:
+   Perform realistic interactions to trigger hidden POST/AJAX endpoints:
+   - Use the Search form: submit test queries (e.g., 'juice', 'apple', 'test').
+   - Open Customer Feedback (/contact), Complaints (/complain), Product Reviews.
+   - Interact with Add to Basket, Address management forms, Delivery methods.
+   - Open Contact, About Us, Photo Wall, Recycling pages.
+
+4. REMAINING NAVIGATION:
+   Click through remaining header, footer, and sidebar links, pagination controls,
+   and filter buttons.
+
+OUTPUT REQUIREMENTS:
+For every step, capture and record the visited URL/route (including paths,
+query parameters, and dynamic route segments). Return ALL unique URLs observed
+throughout the entire session alongside a summary of the actions taken.
+
+Only act on this authorized test target. Use safe, realistic test data without attack payloads.
 """
 
 
@@ -35,13 +68,13 @@ class FirecrawlClient:
         self,
         api_key: Optional[str] = None,
         api_url: str = "https://api.firecrawl.dev/v2",
-        model: str = "spark-1-pro",
+        model: str = "spark-2",
         poll_timeout_seconds: int = 600,
         poll_interval_seconds: int = 10,
         mock_fallback: bool = True,
         public_tunnel_url: Optional[str] = None
     ):
-        self.api_key = api_key or os.getenv("FIRECRAWL_API_KEY", "")
+        self.api_key = os.getenv("FIRECRAWL_API_KEY", "") if api_key is None else api_key
         self.api_url = api_url.rstrip("/")
         self.agent_endpoint = f"{self.api_url}/agent"
         self.model = model
@@ -85,25 +118,34 @@ class FirecrawlClient:
         """
         if not self.is_configured():
             if self.mock_fallback:
-                logger.warning("[FIRECRAWL] API key not configured. Using verified AVideo fallback routes for simulation.")
-                return self._get_fallback_routes()
+                logger.warning("[FIRECRAWL] API key not configured. Using fallback routes for simulation.")
+                return self._get_fallback_routes(target_url)
             else:
                 raise ValueError("Firecrawl API key is required but not configured.")
 
         # Handle localhost target for Firecrawl Cloud
         cloud_target_url = target_url
-        is_local = any(h in target_url for h in ("localhost", "127.0.0.1"))
+        parsed_target = urlparse(target_url)
+        is_local = parsed_target.hostname in ("localhost", "127.0.0.1")
         if is_local:
             if self.public_tunnel_url:
-                cloud_target_url = target_url.replace("http://localhost", self.public_tunnel_url).replace("http://127.0.0.1", self.public_tunnel_url)
+                parsed_tun = urlparse(self.public_tunnel_url)
+                cloud_target_url = urlunparse((
+                    parsed_tun.scheme,
+                    parsed_tun.netloc,
+                    parsed_target.path,
+                    parsed_target.params,
+                    parsed_target.query,
+                    parsed_target.fragment
+                ))
                 logger.info(f"[FIRECRAWL] Mapped local target {target_url} -> public tunnel {cloud_target_url}")
             elif self.mock_fallback:
                 logger.warning(
                     "[FIRECRAWL] Target URL is localhost and no PUBLIC_TUNNEL_URL is configured in .env. "
                     "Firecrawl Cloud cannot reach localhost directly without a tunnel. "
-                    "Using verified AVideo routes for simulation (to run live on Cloud, set PUBLIC_TUNNEL_URL)."
+                    "Using verified routes for simulation (to run live on Cloud, set PUBLIC_TUNNEL_URL)."
                 )
-                return self._get_fallback_routes()
+                return self._get_fallback_routes(target_url)
 
         agent_prompt = prompt or DEFAULT_AGENT_PROMPT
         agent_schema = schema or DiscoveredLinksSchema.model_json_schema()
@@ -161,9 +203,21 @@ class FirecrawlClient:
                         logger.info(f"[FIRECRAWL] Job completed successfully! Found {len(links)} links.")
                         # Map tunnel URLs back to localhost if tunnel was used
                         normalized_links = []
+                        target_origin = os.getenv("TARGET_URL", "http://localhost:3000/").rstrip("/")
+                        p_target = urlparse(target_origin)
+                        p_tunnel = urlparse(self.public_tunnel_url) if self.public_tunnel_url else None
                         for link in links:
-                            if self.public_tunnel_url and self.public_tunnel_url in link:
-                                link = link.replace(self.public_tunnel_url, "http://localhost")
+                            if p_tunnel and p_tunnel.netloc in link:
+                                p_link = urlparse(link)
+                                if p_link.netloc == p_tunnel.netloc:
+                                    link = urlunparse((
+                                        p_target.scheme,
+                                        p_target.netloc,
+                                        p_link.path,
+                                        p_link.params,
+                                        p_link.query,
+                                        p_link.fragment
+                                    ))
                             normalized_links.append(link)
                         return [{"url": link, "method": "GET", "source": "firecrawl", "status_code": 200} for link in normalized_links]
 
@@ -179,29 +233,49 @@ class FirecrawlClient:
         logger.warning(f"[FIRECRAWL] Polling timed out after {self.poll_timeout_seconds}s.")
         return []
 
-    def _get_fallback_routes(self) -> List[Dict[str, Any]]:
+    def _get_fallback_routes(self, target_url: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Provides empirical AVideo routes uncovered by Firecrawl agent during prior research
+        Provides empirical routes uncovered by Firecrawl agent during prior research
         for reproducible offline benchmarking and local verification.
         """
-        fallback_urls = [
-            "http://localhost/siteConfigurations",
-            "http://localhost/plugins",
-            "http://localhost/users",
-            "http://localhost/usersGroups",
-            "http://localhost/trending",
-            "http://localhost/videoOnly",
-            "http://localhost/audioOnly",
-            "http://localhost/listCategories",
-            "http://localhost/mvideos",
-            "http://localhost/view/managerPlugins.php",
-            "http://localhost/view/managerUsers.php",
-            "http://localhost/view/managerVideosOrganize.php",
-            "http://localhost/plugin/PlayLists/managerPlaylists.php",
-            "http://localhost/plugin/Live/view/Live_schedule/panelIndex.php",
-            "http://localhost/objects/getAllEmails.csv.php",
-            "http://localhost/objects/videos.txt.php",
-        ]
+        target = target_url or os.getenv("TARGET_URL", "http://localhost:3000/")
+        if "3000" in str(target) or "juice" in str(target).lower():
+            fallback_urls = [
+                "http://localhost:3000/#/search",
+                "http://localhost:3000/#/login",
+                "http://localhost:3000/#/basket",
+                "http://localhost:3000/#/contact",
+                "http://localhost:3000/#/complain",
+                "http://localhost:3000/#/score-board",
+                "http://localhost:3000/#/administration",
+                "http://localhost:3000/#/recycle",
+                "http://localhost:3000/#/order-history",
+                "http://localhost:3000/rest/user/whoami",
+                "http://localhost:3000/rest/products/search",
+                "http://localhost:3000/api/Products",
+                "http://localhost:3000/api/Feedbacks",
+                "http://localhost:3000/api/Users",
+                "http://localhost:3000/api/BasketItems",
+            ]
+        else:
+            fallback_urls = [
+                "http://localhost/siteConfigurations",
+                "http://localhost/plugins",
+                "http://localhost/users",
+                "http://localhost/usersGroups",
+                "http://localhost/trending",
+                "http://localhost/videoOnly",
+                "http://localhost/audioOnly",
+                "http://localhost/listCategories",
+                "http://localhost/mvideos",
+                "http://localhost/view/managerPlugins.php",
+                "http://localhost/view/managerUsers.php",
+                "http://localhost/view/managerVideosOrganize.php",
+                "http://localhost/plugin/PlayLists/managerPlaylists.php",
+                "http://localhost/plugin/Live/view/Live_schedule/panelIndex.php",
+                "http://localhost/objects/getAllEmails.csv.php",
+                "http://localhost/objects/videos.txt.php",
+            ]
         return [
             {"url": u, "method": "GET", "source": "firecrawl", "status_code": 200}
             for u in fallback_urls

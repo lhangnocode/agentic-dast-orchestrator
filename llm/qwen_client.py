@@ -1,40 +1,45 @@
 """
 Alibaba Cloud Model Studio / Qwen LLM Client via OpenAI-Compatible SDK.
 Provides structured decision making for DAST crawl orchestration.
+
+This client only talks to the model. When it is not configured or the call fails it
+returns None and the orchestrator falls back to orchestrator.policy.HeuristicPolicy.
 """
 
-import json
 import logging
 import os
 from typing import Optional, Tuple
+
 from dotenv import load_dotenv
 from openai import OpenAI
-from pydantic import ValidationError
 
-from orchestrator.decision_schema import OrchestratorDecision, ToolActionEnum
-from storage.state_store import StateStore
+from orchestrator.decision_schema import OrchestratorDecision
 
 load_dotenv()
 logger = logging.getLogger("orchestrator.qwen")
 
 SYSTEM_ORCHESTRATOR_PROMPT = """
-You are an intelligent Web Crawling & Route Discovery Orchestrator.
-Your goal is to maximize the discovery of unique, authenticated pages, application routes,
-and parameter configurations on the target application while avoiding redundant HTTP requests.
+You orchestrate crawl-only discovery tools to map the routes and parameters of ONE authorized
+web application while avoiding redundant requests. You never attack; tools only crawl.
 
-Available Specialized Tools:
-1. `firecrawl_navigate`: Best for semantic UI exploration, expanding administrative dropdowns, modals, and client routes.
-2. `zap_traditional_spider`: High-speed link crawling through HTML anchors and sitemaps.
-3. `zap_ajax_spider`: Headless browser spidering dynamic single-page applications and DOM events.
-4. `wapiti_form_crawl`: Form structure extraction and parameter discovery/reflection without test payloads.
-5. `terminate`: Terminate the crawl when all valuable frontiers are saturated or marginal gain drops to near zero.
+The fast classic crawlers (ZAP traditional spider + Wapiti) have already run as a bootstrap.
+You now decide, one step at a time, which tool adds the most NEW canonical endpoints next.
 
-Strategy Guidelines:
-- Begin by exploring unknown UI territories or running foundational spidering.
-- When new administrative panels or UI routes are uncovered, route them to ZAP or Wapiti to spider internal forms and parameters.
-- When form-rich pages (e.g. managerUsers, managerVideos) are discovered, use `wapiti_form_crawl`.
-- When multiple tools show zero marginal gain or pending frontier is empty, decide `terminate`.
-- Return valid structured JSON adhering to the OrchestratorDecision schema.
+Tools (only choose ones listed in `available_tools`):
+- zap_traditional_spider: cheap link/sitemap spider. Good for newly found server-rendered pages.
+- wapiti_form_crawl: parses forms and parameters of pages. Good for new pages with inputs.
+- zap_ajax_spider: real headless browser (executes JS, clicks elements). The main tool for SPAs:
+  hash routes (/#/...), API-heavy surfaces, or very few HTML pages found by the classic crawlers.
+- firecrawl_navigate: slow, expensive semantic UI agent. Use it sparingly and targeted: on pages
+  that redirect/deny classic crawlers (3xx/401/403) or on JS menus no other tool opened.
+  Put a short instruction for it in `focus`.
+- terminate: when recent marginal gain is ~0 and no tool has a useful unvisited frontier.
+
+Rules:
+- Pick target_seeds from `pending_frontier_candidates` of the chosen tool, or the target URL.
+- Do not repeat a tool that just produced ~0 new endpoints unless its frontier grew since.
+- Prefer cheap tools when they still have frontier; justify expensive ones in `reasoning`.
+- Return valid structured JSON matching the OrchestratorDecision schema.
 """
 
 
@@ -54,33 +59,21 @@ class QwenClient:
 
         self.client: Optional[OpenAI] = None
         if self.is_configured():
-            self.client = OpenAI(
-                api_key=self.api_key,
-                base_url=self.base_url
-            )
+            self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
 
     def is_configured(self) -> bool:
         return bool(self.api_key and self.api_key != "your_dashscope_api_key_here")
 
-    def get_decision(
-        self,
-        context_yaml: str,
-        store: StateStore,
-        current_iteration: int,
-        base_url: str
-    ) -> Tuple[OrchestratorDecision, int, int]:
+    def get_decision(self, context_yaml: str) -> Optional[Tuple[OrchestratorDecision, int, int]]:
         """
-        Requests the next tactical crawling decision from Qwen.
-        Returns: (OrchestratorDecision, prompt_tokens, completion_tokens).
+        Requests the next crawling decision from Qwen.
+        Returns (decision, prompt_tokens, completion_tokens), or None if unavailable/failed.
         """
-        if not self.is_configured() or self.client is None:
-            logger.info("[LLM] DashScope API key not set. Using deterministic heuristic orchestrator.")
-            return self._heuristic_decision(store, current_iteration, base_url), 0, 0
+        if self.client is None:
+            return None
 
         user_content = f"Current Orchestration State:\n```yaml\n{context_yaml}\n```\nWhat is the next optimal tool action?"
-
         try:
-            # Call using OpenAI beta parse for structured Pydantic response
             completion = self.client.beta.chat.completions.parse(
                 model=self.model,
                 messages=[
@@ -90,76 +83,15 @@ class QwenClient:
                 response_format=OrchestratorDecision,
                 temperature=0.2,
             )
-
-            prompt_tokens = completion.usage.prompt_tokens if completion.usage else 0
-            completion_tokens = completion.usage.completion_tokens if completion.usage else 0
-
             decision = completion.choices[0].message.parsed
             if decision is None:
                 raise ValueError("Parsed decision is None from LLM response.")
 
+            prompt_tokens = completion.usage.prompt_tokens if completion.usage else 0
+            completion_tokens = completion.usage.completion_tokens if completion.usage else 0
             logger.info(f"[LLM] Qwen decision: action={decision.action.value}, seeds={len(decision.target_seeds)}")
             return decision, prompt_tokens, completion_tokens
 
         except Exception as e:
-            logger.warning(f"[LLM] Qwen API call failed: {e}. Falling back to heuristic decision.")
-            return self._heuristic_decision(store, current_iteration, base_url), 0, 0
-
-    def _heuristic_decision(
-        self,
-        store: StateStore,
-        current_iteration: int,
-        base_url: str
-    ) -> OrchestratorDecision:
-        """
-        Deterministic research baseline for offline execution and regression testing:
-        Iter 1: Firecrawl UI navigation to discover admin dropdowns and hidden routes.
-        Iter 2: ZAP Traditional Spider to exhaustively spider links discovered by Firecrawl.
-        Iter 3: Wapiti Form Crawl to extract and reflect parameters on discovered manager pages.
-        Iter 4: ZAP Ajax Spider to crawl dynamic DOM elements and client SPA routes.
-        Iter >= 5: Terminate if pending frontier is low or saturated.
-        """
-        if current_iteration == 1:
-            return OrchestratorDecision(
-                action=ToolActionEnum.FIRECRAWL_NAVIGATE,
-                reasoning="Initial state: Firecrawl UI agent explores authenticated admin dropdowns, menus, and hidden panels.",
-                target_seeds=[base_url],
-                expected_discovery_type="admin_panels_and_menus"
-            )
-
-        if current_iteration == 2:
-            pending_zap = store.get_pending_frontier("zap_traditional_spider", limit=15)
-            seeds = pending_zap if pending_zap else [base_url]
-            return OrchestratorDecision(
-                action=ToolActionEnum.ZAP_TRADITIONAL_SPIDER,
-                reasoning="Second phase: ZAP Traditional Spider maps out link graphs starting from semantic routes discovered by Firecrawl.",
-                target_seeds=seeds,
-                expected_discovery_type="hyperlinks_and_static_routes"
-            )
-
-        if current_iteration == 3:
-            pending_wapiti = store.get_pending_frontier("wapiti_form_crawl", limit=15)
-            seeds = pending_wapiti if pending_wapiti else [base_url]
-            return OrchestratorDecision(
-                action=ToolActionEnum.WAPITI_FORM_CRAWL,
-                reasoning="Third phase: Wapiti form specialist inspects input forms, user groups, and manager endpoints to discover query/POST parameters.",
-                target_seeds=seeds,
-                expected_discovery_type="form_parameters"
-            )
-
-        if current_iteration == 4:
-            pending_ajax = store.get_pending_frontier("zap_ajax_spider", limit=10)
-            seeds = pending_ajax if pending_ajax else [base_url]
-            return OrchestratorDecision(
-                action=ToolActionEnum.ZAP_AJAX_SPIDER,
-                reasoning="Fourth phase: ZAP Ajax Spider executes headless DOM exploration on remaining interactive endpoints.",
-                target_seeds=seeds,
-                expected_discovery_type="dynamic_client_routes"
-            )
-
-        return OrchestratorDecision(
-            action=ToolActionEnum.TERMINATE,
-            reasoning="All specialized crawler capabilities have explored the attack surface. Frontier is saturated.",
-            target_seeds=[],
-            expected_discovery_type="complete"
-        )
+            logger.warning(f"[LLM] Qwen API call failed: {e}")
+            return None

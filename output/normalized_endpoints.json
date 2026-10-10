@@ -1,291 +1,5 @@
 [
   {
-    "canonical_hash": "d6fa3e73ae91614fbe37be006f916b93a75b1e48697bfbe8e4a45e75eba0cd0a",
-    "canonical_key": "GET #/about",
-    "method": "GET",
-    "path_template": "#/about",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/about",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "756c558ad398803f5078ca0f4a95f1e2c34dcc9c1ac820cd3062fb2e55cd5295",
-    "canonical_key": "GET #/account/profile",
-    "method": "GET",
-    "path_template": "#/account/profile",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/account/profile",
-    "status_code": 200,
-    "first_seen_iteration": 4,
-    "created_at": "2026-09-29 06:11:19"
-  },
-  {
-    "canonical_hash": "1a62d3089bedbc6fe3d6f6b29f75d26b2477c2f9595016493c53617409b909db",
-    "canonical_key": "GET #/address/saved",
-    "method": "GET",
-    "path_template": "#/address/saved",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/address/saved",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "1d381e28c604498846e79a9c7a53e0ca385c4178fa32cf57fcf7455f4729ce4c",
-    "canonical_key": "GET #/address/select",
-    "method": "GET",
-    "path_template": "#/address/select",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/address/select",
-    "status_code": 200,
-    "first_seen_iteration": 5,
-    "created_at": "2026-09-29 06:17:38"
-  },
-  {
-    "canonical_hash": "474209007bc91b52ea1f170f6fcf69f185087f2d1f7072dfea656160eb24524f",
-    "canonical_key": "GET #/admin/",
-    "method": "GET",
-    "path_template": "#/admin/",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/admin/",
-    "status_code": 200,
-    "first_seen_iteration": 5,
-    "created_at": "2026-09-29 06:17:37"
-  },
-  {
-    "canonical_hash": "dc328b96a7287093825b768df60632a678e3bbd01c7538ab90d811f07923e4ae",
-    "canonical_key": "GET #/administration",
-    "method": "GET",
-    "path_template": "#/administration",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/administration",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "6f3dfd00413812fef9627c7f7e8cec6ce9bbe20d66d0e8ebc09c6fe50cbecb9c",
-    "canonical_key": "GET #/basket",
-    "method": "GET",
-    "path_template": "#/basket",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/basket",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "21953dc89844dc2138a77c1373a2c158ed3dd3fec78d8c629625713dee4ecc71",
-    "canonical_key": "GET #/chatbot",
-    "method": "GET",
-    "path_template": "#/chatbot",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/chatbot",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "9f0ac0668b07580fd58462790ee08f78b3f85856ed89e09804b673dcbebf9895",
-    "canonical_key": "GET #/complain",
-    "method": "GET",
-    "path_template": "#/complain",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/complain",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "7c1099d556c4e9c534e6ff3374ab1094fb73cc6d65948cbfb9e044f6a8f6df96",
-    "canonical_key": "GET #/contact",
-    "method": "GET",
-    "path_template": "#/contact",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/contact",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "9076371103034a65a16cda05fc3929262ba94f9f7021a77b060fb81c06ed04f3",
-    "canonical_key": "GET #/delivery-method",
-    "method": "GET",
-    "path_template": "#/delivery-method",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/delivery-method",
-    "status_code": 200,
-    "first_seen_iteration": 5,
-    "created_at": "2026-09-29 06:17:38"
-  },
-  {
-    "canonical_hash": "e2af14bddb54704a26cb893237fdb6a3429383e052828f48952f9b92003fd2b0",
-    "canonical_key": "GET #/delivery-methods",
-    "method": "GET",
-    "path_template": "#/delivery-methods",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/delivery-methods",
-    "status_code": 200,
-    "first_seen_iteration": 6,
-    "created_at": "2026-09-29 06:23:23"
-  },
-  {
-    "canonical_hash": "2063a52245e0648bcca4b6297c68708fdbcf5c828336e79c68ae2bb1d3e7c84d",
-    "canonical_key": "GET #/deluxe-membership",
-    "method": "GET",
-    "path_template": "#/deluxe-membership",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/deluxe-membership",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "fd4c64e034056e3bf7cd87cf3f90f5b9125dc2dac115b420a1f0c7acb7522239",
-    "canonical_key": "GET #/login",
-    "method": "GET",
-    "path_template": "#/login",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/login",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "e57a9ca29b0252e9fc4c4faac33ed71720d428d67130b45e7617f21b4c949510",
-    "canonical_key": "GET #/order-completion",
-    "method": "GET",
-    "path_template": "#/order-completion",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/order-completion",
-    "status_code": 200,
-    "first_seen_iteration": 6,
-    "created_at": "2026-09-29 06:23:23"
-  },
-  {
-    "canonical_hash": "f29fc5a6c992aa9336e050a91c8f61d154750beffa9415893a4ddc4baf312448",
-    "canonical_key": "GET #/order-history",
-    "method": "GET",
-    "path_template": "#/order-history",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/order-history",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "e4be807527c77d639fab774d416e5e1edca5ccba92d125d17d8326c781f41a25",
-    "canonical_key": "GET #/payment/saved",
-    "method": "GET",
-    "path_template": "#/payment/saved",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/payment/saved",
-    "status_code": 200,
-    "first_seen_iteration": 4,
-    "created_at": "2026-09-29 06:11:19"
-  },
-  {
-    "canonical_hash": "843bf9e3e2c052346d90f81fa6ed0fc645526f2ff81079736004d85e176da7b6",
-    "canonical_key": "GET #/photo-wall",
-    "method": "GET",
-    "path_template": "#/photo-wall",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/photo-wall",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "7a9a5f24797c820138d1ab6c0a901dd0f5c2f12d23faff641e6d6bb2ce2112bc",
-    "canonical_key": "GET #/privacy-security",
-    "method": "GET",
-    "path_template": "#/privacy-security",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/privacy-security",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "8379970226fc92a2432d5f6bc163978418bd7b89bfdaaeaad413d2f49398fdaa",
-    "canonical_key": "GET #/profile",
-    "method": "GET",
-    "path_template": "#/profile",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/profile",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "7e782a671b1f0756b218213c4c43cad6b46c85ed482cd1efbc59985d22b739d0",
-    "canonical_key": "GET #/recycle",
-    "method": "GET",
-    "path_template": "#/recycle",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/recycle",
-    "status_code": 200,
-    "first_seen_iteration": 4,
-    "created_at": "2026-09-29 06:11:19"
-  },
-  {
-    "canonical_hash": "8361d21c05e9e79e4fc7e261cc2ce9cdac6892117684719ab2f30097a43462ea",
-    "canonical_key": "GET #/saved-payment-methods",
-    "method": "GET",
-    "path_template": "#/saved-payment-methods",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/saved-payment-methods",
-    "status_code": 200,
-    "first_seen_iteration": 6,
-    "created_at": "2026-09-29 06:23:23"
-  },
-  {
-    "canonical_hash": "5b1852c6675929240e3df9922e1569f36201c5329e78b4ef113af7b66ac96d2e",
-    "canonical_key": "GET #/score-board",
-    "method": "GET",
-    "path_template": "#/score-board",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/score-board",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "6afeea28f9124f29627accc114934c5d52492af2ed57e34de7ea0cae18da265b",
-    "canonical_key": "GET #/search",
-    "method": "GET",
-    "path_template": "#/search",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/search",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "444129eadf318a082b29e59413df54c35cd84e384f9e541729318ba24bc33d9e",
-    "canonical_key": "GET #/search?q={q}",
-    "method": "GET",
-    "path_template": "#/search",
-    "query_params": "[\"q\"]",
-    "normalized_url": "http://localhost:3000/#/search?q={q}",
-    "status_code": 200,
-    "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "25c1a167b7107793f7e2c385bb8a77fba522f6324e7749ee92751e065a3c05ca",
-    "canonical_key": "GET #/wallet",
-    "method": "GET",
-    "path_template": "#/wallet",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/#/wallet",
-    "status_code": 200,
-    "first_seen_iteration": 4,
-    "created_at": "2026-09-29 06:11:19"
-  },
-  {
     "canonical_hash": "c767025d0edc7a064cf0003cc4d5a2f5f9e013c608f7a6909554afcdb1126fb2",
     "canonical_key": "GET /",
     "method": "GET",
@@ -294,18 +8,18 @@
     "normalized_url": "http://localhost:3000/",
     "status_code": 200,
     "first_seen_iteration": 0,
-    "created_at": "2026-09-29 05:43:29"
+    "created_at": "2026-10-06 00:30:45"
   },
   {
-    "canonical_hash": "059a5b30a25207426cf874f5814e354b71726709ef302e4b376debcc78489ffa",
-    "canonical_key": "GET /api",
+    "canonical_hash": "d365a0844f3458afc63e256cb9840f98e0bfc8300489a60104fabb391a1886a6",
+    "canonical_key": "GET /?email={email}&password={password}",
     "method": "GET",
-    "path_template": "/api",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/api",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "path_template": "/",
+    "query_params": "[\"email\", \"password\"]",
+    "normalized_url": "http://localhost:3000/?email={email}&password={password}",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "b8e824447e1054650b46ec038e95cd7bb4aa3417bec22f6439283bd6e9ec4a1d",
@@ -315,19 +29,19 @@
     "query_params": "[\"name\"]",
     "normalized_url": "http://localhost:3000/api/Challenges?name={name}",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
-    "canonical_hash": "6a549b834509461fdc2fecd841814e2bf3c0a26fa243231c2a79d7e412a05a06",
-    "canonical_key": "GET /api/Challenges",
+    "canonical_hash": "216b1400b7505ba417f1b24520a06ac12733b0fe410c3ef6d2d8bd7f469cb5e4",
+    "canonical_key": "GET /api/Feedbacks",
     "method": "GET",
-    "path_template": "/api/Challenges",
+    "path_template": "/api/Feedbacks",
     "query_params": "[]",
-    "normalized_url": "http://localhost:3000/api/Challenges",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "normalized_url": "http://localhost:3000/api/Feedbacks",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "64c483ca7e23ebd6de4645db5fef83b97f28db37e3cee3f195c41955da77c051",
@@ -337,19 +51,19 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/api/Quantitys",
     "status_code": 200,
-    "first_seen_iteration": 7,
-    "created_at": "2026-09-29 06:27:03"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
-    "canonical_hash": "cd66a44c053f3fa48a4125119a68972ed75eeab38a400cfa77ccc73b53d3d8ab",
-    "canonical_key": "GET /assets/i18n",
+    "canonical_hash": "6e39ceddd25f0748c9a656771b971fc241853e7d594f0079e797a0361d8403bf",
+    "canonical_key": "GET /api/SecurityQuestions",
     "method": "GET",
-    "path_template": "/assets/i18n",
+    "path_template": "/api/SecurityQuestions",
     "query_params": "[]",
-    "normalized_url": "http://localhost:3000/assets/i18n",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "normalized_url": "http://localhost:3000/api/SecurityQuestions",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "091cf1227471e4a6eeeea57f45e60a4c3c74f3dddb12e3586cd122949694bb55",
@@ -359,41 +73,19 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/assets/i18n/en.json",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
-    "canonical_hash": "1c0649a835838ae150167e36f2fc5dc6b9d9617c604be8d0ba1da12055538b47",
-    "canonical_key": "GET /assets/public",
+    "canonical_hash": "6ecc6cf03bae2fb5dd39d7ad45b0c4aa2a3ed1957e123c466abf2072adf7e182",
+    "canonical_key": "GET /assets/public/images/uploads/%E1%93%9A%E1%98%8F%E1%97%A2-",
     "method": "GET",
-    "path_template": "/assets/public",
+    "path_template": "/assets/public/images/uploads/%E1%93%9A%E1%98%8F%E1%97%A2-",
     "query_params": "[]",
-    "normalized_url": "http://localhost:3000/assets/public",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
-  },
-  {
-    "canonical_hash": "e8f009fea97d35d704ede857e07bbac924b4422c2761b963a1d8545925f31a25",
-    "canonical_key": "GET /assets/public/images",
-    "method": "GET",
-    "path_template": "/assets/public/images",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/assets/public/images",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
-  },
-  {
-    "canonical_hash": "e5de88abb8865cf52cab65c4295156336117c3614b3b91509830596d09d5ae6a",
-    "canonical_key": "GET /assets/public/images/products",
-    "method": "GET",
-    "path_template": "/assets/public/images/products",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/assets/public/images/products",
-    "status_code": 0,
-    "first_seen_iteration": 7,
-    "created_at": "2026-09-29 06:27:03"
+    "normalized_url": "http://localhost:3000/assets/public/images/uploads/%E1%93%9A%E1%98%8F%E1%97%A2-",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "b6507476507127b0613975b5b04335e31075a4be42860e10bbcdbbfa25702b9e",
@@ -403,8 +95,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "e6843028eb646c796d84d604f88bc2b4ed8d1c555d5b260d64e9491bc6ae00bd",
@@ -414,8 +106,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/acquisitions.md",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "9f07b3c4a3260ef30edc7e6944348299a045b991d335c8d27786410970ad030e",
@@ -425,8 +117,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/announcement_encrypted.md",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "672e7afa118cf52318cdb546e06cc970e8e618db7c53f9320e47c907e2d44b4d",
@@ -436,8 +128,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/coupons_2013.md.bak",
     "status_code": 403,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "511c3fad2a82aac840415612b50581681f6c71d65f9113a517c37ffa836c77e7",
@@ -447,8 +139,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/eastere.gg",
     "status_code": 403,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "fe734b88899c0c1aff32b8aea66d0785e53020dac463c581486396ae4b372699",
@@ -458,8 +150,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/encrypt.pyc",
     "status_code": 403,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "0b7fc21fd0498bcb6d98f3c14b115e25385f8dff808ac78b65599fb1091ffff8",
@@ -469,8 +161,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/incident-support.kdbx",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "69b87a0e169c21aa679c9a98a5923d11945c67e8e86a2df558af049b3b8ba6bb",
@@ -480,8 +172,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/legal.md",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "f783dded1bc99f1a7f17ea5b47002aeeb7f840adfedd623dd73730e1b56179cb",
@@ -491,8 +183,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/package-lock.json.bak",
     "status_code": 403,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "90535c91519259deaafa2c7ba117c723e8ca6d8c73e65d8c017600cf35000705",
@@ -502,8 +194,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/package.json.bak",
     "status_code": 403,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "bc0d92433fc16b2b18f5a85c65201e63343598202ac3e32dab21d34db4f41143",
@@ -513,8 +205,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/quarantine",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "2048417ce6f2b61261162ec278e4760e68f6a9865d7b66ddc5c99523bc2d0d94",
@@ -524,8 +216,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/quarantine/juicy_malware_linux_amd_64.url",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "0a3f7646fc1c64e57bf27ee8233c664c3f1baf465a95c9c0114b185958a2e30f",
@@ -535,8 +227,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/quarantine/juicy_malware_linux_arm_64.url",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "9f942553be468aeee4787ad9921c1fda4f4eca929e8223a9e94d047adf7d31f6",
@@ -546,8 +238,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/quarantine/juicy_malware_macos_64.url",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "34f34e6f6c18f1ecd52acabe9ab4e283fb787d449265e700293b1aa994a21d63",
@@ -557,8 +249,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/quarantine/juicy_malware_windows_64.exe.url",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "2c02e50f1869a0041adcd5c1d3df4d5c2cf3712a404791ad93316ca7feab8652",
@@ -568,63 +260,19 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/ftp/suspicious_errors.yml",
     "status_code": 403,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
-    "canonical_hash": "12b211ff948d3027dfe5109c2b5f1c34a4e23744d97f25617cf01f06f0ceee1d",
-    "canonical_key": "GET /juice-shop",
-    "method": "GET",
-    "path_template": "/juice-shop",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/juice-shop",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
-  },
-  {
-    "canonical_hash": "7746f2609ab136fd22259880492a6014b1edf3538a773345263f8dfcfaf18b26",
-    "canonical_key": "GET /media",
-    "method": "GET",
-    "path_template": "/media",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/media",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
-  },
-  {
-    "canonical_hash": "07cd00f6f97604035326178c8fd1316df5a84e53112a5b50ec284eb2a8f13b97",
-    "canonical_key": "GET /redirect?to={to}",
+    "canonical_hash": "dc2694ec32ebe352c516aeb839b0945a3744080a7af24f01c0f0819f6cc0d1b9",
+    "canonical_key": "GET /redirect",
     "method": "GET",
     "path_template": "/redirect",
-    "query_params": "[\"to\"]",
-    "normalized_url": "http://localhost:3000/redirect?to={to}",
-    "status_code": 200,
+    "query_params": "[]",
+    "normalized_url": "http://localhost:3000/redirect",
+    "status_code": 500,
     "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
-  },
-  {
-    "canonical_hash": "048e5f12ecfd459b0226b2fe746ca7c89089e120de350d78f1ccb45ffdbbf9b4",
-    "canonical_key": "GET /rest",
-    "method": "GET",
-    "path_template": "/rest",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/rest",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
-  },
-  {
-    "canonical_hash": "2041a88d26be0af11993291ceda5c850a224be11cbe4878e51c62a841d17a1a0",
-    "canonical_key": "GET /rest/admin",
-    "method": "GET",
-    "path_template": "/rest/admin",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/rest/admin",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "1b69ced805034c9b947663cd9fb71b93a55e22b09743fd9624bd4b1443622c06",
@@ -634,8 +282,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/rest/admin/application-configuration",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "5a46932e99b33fe6e4b0e6d1072cd82a781d7603f81aea74cc87f25e54e47402",
@@ -645,8 +293,30 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/rest/admin/application-version",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
+  },
+  {
+    "canonical_hash": "302578e1feb54b911618a8a86db8c731332319db3aa7f3e871b7e5661022c8a4",
+    "canonical_key": "GET /rest/captcha",
+    "method": "GET",
+    "path_template": "/rest/captcha",
+    "query_params": "[]",
+    "normalized_url": "http://localhost:3000/rest/captcha",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
+  },
+  {
+    "canonical_hash": "cd963dbb07d821d2addacf867d378c5dc9ce5c52b4c7834334d95d40269d06dc",
+    "canonical_key": "GET /rest/continue-code",
+    "method": "GET",
+    "path_template": "/rest/continue-code",
+    "query_params": "[]",
+    "normalized_url": "http://localhost:3000/rest/continue-code",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "a575fd0fc9fb12dfb6813469c89a68b051e5948a0bc9d4f409f5ee9281cb04c0",
@@ -656,19 +326,19 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/rest/languages",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
-    "canonical_hash": "a1b0e8c0999e92665f6061ad5adbfce94ad25fc2d46b4852f09fd0d38fdf7cb2",
-    "canonical_key": "GET /rest/products",
+    "canonical_hash": "1a935f8e88603f40f31efb642913af8bcd70d512aae19bbcb6f4e365f81dec58",
+    "canonical_key": "GET /rest/memories",
     "method": "GET",
-    "path_template": "/rest/products",
+    "path_template": "/rest/memories",
     "query_params": "[]",
-    "normalized_url": "http://localhost:3000/rest/products",
-    "status_code": 0,
-    "first_seen_iteration": 7,
-    "created_at": "2026-09-29 06:27:03"
+    "normalized_url": "http://localhost:3000/rest/memories",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "5ef77a506d0a7f81688b9cf954921ea8f40916b1b26d675adf53605e39239583",
@@ -678,8 +348,19 @@
     "query_params": "[\"q\"]",
     "normalized_url": "http://localhost:3000/rest/products/search?q={q}",
     "status_code": 200,
-    "first_seen_iteration": 7,
-    "created_at": "2026-09-29 06:27:03"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
+  },
+  {
+    "canonical_hash": "2d1bffc50f452a37228a593c1f686e6d37d901b6d70ad24d0b696192417908c5",
+    "canonical_key": "GET /rest/user/whoami?fields={fields}",
+    "method": "GET",
+    "path_template": "/rest/user/whoami",
+    "query_params": "[\"fields\"]",
+    "normalized_url": "http://localhost:3000/rest/user/whoami?fields={fields}",
+    "status_code": 200,
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "deae90bdcf4d6dfac958411d69b7e9e78405006dff27e601261fe4218691d25b",
@@ -689,8 +370,8 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/robots.txt",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "efe3322f38390859600f9224ac34026658c8f8d7ba14c15cdc22de28ade5ec1f",
@@ -700,8 +381,30 @@
     "query_params": "[]",
     "normalized_url": "http://localhost:3000/sitemap.xml",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
+  },
+  {
+    "canonical_hash": "e3ed61fbf281ba9ebbfc1fd2f90a91fab9fb58d0893fa3b467a374af4a266eff",
+    "canonical_key": "GET /sitemap.xml?email={email}&password={password}",
+    "method": "GET",
+    "path_template": "/sitemap.xml",
+    "query_params": "[\"email\", \"password\"]",
+    "normalized_url": "http://localhost:3000/sitemap.xml?email={email}&password={password}",
+    "status_code": 200,
+    "first_seen_iteration": 2,
+    "created_at": "2026-10-06 00:35:43"
+  },
+  {
+    "canonical_hash": "5ed7a96117b538768787b3e95663cf676120672cab889959672920ccfe108978",
+    "canonical_key": "GET /sitemap.xml/socket.io?EIO={EIO}&t={t}&transport={transport}",
+    "method": "GET",
+    "path_template": "/sitemap.xml/socket.io",
+    "query_params": "[\"EIO\", \"t\", \"transport\"]",
+    "normalized_url": "http://localhost:3000/sitemap.xml/socket.io?EIO={EIO}&t={t}&transport={transport}",
+    "status_code": 200,
+    "first_seen_iteration": 2,
+    "created_at": "2026-10-06 00:35:43"
   },
   {
     "canonical_hash": "7a0b085e4edcd4fe4cfee167a11bbe71565114474471331f1aaa04de1cad4dea",
@@ -711,19 +414,8 @@
     "query_params": "[\"EIO\", \"t\", \"transport\"]",
     "normalized_url": "http://localhost:3000/socket.io?EIO={EIO}&t={t}&transport={transport}",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
-  },
-  {
-    "canonical_hash": "59f213888697b65236734f2e2c570fc926bbd5e43d4f006d5cbf28919ff6eefb",
-    "canonical_key": "GET /socket.io",
-    "method": "GET",
-    "path_template": "/socket.io",
-    "query_params": "[]",
-    "normalized_url": "http://localhost:3000/socket.io",
-    "status_code": 0,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "50795266a33372415757a3aa312dd08e6de55e4780e0e2991d1810bee8c28388",
@@ -733,8 +425,8 @@
     "query_params": "[\"EIO\", \"sid\", \"t\", \"transport\"]",
     "normalized_url": "http://localhost:3000/socket.io?EIO={EIO}&sid={sid}&t={t}&transport={transport}",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "32d605f76095633b145e3af9738b5a0e4fa94fe19815e7a6e53860e5f2804cbe",
@@ -744,8 +436,8 @@
     "query_params": "[\"EIO\", \"sid\", \"t\", \"transport\"]",
     "normalized_url": "http://localhost:3000/socket.io?EIO={EIO}&sid={sid}&t={t}&transport={transport}",
     "status_code": 200,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
     "canonical_hash": "6ad73701db1de87d488e7779253d658b93e66f34f22761e27d69b847eedde5d4",
@@ -755,18 +447,18 @@
     "query_params": "[\"EIO\", \"sid\", \"transport\"]",
     "normalized_url": "http://localhost:3000/socket.io?EIO={EIO}&sid={sid}&transport={transport}",
     "status_code": 101,
-    "first_seen_iteration": 3,
-    "created_at": "2026-09-29 05:54:13"
+    "first_seen_iteration": 1,
+    "created_at": "2026-10-06 00:31:42"
   },
   {
-    "canonical_hash": "31d189229c65aa5546c60f6af16ccdb6ac36e3e34b0ddde0b0123baf326122a8",
-    "canonical_key": "GET /watch?v={v}",
-    "method": "GET",
-    "path_template": "/watch",
-    "query_params": "[\"v\"]",
-    "normalized_url": "http://localhost:3000/watch?v={v}",
+    "canonical_hash": "88384ace4ba7e391eae602bdc9a3b5c8c4f8bcb8c53ed86fd843ae833d51cf15",
+    "canonical_key": "POST /socket.io",
+    "method": "POST",
+    "path_template": "/socket.io",
+    "query_params": "[]",
+    "normalized_url": "http://localhost:3000/socket.io",
     "status_code": 200,
     "first_seen_iteration": 1,
-    "created_at": "2026-09-29 05:50:07"
+    "created_at": "2026-10-06 00:31:42"
   }
 ]

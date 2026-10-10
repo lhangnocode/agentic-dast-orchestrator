@@ -22,9 +22,6 @@ wheels/
 
 # Virtual Environment
 .venv/
-env/
-venv/
-ENV/
 
 # Secrets & Local Configurations
 .env
@@ -43,3 +40,5 @@ htmlcov/
 # Text files
 *.txt
 !requirements.txt
+
+/ground_truth/avideo_routes.json

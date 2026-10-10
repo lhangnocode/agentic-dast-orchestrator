@@ -1,58 +1,81 @@
 """
-Adaptive Crawl Orchestration Loop.
-Coordinates the cognitive plane (Qwen / Alibaba Cloud), safety firewall,
-deterministic tool wrappers (ZAP, Wapiti, Firecrawl), and SQLite state matrix.
+Adaptive Crawl Orchestration Loop (strategy 2: classic crawlers first).
+
+  Phase 1 - Bootstrap (deterministic, no LLM):
+            round 1: ZAP (traditional + Ajax spider) and Wapiti crawl from the base URL;
+            round 2 (exchange): each engine is re-seeded with ALL URLs the other engine found
+            (ZAP <- Wapiti, Wapiti <- ZAP), without any seed limit.
+            Tools of the same engine run one after another (they share ZAP's history);
+            different engines run in parallel when `bootstrap.parallel` is true.
+  Phase 2 - Adaptive rounds: the LLM (or HeuristicPolicy as fallback) picks the next tool
+            from the compacted state - typically the Ajax Spider for SPAs and Firecrawl
+            only on what the classic crawlers could not open.
+
+Every run is normalized into the SQLite store, and the coverage matrix is updated so a tool
+is never re-seeded with pages it already visited.
 """
 
 import json
 import logging
-import os
-import time
+from collections import OrderedDict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 from llm.qwen_client import QwenClient
-from normalization.normalizer import normalize_endpoint
+from normalization.normalizer import NormalizationProfile, normalize_endpoint
 from orchestrator.compactor import StateCompactor
 from orchestrator.decision_schema import OrchestratorDecision, ToolActionEnum
+from orchestrator.policy import HeuristicPolicy
 from orchestrator.safety_firewall import SafetyFirewall
 from storage.state_store import StateStore
-from tools.firecrawl_client import FirecrawlClient
-from tools.wapiti_wrapper import WapitiWrapper
-from tools.zap_wrapper import ZapWrapper
+from tools.registry import ToolRegistry, ToolRun, WAPITI, ZAP_AJAX, ZAP_TRADITIONAL
 
 logger = logging.getLogger("orchestrator.loop")
 
+DEFAULT_BOOTSTRAP_TOOLS = [ZAP_TRADITIONAL, ZAP_AJAX, WAPITI]
+
+
+def engine_of(tool: str) -> str:
+    """'zap_ajax_spider' -> 'zap': tools of one engine share state and must not run concurrently."""
+    return tool.split("_", 1)[0]
+
 
 class AdaptiveOrchestrator:
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any], tools: Optional[ToolRegistry] = None):
         self.config = config
         self.target_config = config.get("target", {})
         self.base_url = self.target_config.get("base_url", "http://localhost/")
+        self.extra_seeds: List[str] = list(self.target_config.get("seed_urls", []))
         self.allowed_hosts = list(self.target_config.get("allowed_hosts", ["localhost", "127.0.0.1"]))
-        
-        # Tunnel integration for Firecrawl Cloud
-        self.public_tunnel_url = (os.getenv("PUBLIC_TUNNEL_URL") or self.target_config.get("public_tunnel_url") or "").rstrip("/")
-        if self.public_tunnel_url:
-            from urllib.parse import urlparse
-            p_tun = urlparse(self.public_tunnel_url)
-            if p_tun.hostname and p_tun.hostname not in self.allowed_hosts:
-                self.allowed_hosts.append(p_tun.hostname)
-                logger.info(f"[INIT] Added public tunnel host to firewall allowed scope: {p_tun.hostname}")
+
+        self.tools = tools or ToolRegistry.from_config(config)
+        tunnel_host = urlparse(self.tools.firecrawl.public_tunnel_url).hostname if self.tools.firecrawl.public_tunnel_url else None
+        if tunnel_host and tunnel_host not in self.allowed_hosts:
+            self.allowed_hosts.append(tunnel_host)
+            logger.info(f"[INIT] Added public tunnel host to firewall allowed scope: {tunnel_host}")
 
         self.orch_config = config.get("orchestrator", {})
         self.max_iterations = self.orch_config.get("max_iterations", 8)
         self.marginal_gain_threshold = self.orch_config.get("marginal_gain_threshold", 0.03)
+        self.patience = self.orch_config.get("early_stop_patience", 2)
+        bootstrap_cfg = self.orch_config.get("bootstrap", {})
+        self.bootstrap_tools: List[str] = list(bootstrap_cfg.get("tools", DEFAULT_BOOTSTRAP_TOOLS))
+        self.bootstrap_parallel: bool = bootstrap_cfg.get("parallel", True)
+        self.exchange_round: bool = bootstrap_cfg.get("exchange_round", True)
 
-        # Storage
         db_path = config.get("storage", {}).get("sqlite_db", "storage/orchestrator_state.db")
         self.store = StateStore(db_path=db_path)
+        self.profile = NormalizationProfile.from_config(config)
 
-        # Safety & Compaction
         self.firewall = SafetyFirewall(allowed_hosts=self.allowed_hosts, base_url=self.base_url)
         self.compactor = StateCompactor(max_sample_endpoints=self.orch_config.get("compactor_max_endpoints", 30))
+        self.policy = HeuristicPolicy(
+            max_runs_per_tool=self.orch_config.get("max_runs_per_tool", 2),
+            seed_limit=self.orch_config.get("seed_limit", 15),
+        )
 
-        # LLM Client
         llm_cfg = config.get("llm", {})
         self.qwen_client = QwenClient(
             api_key=llm_cfg.get("api_key"),
@@ -60,175 +83,216 @@ class AdaptiveOrchestrator:
             model=llm_cfg.get("model")
         )
 
-        # Tools
-        tools_cfg = config.get("tools", {})
-        zap_cfg = tools_cfg.get("zap", {})
-        self.zap = ZapWrapper(
-            api_url=zap_cfg.get("api_url", "http://127.0.0.1:18080"),
-            api_key=zap_cfg.get("api_key", "changeme")
-        )
-
-        wapiti_cfg = tools_cfg.get("wapiti", {})
-        self.wapiti = WapitiWrapper(
-            binary_path=wapiti_cfg.get("binary", "wapiti"),
-            scope=wapiti_cfg.get("scope", "domain"),
-            max_parameters=wapiti_cfg.get("max_parameters", 100),
-            max_scan_time=wapiti_cfg.get("max_scan_time", 300),
-            timeout=wapiti_cfg.get("timeout", 20),
-            session_db_path=wapiti_cfg.get("session_file", "output/temp/wapiti/session.db"),
-            report_path=wapiti_cfg.get("report_file", "output/temp/wapiti/report.json"),
-            log_path=wapiti_cfg.get("log_file", "output/logs/wapiti.log"),
-        )
-
-        firecrawl_cfg = tools_cfg.get("firecrawl", {})
-        self.firecrawl = FirecrawlClient(
-            api_key=firecrawl_cfg.get("api_key"),
-            api_url=firecrawl_cfg.get("api_url", "https://api.firecrawl.dev/v2"),
-            model=firecrawl_cfg.get("model", "spark-2"),
-            poll_timeout_seconds=firecrawl_cfg.get("poll_timeout_seconds", 600),
-            poll_interval_seconds=firecrawl_cfg.get("poll_interval_seconds", 10),
-            mock_fallback=True,
-            public_tunnel_url=self.public_tunnel_url
-        )
-
+    # ------------------------------------------------------------------ setup
     def seed_initial_target(self) -> None:
-        """Seeds the root target URL into state store if store is empty."""
-        if self.store.get_total_endpoints_count() == 0:
-            root_ep = normalize_endpoint(self.base_url, method="GET", source_tool="initial_seed", target_base=self.base_url)
-            if root_ep:
-                self.store.insert_or_update_endpoint(root_ep, current_iteration=0)
-                logger.info(f"[INIT] Seeded target base URL: {self.base_url}")
+        """Seeds the base URL (and configured entry points) if the store is empty."""
+        if self.store.get_total_endpoints_count() > 0:
+            return
+        for url in [self.base_url] + self.extra_seeds:
+            ep = normalize_endpoint(url, method="GET", source_tool="initial_seed", status_code=0, profile=self.profile)
+            if ep:
+                self.store.insert_or_update_endpoint(ep, current_iteration=0)
+        logger.info(f"[INIT] Seeded target: {self.base_url} (+{len(self.extra_seeds)} configured entry point(s))")
 
+    # ------------------------------------------------------------------ main loop
     def run(self) -> Dict[str, Any]:
-        """
-        Executes the adaptive orchestration state machine loop.
-        """
         logger.info(f"=== Starting Adaptive DAST Crawl Orchestrator on {self.base_url} ===")
         self.seed_initial_target()
 
-        low_gain_consecutive_rounds = 0
-        total_prompt_tokens = 0
-        total_completion_tokens = 0
+        available = self.tools.available_tools()
+        logger.info(f"[INIT] Available tools: {available or 'none'}")
 
-        for iteration in range(1, self.max_iterations + 1):
+        totals = {"prompt_tokens": 0, "completion_tokens": 0, "requests_sent": 0}
+        decision_sources = {"bootstrap": 0, "exchange": 0, "llm": 0, "heuristic": 0}
+        iteration = 0
+
+        # Phase 1: deterministic bootstrap with the classic crawlers
+        bootstrap = [t for t in self.bootstrap_tools if t in available]
+        skipped = [t for t in self.bootstrap_tools if t not in available]
+        if skipped:
+            logger.warning(f"[BOOTSTRAP] Skipping unavailable tool(s): {skipped}")
+        if bootstrap and self.max_iterations > 0:
+            iteration = 1
+            for run in self._run_bootstrap(bootstrap, iteration):
+                totals["requests_sent"] += run.requests_sent
+                decision_sources["bootstrap"] += 1
+            if self.exchange_round and self.max_iterations > 1 and len({engine_of(t) for t in bootstrap}) > 1:
+                iteration = 2
+                for run in self._run_exchange(bootstrap, iteration):
+                    totals["requests_sent"] += run.requests_sent
+                    decision_sources["exchange"] += 1
+
+        # Phase 2: adaptive rounds
+        low_gain_rounds = 0
+        while iteration < self.max_iterations:
+            iteration += 1
+            decision, source, p_tok, c_tok = self._decide(iteration, available)
+            totals["prompt_tokens"] += p_tok
+            totals["completion_tokens"] += c_tok
+            decision_sources[source] += 1
+            logger.info(f"[Decision:{source}] {decision.action.value} - {decision.reasoning}")
+
+            if decision.action == ToolActionEnum.TERMINATE:
+                logger.info("[STOP] Orchestrator decided to terminate: surface is saturated.")
+                break
+
+            seeds = self.firewall.sanitize_seeds(decision.target_seeds)
             endpoints_before = self.store.get_total_endpoints_count()
-            logger.info(f"\n--- [Iteration {iteration}/{self.max_iterations}] Current Attack Surface: {endpoints_before} endpoints ---")
+            run = self.tools.run(decision.action.value, seeds, base_url=self.base_url, focus=decision.focus or "")
+            new = self._ingest(run, iteration)
+            totals["requests_sent"] += run.requests_sent
+            marginal_gain = new / max(endpoints_before, 1)
+            self._record(run, iteration, endpoints_before, new, decision.reasoning, p_tok, c_tok)
 
-            # 1. State Compaction
+            if marginal_gain < self.marginal_gain_threshold:
+                low_gain_rounds += 1
+                if low_gain_rounds >= self.patience:
+                    logger.info(
+                        f"[EARLY STOPPING] Marginal gain below {self.marginal_gain_threshold * 100:.1f}% "
+                        f"for {self.patience} consecutive adaptive round(s). Halting crawl."
+                    )
+                    break
+            else:
+                low_gain_rounds = 0
+
+        summary = self.export_results()
+        summary["total_prompt_tokens"] = totals["prompt_tokens"]
+        summary["total_completion_tokens"] = totals["completion_tokens"]
+        summary["total_requests_sent"] = totals["requests_sent"]
+        summary["decision_sources"] = decision_sources
+        summary["iterations_run"] = iteration
+        return summary
+
+    # ------------------------------------------------------------------ phases
+    def _run_bootstrap(self, tools: List[str], iteration: int) -> List[ToolRun]:
+        """Round 1: every bootstrap tool crawls from the base URL (+ configured entry points)."""
+        seeds = self.firewall.sanitize_seeds([self.base_url] + self.extra_seeds)
+        logger.info(f"\n--- [Iteration {iteration}/{self.max_iterations}] Bootstrap: {tools} ---")
+        return self._run_plan([(t, seeds) for t in tools], iteration,
+                              "Bootstrap: classic crawler baseline of the surface.")
+
+    def _run_exchange(self, tools: List[str], iteration: int) -> List[ToolRun]:
+        """
+        Round 2: each tool is seeded with every URL found by the OTHER engine(s) that it has
+        not visited yet (ZAP tools <- Wapiti's URLs, Wapiti <- ZAP's URLs). No seed limit.
+        Seeds are computed before anything runs, so the exchange is symmetric.
+        """
+        plan = []
+        for tool in tools:
+            others = [t for t in tools if engine_of(t) != engine_of(tool)]
+            seeds = self.store.get_pending_frontier(tool, limit=None, sources=others)
+            seeds = [s for s in seeds if self.firewall.is_in_scope(s)]
+            if seeds:
+                plan.append((tool, seeds))
+            logger.info(f"[EXCHANGE] {tool} <- {len(seeds)} URL(s) discovered by {sorted({engine_of(t) for t in others})}")
+
+        if not plan:
+            logger.info("[EXCHANGE] Nothing to exchange: both engines found the same URLs.")
+            return []
+        logger.info(f"\n--- [Iteration {iteration}/{self.max_iterations}] Exchange round: {[t for t, _ in plan]} ---")
+        return self._run_plan(plan, iteration, "Exchange: re-seeded with the other engine's discoveries.")
+
+    def _run_plan(self, plan: List[Tuple[str, List[str]]], iteration: int, reasoning: str) -> List[ToolRun]:
+        """
+        Runs (tool, seeds) pairs. Tools of the same engine run sequentially in one lane;
+        lanes run in parallel if configured. Results are ingested in plan order afterwards.
+        """
+        lanes: "OrderedDict[str, List[Tuple[str, List[str]]]]" = OrderedDict()
+        for tool, seeds in plan:
+            lanes.setdefault(engine_of(tool), []).append((tool, seeds))
+
+        def run_lane(items: List[Tuple[str, List[str]]]) -> List[ToolRun]:
+            return [self.tools.run(tool, seeds, self.base_url) for tool, seeds in items]
+
+        if self.bootstrap_parallel and len(lanes) > 1:
+            with ThreadPoolExecutor(max_workers=len(lanes)) as pool:
+                lane_runs = list(pool.map(run_lane, lanes.values()))
+        else:
+            lane_runs = [run_lane(items) for items in lanes.values()]
+        runs_by_tool = {run.tool: run for runs in lane_runs for run in runs}
+
+        runs = []
+        for tool, _ in plan:
+            run = runs_by_tool[tool]
+            before = self.store.get_total_endpoints_count()
+            new = self._ingest(run, iteration)
+            self._record(run, iteration, before, new, reasoning)
+            runs.append(run)
+        return runs
+
+    def _decide(self, iteration: int, available: List[str]) -> Tuple[OrchestratorDecision, str, int, int]:
+        """LLM decision when possible and valid, HeuristicPolicy otherwise."""
+        if self.qwen_client.is_configured():
             context_yaml = self.compactor.build_prompt_context(
                 store=self.store,
                 current_iteration=iteration,
                 max_iterations=self.max_iterations,
-                base_url=self.base_url
+                base_url=self.base_url,
+                available_tools=available,
             )
+            result = self.qwen_client.get_decision(context_yaml)
+            if result is not None:
+                decision, p_tok, c_tok = result
+                if decision.action == ToolActionEnum.TERMINATE or decision.action.value in available:
+                    if decision.action != ToolActionEnum.TERMINATE and not decision.target_seeds:
+                        decision.target_seeds = self.store.get_pending_frontier(
+                            decision.action.value, limit=self.policy.seed_limit) or [self.base_url]
+                    return decision, "llm", p_tok, c_tok
+                logger.warning(f"[LLM] Chose unavailable tool {decision.action.value}; using heuristic policy.")
+                return self.policy.decide(self.store, available, self.base_url), "heuristic", p_tok, c_tok
 
-            # 2. Cognitive Decision (Qwen / Alibaba Cloud)
-            start_llm = time.time()
-            decision, p_tok, c_tok = self.qwen_client.get_decision(
-                context_yaml=context_yaml,
-                store=self.store,
-                current_iteration=iteration,
-                base_url=self.base_url
+        return self.policy.decide(self.store, available, self.base_url), "heuristic", 0, 0
+
+    # ------------------------------------------------------------------ state updates
+    def _ingest(self, run: ToolRun, iteration: int) -> int:
+        """Normalizes a tool run into the store and marks what the tool has now visited."""
+        new = 0
+        visited_hashes = []
+        for item in run.results:
+            norm = normalize_endpoint(
+                item.get("url", ""),
+                method=item.get("method", "GET"),
+                source_tool=item.get("source", run.tool),
+                status_code=item.get("status_code", 0),
+                profile=self.profile,
             )
-            total_prompt_tokens += p_tok
-            total_completion_tokens += c_tok
+            if not norm:
+                continue
+            if self.store.insert_or_update_endpoint(norm, current_iteration=iteration):
+                new += 1
+            visited_hashes.append(norm["canonical_hash"])
 
-            logger.info(f"[LLM Decision] Action: {decision.action.value}")
-            logger.info(f"[LLM Reasoning] {decision.reasoning}")
+        for seed in run.seeds:
+            norm = normalize_endpoint(seed, profile=self.profile)
+            if norm:
+                visited_hashes.append(norm["canonical_hash"])
+        self.store.mark_hashes_processed(visited_hashes, run.tool, iteration)
 
-            # 3. Check for deliberate termination
-            if decision.action == ToolActionEnum.TERMINATE:
-                logger.info("[STOP] Orchestrator decided to terminate exploration: surface is saturated.")
-                break
+        logger.info(
+            f"[{run.tool}] {len(run.results)} raw result(s) -> {new} new canonical endpoint(s) | "
+            f"requests: {run.requests_sent} | {run.duration_seconds:.1f}s"
+            + (f" | error: {run.error}" if run.error else "")
+        )
+        return new
 
-            # 4. Scope Whitelist & Seed Sanitization (SSRF Protection)
-            sanitized_seeds = self.firewall.sanitize_seeds(decision.target_seeds)
-            logger.info(f"[Firewall] Sanitized {len(sanitized_seeds)} active seed(s): {sanitized_seeds[:3]}...")
+    def _record(self, run: ToolRun, iteration: int, endpoints_before: int, new: int, reasoning: str,
+                prompt_tokens: int = 0, completion_tokens: int = 0) -> None:
+        self.store.record_iteration({
+            "iteration": iteration,
+            "chosen_tool": run.tool,
+            "reasoning": reasoning,
+            "target_seeds": run.seeds,
+            "endpoints_before": endpoints_before,
+            "endpoints_after": self.store.get_total_endpoints_count(),
+            "new_endpoints_discovered": new,
+            "marginal_gain": new / max(endpoints_before, 1),
+            "tool_duration_seconds": run.duration_seconds,
+            "llm_prompt_tokens": prompt_tokens,
+            "llm_completion_tokens": completion_tokens,
+            "requests_sent": run.requests_sent,
+        })
 
-            # 5. Tool Execution Plane
-            tool_start = time.time()
-            raw_results = self._dispatch_tool(decision.action, sanitized_seeds)
-            tool_duration = time.time() - tool_start
-
-            # 6. Normalization & State Store Update
-            new_discovered = 0
-            for item in raw_results:
-                raw_url = item.get("url", "")
-                method = item.get("method", "GET")
-                status = item.get("status_code", 200)
-                src = item.get("source", decision.action.value)
-
-                norm = normalize_endpoint(raw_url, method=method, source_tool=src, status_code=status, target_base=self.base_url)
-                if norm:
-                    is_fresh = self.store.insert_or_update_endpoint(norm, current_iteration=iteration)
-                    if is_fresh:
-                        new_discovered += 1
-
-            endpoints_after = self.store.get_total_endpoints_count()
-            marginal_gain = new_discovered / max(endpoints_before, 1)
-
-            logger.info(
-                f"[Iteration {iteration} Complete] New Discoveries: {new_discovered} | "
-                f"Total Endpoints: {endpoints_after} | Marginal Gain: {marginal_gain * 100:.1f}% | "
-                f"Tool Duration: {tool_duration:.1f}s"
-            )
-
-            # 7. Record History Record
-            self.store.record_iteration({
-                "iteration": iteration,
-                "chosen_tool": decision.action.value,
-                "reasoning": decision.reasoning,
-                "target_seeds": sanitized_seeds,
-                "endpoints_before": endpoints_before,
-                "endpoints_after": endpoints_after,
-                "new_endpoints_discovered": new_discovered,
-                "marginal_gain": marginal_gain,
-                "tool_duration_seconds": tool_duration,
-                "llm_prompt_tokens": p_tok,
-                "llm_completion_tokens": c_tok
-            })
-
-            # 8. Adaptive Early Stopping Check
-            if iteration >= 3 and marginal_gain < self.marginal_gain_threshold:
-                low_gain_consecutive_rounds += 1
-                if low_gain_consecutive_rounds >= 2:
-                    logger.info(
-                        f"[EARLY STOPPING] Marginal gain fell below {self.marginal_gain_threshold * 100:.1f}% "
-                        f"for 2 consecutive iterations. Halting crawl."
-                    )
-                    break
-            else:
-                low_gain_consecutive_rounds = 0
-
-        # Export final results
-        final_summary = self.export_results()
-        final_summary["total_prompt_tokens"] = total_prompt_tokens
-        final_summary["total_completion_tokens"] = total_completion_tokens
-        return final_summary
-
-    def _dispatch_tool(self, action: ToolActionEnum, seeds: List[str]) -> List[Dict[str, Any]]:
-        """Invokes the selected tool safely."""
-        try:
-            if action == ToolActionEnum.FIRECRAWL_NAVIGATE:
-                target = seeds[0] if seeds else self.base_url
-                return self.firecrawl.run_agent_discovery(target_url=target)
-
-            elif action == ToolActionEnum.ZAP_TRADITIONAL_SPIDER:
-                return self.zap.run_traditional_spider(seeds=seeds)
-
-            elif action == ToolActionEnum.ZAP_AJAX_SPIDER:
-                return self.zap.run_ajax_spider(seeds=seeds)
-
-            elif action == ToolActionEnum.WAPITI_FORM_CRAWL:
-                return self.wapiti.run_crawl_only(base_url=self.base_url, seeds=seeds)
-
-            else:
-                logger.warning(f"Unrecognized action: {action}")
-                return []
-        except Exception as e:
-            logger.error(f"Error executing {action.value}: {e}")
-            return []
-
+    # ------------------------------------------------------------------ export
     def export_results(self) -> Dict[str, Any]:
         """Saves canonical discovered endpoints to standard output files."""
         endpoints = self.store.get_all_endpoints()
@@ -240,8 +304,7 @@ class AdaptiveOrchestrator:
         json_file = output_dir / "normalized_endpoints.json"
         json_v2_file = output_dir / "normalized_endpoints_v2.json"
 
-        # Unique normalized URLs
-        unique_urls = sorted(list(dict.fromkeys(ep["normalized_url"] for ep in endpoints)))
+        unique_urls = sorted(dict.fromkeys(ep["normalized_url"] for ep in endpoints))
         for target_txt in (txt_file, txt_v2_file):
             with open(target_txt, "w", encoding="utf-8") as f:
                 for u in unique_urls:

@@ -7,7 +7,20 @@ Provenance, and Iterative Execution History.
 import json
 import sqlite3
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+# Tool names of the coverage matrix (mirror orchestrator.decision_schema.ToolActionEnum)
+CRAWL_TOOLS = ("zap_traditional_spider", "zap_ajax_spider", "wapiti_form_crawl", "firecrawl_navigate")
+
+# Legacy / short source labels mapped onto coverage-matrix tool names
+SOURCE_TOOL_ALIASES = {
+    "zap": "zap_traditional_spider",
+    "wapiti": "wapiti_form_crawl",
+    "firecrawl": "firecrawl_navigate",
+}
+
+# Path segments that mark an endpoint as a machine API rather than a rendered page
+API_SEGMENTS = {"api", "rest", "graphql", "rpc", "ajax", "json", "v1", "v2", "v3"}
 
 
 class StateStore:
@@ -119,6 +132,11 @@ class StateStore:
                 """)
                 cursor.execute("DROP TABLE execution_history_old;")
 
+            # Migration: per-run request counter (input for request-efficiency metrics)
+            cursor.execute("PRAGMA table_info(execution_history);")
+            if "requests_sent" not in {row[1] for row in cursor.fetchall()}:
+                cursor.execute("ALTER TABLE execution_history ADD COLUMN requests_sent INTEGER DEFAULT 0;")
+
             # Indices for rapid querying
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_endpoints_path ON endpoints(path_template);")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_tool_coverage_lookup ON tool_coverage(tool_name, status);")
@@ -155,25 +173,19 @@ class StateStore:
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, (canonical_hash, canonical_key, method, path_template, query_params, normalized_url, status_code, current_iteration))
 
-                # Initialize coverage matrix for standard tools as PENDING
-                mapped_tool = source_tool
-                if source_tool == "firecrawl":
-                    mapped_tool = "firecrawl_navigate"
-                elif source_tool == "zap":
-                    mapped_tool = "zap_traditional_spider"
-                elif source_tool == "wapiti":
-                    mapped_tool = "wapiti_form_crawl"
-
-                for t in ["zap_traditional_spider", "zap_ajax_spider", "wapiti_form_crawl", "firecrawl_navigate"]:
+                # Initialize coverage matrix: the discovering tool already saw it, the others are PENDING
+                mapped_tool = SOURCE_TOOL_ALIASES.get(source_tool, source_tool)
+                for t in CRAWL_TOOLS:
                     init_status = "PROCESSED" if t == mapped_tool else "PENDING"
                     cursor.execute("""
                         INSERT INTO tool_coverage (canonical_hash, tool_name, status, last_attempt_iteration)
                         VALUES (?, ?, ?, ?)
                     """, (canonical_hash, t, init_status, current_iteration if t == mapped_tool else 0))
             else:
-                # Update status code if transitioning to 200 OK
-                if status_code == 200 and row["status_code"] != 200:
-                    cursor.execute("UPDATE endpoints SET status_code = 200 WHERE canonical_hash = ?", (canonical_hash,))
+                # Keep the most informative status: a verified 2xx wins, and any real status beats unknown (0)
+                old_status = row["status_code"] or 0
+                if (200 <= status_code < 300 and not 200 <= old_status < 300) or (old_status == 0 and status_code):
+                    cursor.execute("UPDATE endpoints SET status_code = ? WHERE canonical_hash = ?", (status_code, canonical_hash))
 
             # Record provenance
             cursor.execute("""
@@ -199,23 +211,110 @@ class StateStore:
             """, (canonical_hash, tool_name, status, iteration))
             conn.commit()
 
-    def get_pending_frontier(self, tool_name: str, limit: int = 30) -> List[str]:
-        """
-        Retrieves normalized seed URLs that have not yet been processed by tool_name.
-        Prioritizes endpoints with HTTP 200 status.
-        """
+    def mark_hashes_processed(self, canonical_hashes: Iterable[str], tool_name: str, iteration: int,
+                              status: str = "PROCESSED") -> int:
+        """Marks known endpoints as visited by tool_name. Unknown hashes are ignored. Returns rows updated."""
+        hashes = list(dict.fromkeys(canonical_hashes))
+        if not hashes:
+            return 0
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
-                SELECT e.normalized_url
+            cursor.executemany("""
+                UPDATE tool_coverage
+                SET status = ?, last_attempt_iteration = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE canonical_hash = ? AND tool_name = ?
+            """, [(status, iteration, h, tool_name) for h in hashes])
+            conn.commit()
+            return cursor.rowcount
+
+    def get_pending_frontier(self, tool_name: str, limit: Optional[int] = 30,
+                             statuses: Optional[Iterable[int]] = None,
+                             sources: Optional[Iterable[str]] = None) -> List[str]:
+        """
+        Retrieves GET seed URLs that tool_name has not visited yet.
+        - limit: maximum number of seeds; None = no limit.
+        - statuses: only endpoints with these HTTP status codes.
+        - sources: only endpoints discovered by these tools (provenance).
+        Dead ends (404/405/410 and 5xx) are skipped; 2xx come first, then auth walls/redirects.
+        Returns a concrete URL observed by a crawler (raw sample), not the {placeholder} template,
+        so the seed can actually be requested.
+        """
+        filters = ""
+        params: List[Any] = [tool_name]
+        if statuses:
+            status_list = list(statuses)
+            filters += f" AND e.status_code IN ({','.join('?' * len(status_list))})"
+            params.extend(status_list)
+        if sources:
+            source_list = list(sources)
+            filters += (" AND EXISTS (SELECT 1 FROM endpoint_sources src WHERE src.canonical_hash = e.canonical_hash"
+                        f" AND src.source_tool IN ({','.join('?' * len(source_list))}))")
+            params.extend(source_list)
+        params.append(-1 if limit is None else limit)  # SQLite: LIMIT -1 = unlimited
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(f"""
+                SELECT e.normalized_url,
+                       (SELECT es.raw_sample FROM endpoint_sources es
+                        WHERE es.canonical_hash = e.canonical_hash AND es.raw_sample LIKE 'http%'
+                        ORDER BY es.raw_sample LIKE '%{{%' ASC, length(es.raw_sample) ASC
+                        LIMIT 1) AS sample_url
                 FROM endpoints e
                 JOIN tool_coverage tc ON e.canonical_hash = tc.canonical_hash
                 WHERE tc.tool_name = ? AND tc.status = 'PENDING'
-                ORDER BY e.status_code = 200 DESC, e.first_seen_iteration ASC
+                  AND e.method = 'GET'
+                  AND e.status_code NOT IN (404, 405, 410) AND e.status_code < 500
+                  {filters}
+                ORDER BY (e.status_code BETWEEN 200 AND 299) DESC, e.first_seen_iteration ASC
                 LIMIT ?
-            """, (tool_name, limit))
-            rows = cursor.fetchall()
-            return [row["normalized_url"] for row in rows]
+            """, params)
+            return list(dict.fromkeys(row["sample_url"] or row["normalized_url"] for row in cursor.fetchall()))
+
+    def get_tool_run_counts(self) -> Dict[str, int]:
+        """How many times each tool has been executed (bootstrap + adaptive iterations)."""
+        counts = {t: 0 for t in CRAWL_TOOLS}
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT chosen_tool, COUNT(*) AS cnt FROM execution_history GROUP BY chosen_tool")
+            for row in cursor.fetchall():
+                counts[row["chosen_tool"]] = row["cnt"]
+        return counts
+
+    def get_surface_profile(self) -> Dict[str, int]:
+        """
+        Raw shape of the discovered surface, used to detect SPAs and auth walls without
+        any knowledge of the target application.
+        """
+        profile = {
+            "total": 0, "get": 0, "non_get": 0, "html_pages": 0, "api_like": 0,
+            "hash_routes": 0, "parameterized": 0, "auth_walls": 0, "redirects": 0,
+            "errors": 0,
+        }
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT method, path_template, query_params, status_code FROM endpoints")
+            for row in cursor.fetchall():
+                path = row["path_template"] or "/"
+                status = row["status_code"] or 0
+                segments = {s.lower() for s in path.split("#")[0].split("/") if s}
+                is_api = bool(segments & API_SEGMENTS) or path.endswith(".json")
+                profile["total"] += 1
+                profile["get" if row["method"] == "GET" else "non_get"] += 1
+                if "#" in path:
+                    profile["hash_routes"] += 1
+                if is_api:
+                    profile["api_like"] += 1
+                elif row["method"] == "GET" and "#" not in path and 200 <= status < 300:
+                    profile["html_pages"] += 1
+                if row["query_params"] not in (None, "", "[]"):
+                    profile["parameterized"] += 1
+                if status in (401, 403):
+                    profile["auth_walls"] += 1
+                elif 300 <= status < 400:
+                    profile["redirects"] += 1
+                elif status >= 400:
+                    profile["errors"] += 1
+        return profile
 
     def get_total_endpoints_count(self) -> int:
         with self._get_connection() as conn:
@@ -274,7 +373,7 @@ class StateStore:
 
         # Get high-value pending endpoints for each tool
         pending_samples = {}
-        for tool in ["zap_traditional_spider", "zap_ajax_spider", "wapiti_form_crawl", "firecrawl_navigate"]:
+        for tool in CRAWL_TOOLS:
             frontier = self.get_pending_frontier(tool, limit=5)
             pending_samples[tool] = frontier
 
@@ -293,21 +392,21 @@ class StateStore:
                 for r in cursor.fetchall()
             ]
 
-        # Get latest iteration history
-        latest_history = None
+        # Latest runs (several rows can share an iteration when tools ran in parallel)
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM execution_history ORDER BY iteration DESC LIMIT 1")
-            row = cursor.fetchone()
-            if row:
-                latest_history = dict(row)
+            cursor.execute("SELECT * FROM execution_history ORDER BY id DESC LIMIT 3")
+            recent_runs = [dict(r) for r in cursor.fetchall()]
 
         return {
             "total_canonical_endpoints": total_eps,
             "tool_coverage_matrix": tool_stats,
             "tool_provenance_contributions": provenance,
             "pending_frontier_samples": pending_samples,
-            "latest_run": latest_history,
+            "latest_run": recent_runs[0] if recent_runs else None,
+            "recent_runs": recent_runs,
+            "tool_run_counts": self.get_tool_run_counts(),
+            "surface_profile": self.get_surface_profile(),
             "recent_canonical_endpoints_sample": recent_endpoints[:max_sample_endpoints],
         }
 
@@ -316,11 +415,12 @@ class StateStore:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT OR REPLACE INTO execution_history (
+                INSERT INTO execution_history (
                     iteration, chosen_tool, reasoning, target_seeds,
                     endpoints_before, endpoints_after, new_endpoints_discovered,
-                    marginal_gain, tool_duration_seconds, llm_prompt_tokens, llm_completion_tokens
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    marginal_gain, tool_duration_seconds, llm_prompt_tokens, llm_completion_tokens,
+                    requests_sent
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 record["iteration"],
                 record["chosen_tool"],
@@ -333,5 +433,6 @@ class StateStore:
                 record.get("tool_duration_seconds", 0.0),
                 record.get("llm_prompt_tokens", 0),
                 record.get("llm_completion_tokens", 0),
+                record.get("requests_sent", 0),
             ))
             conn.commit()

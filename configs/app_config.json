@@ -1,39 +1,114 @@
 {
   "target": {
     "base_url": "http://localhost:3000/",
+    "seed_urls": [],
     "allowed_hosts": [
       "localhost",
       "127.0.0.1",
       "host.docker.internal"
     ]
   },
+  "auth": {
+    "enabled": true,
+    "login": {
+      "url": "http://localhost:3000/rest/user/login",
+      "method": "POST",
+      "json": {
+        "email": "${AUTH_USER}",
+        "password": "${AUTH_PASSWORD}"
+      },
+      "token_path": "authentication.token",
+      "token_var": "AUTH_TOKEN"
+    },
+    "headers": {
+      "Authorization": "Bearer ${AUTH_TOKEN}"
+    },
+    "cookies": {
+      "token": "${AUTH_TOKEN}"
+    }
+  },
   "orchestrator": {
     "max_iterations": 8,
     "max_request_budget": 1500,
     "marginal_gain_threshold": 0.03,
+    "early_stop_patience": 2,
+    "max_runs_per_tool": 3,
+    "seed_limit": null,
     "max_llm_token_budget": 200000,
-    "compactor_max_endpoints": 60
+    "compactor_max_endpoints": 60,
+    "bootstrap": {
+      "tools": [
+        "zap_traditional_spider",
+        "zap_ajax_spider",
+        "wapiti_form_crawl"
+      ],
+      "parallel": true,
+      "exchange_round": true
+    }
+  },
+  "normalization": {
+    "host_aliases": [
+      "localhost",
+      "127.0.0.1",
+      "host.docker.internal"
+    ],
+    "path_rules": [],
+    "query_aliases": {},
+    "trailing_slash_dirs": [],
+    "junk_substrings": []
   },
   "tools": {
     "zap": {
+      "enabled": true,
       "api_url": "http://127.0.0.1:18080",
       "api_key": "changeme",
-      "spider_max_depth": 5,
-      "ajax_spider_timeout_sec": 120
+      "target_host_alias": "host.docker.internal",
+      "spider": {
+        "max_depth": 5,
+        "max_duration_min": 0,
+        "thread_count": 5,
+        "parse_sitemap_xml": true,
+        "parse_robots_txt": true,
+        "process_form": true,
+        "post_form": false
+      },
+      "ajax_spider": {
+        "browser_id": "firefox-headless",
+        "number_of_browsers": 2,
+        "max_crawl_depth": 5,
+        "max_crawl_states": 0,
+        "max_duration_min": 0,
+        "event_wait_ms": 1000,
+        "reload_wait_ms": 1000,
+        "click_default_elems": true,
+        "click_elems_once": true,
+        "random_inputs": true,
+        "max_seeds": null
+      }
     },
     "wapiti": {
+      "enabled": true,
       "binary": "wapiti",
       "scope": "domain",
       "max_parameters": 100,
-      "max_scan_time": 300,
+      "max_scan_time": null,
       "timeout": 20,
+      "depth": 40,
+      "max_links_per_page": 100,
+      "headless": "hidden",
+      "wait_sec": 2,
+      "cookie_file": null,
       "session_file": "output/temp/wapiti/session.db",
       "report_file": "output/temp/wapiti/report.json",
       "log_file": "output/logs/wapiti.log"
     },
     "firecrawl": {
+      "enabled": true,
       "api_url": "https://api.firecrawl.dev/v2",
       "model": "spark-2",
+      "max_seeds": 5,
+      "auth_instructions": "Before exploring, open the login page (/#/login) and sign in with email ${AUTH_USER} and password ${AUTH_PASSWORD}. Stay logged in for the whole session and never click logout.",
+      "fallback_routes_file": null,
       "poll_timeout_seconds": 600,
       "poll_interval_seconds": 10
     }

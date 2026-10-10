@@ -27,10 +27,24 @@ class WapitiWrapper:
         report_path: str = "output/temp/wapiti/report.json",
         log_path: str = "output/logs/wapiti.log",
         timeout: int = 20,
-        max_scan_time: int = 300,
+        max_scan_time: Optional[int] = 300,
         max_parameters: int = 100,
         scope: str = "domain",
+        headless: str = "no",
+        wait_sec: Optional[float] = None,
+        depth: Optional[int] = None,
+        max_links_per_page: Optional[int] = None,
+        cookie_file: Optional[str] = None,
+        headers: Optional[Dict[str, str]] = None,
+        cookies: Optional[Dict[str, str]] = None,
     ):
+        """
+        headless: "no" | "hidden" | "both". "hidden"/"both" drive a headless Firefox so
+        JavaScript-rendered links and forms of SPAs are discovered (slower).
+        wait_sec: seconds to wait for client-side rendering before analysing a page (headless only).
+        cookie_file: JSON cookie file passed to Wapiti (-c), e.g. an exported authenticated session.
+        headers / cookies: sent with every request (-H / -C), e.g. from orchestrator.auth.
+        """
         self.binary_path = binary_path
         self.session_db_path = Path(session_db_path)
         self.report_path = Path(report_path)
@@ -39,6 +53,14 @@ class WapitiWrapper:
         self.max_scan_time = max_scan_time
         self.max_parameters = max_parameters
         self.scope = scope
+        self.headless = headless or "no"
+        self.wait_sec = wait_sec
+        self.depth = depth
+        self.max_links_per_page = max_links_per_page
+        self.cookie_file = cookie_file
+        self.headers = dict(headers or {})
+        self.cookies = dict(cookies or {})
+        self.last_request_count = 0
 
         self.session_db_path.parent.mkdir(parents=True, exist_ok=True)
         self.report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -73,7 +95,6 @@ class WapitiWrapper:
             "--scope", self.scope,
             "--store-session", str(self.session_db_path),
             "--max-parameters", str(self.max_parameters),
-            "--max-scan-time", str(self.max_scan_time),
             "--timeout", str(self.timeout),
             "-f", "json",
             "-o", str(self.report_path),
@@ -82,18 +103,33 @@ class WapitiWrapper:
 
         if flush_session:
             cmd.append("--flush-session")
+        if self.max_scan_time:
+            cmd.extend(["--max-scan-time", str(self.max_scan_time)])
+        if self.headless != "no":
+            cmd.extend(["--headless", self.headless])
+            if self.wait_sec:
+                cmd.extend(["--wait", str(self.wait_sec)])
+        if self.depth:
+            cmd.extend(["-d", str(self.depth)])
+        if self.max_links_per_page:
+            cmd.extend(["--max-links-per-page", str(self.max_links_per_page)])
+        if self.cookie_file:
+            cmd.extend(["-c", self.cookie_file])
 
-        # Inject seeds
-        if seeds:
-            for s in seeds:
-                s_clean = s.strip()
-                if s_clean:
-                    cmd.extend(["-s", s_clean])
+        # Inject seeds. Hash routes (/#/x) only make sense for the headless crawler.
+        for seed in dict.fromkeys(s.strip() for s in (seeds or [])):
+            if not seed or seed.rstrip("/") == base_url.rstrip("/"):
+                continue
+            if "#" in seed and self.headless == "no":
+                continue
+            cmd.extend(["-s", seed])
 
-        # Inject cookies if provided
-        if cookies:
-            cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
-            cmd.extend(["-C", cookie_str])
+        # Authenticated session: headers and cookies on every request
+        for name, value in self.headers.items():
+            cmd.extend(["-H", f"{name}: {value}"])
+        all_cookies = {**self.cookies, **(cookies or {})}
+        if all_cookies:
+            cmd.extend(["-C", "; ".join(f"{k}={v}" for k, v in all_cookies.items())])
 
         logger.info(f"[WAPITI] Executing crawl-only command: {' '.join(cmd[:6])} ...")
 
@@ -110,7 +146,7 @@ class WapitiWrapper:
                 text=True,
                 encoding="utf-8",
                 errors="replace",
-                timeout=self.max_scan_time + 30
+                timeout=self.max_scan_time + 60 if self.max_scan_time else None
             )
             if res.returncode != 0:
                 logger.warning(f"[WAPITI] Returned code {res.returncode}: {res.stderr[:200]}")
@@ -143,6 +179,7 @@ class WapitiWrapper:
                 FROM paths
             """)
             paths_rows = [dict(r) for r in cursor.fetchall()]
+            self.last_request_count = len(paths_rows)
 
             cursor.execute("""
                 SELECT param_id, path_id, type, position, name, value1
@@ -168,7 +205,7 @@ class WapitiWrapper:
                 method = (req.get("method") or "GET").upper()
                 pid = req["path_id"]
                 resp_info = responses_by_id.get(req.get("response_id")) or {}
-                status_code = resp_info.get("status_code", 200)
+                status_code = resp_info.get("status_code") or 0
 
                 # Reconstruct full URL with query parameters from params table if not already present
                 path_params = params_by_path.get(pid, [])
@@ -182,7 +219,7 @@ class WapitiWrapper:
                     "url": url,
                     "method": method,
                     "status_code": status_code,
-                    "source": "wapiti",
+                    "source": "wapiti_form_crawl",
                     "params": [pr["name"] for pr in path_params if pr.get("name")]
                 })
 

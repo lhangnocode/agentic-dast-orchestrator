@@ -45,7 +45,8 @@ The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framewo
 ```
 
 ### Key Capabilities
-- **Semantic UI Pathfinder (Firecrawl Cloud)**: Autonomously navigates authenticated dropdowns, avatars, administrative links, and client-side routes.
+- **Strategy 2 – classic crawlers first**: a deterministic bootstrap with no LLM. In round 1, ZAP (Traditional + Ajax Spider) and Wapiti crawl from the base URL. In round 2 (exchange), each engine is re-seeded with ALL URLs the other engine found, with no seed limit. The orchestrator then picks the next tool from the surface they mapped.
+- **Semantic UI Pathfinder (Firecrawl Cloud)**: a targeted, expensive tool. It only runs on what the classic crawlers could not open (auth walls/redirects, JS-only menus).
 - **High-Speed Link Spider (OWASP ZAP)**: Crawls traditional anchor structures and handles dynamic JavaScript DOM events with Ajax Spider.
 - **Parameter & Form Specialist (Wapiti)**: Extracts complex multi-field forms and parameter mutations strictly in crawl-only mode (`-m ""`).
 - **Cognitive Decision Layer (Qwen-Plus)**: Evaluates marginal gains ($MG$), state saturation, and dynamically steers seed frontiers to the optimal tool.
@@ -59,27 +60,28 @@ The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framewo
 ```text
 agentic-dast-orchestrator/
 ├── configs/
-│   ├── app_config.json          # Target parameters, timeouts, and budget limits
-│   └── login_config.json        # AVideo CMS credentials and Playwright selectors
+│   └── app_config.json          # Target, auth, normalization rules, tool options and budgets
 ├── evaluation/
 │   ├── benchmark_runner.py      # Experiment comparative evaluation runner
 │   └── metrics.py               # Recall, Precision, F1, Request Efficiency metrics
 ├── ground_truth/
 │   └── avideo_routes.json       # 112 canonical verified AVideo attack surfaces
 ├── llm/
-│   └── qwen_client.py           # DashScope OpenAI-compatible client & heuristic fallback
+│   └── qwen_client.py           # DashScope OpenAI-compatible client (returns None on failure)
 ├── normalization/
-│   ├── normalizer.py            # Rules 1-3 implementation & canonical hashing
-│   └── patterns.py              # Junk/trap regexes and generalization templates
+│   ├── normalizer.py            # Rules 1-4 + NormalizationProfile (target-specific rules come from config)
+│   └── patterns.py              # Generic junk/trap regexes and dynamic-segment patterns
 ├── orchestrator/
 │   ├── compactor.py             # YAML state abstract builder (<1,000 tokens)
 │   ├── decision_schema.py       # Pydantic schemas for structured LLM decisions
-│   ├── loop.py                  # Main adaptive orchestration state machine
+│   ├── loop.py                  # Bootstrap (ZAP+Wapiti) then adaptive rounds state machine
+│   ├── policy.py                # Deterministic fallback policy + generic SPA/auth-wall detection
 │   └── safety_firewall.py       # SSRF prevention and seed whitelist sanitization
 ├── storage/
 │   └── state_store.py           # Relational SQLite state store (Endpoints, Matrix, History)
 ├── tools/
-│   ├── firecrawl_client.py      # Firecrawl /v2/agent polling wrapper
+│   ├── firecrawl_client.py      # Firecrawl /v2/agent wrapper (targeted seeds, generic prompt)
+│   ├── registry.py              # Builds tools from config, availability checks, uniform run()
 │   ├── wapiti_wrapper.py        # Wapiti crawl-only CLI & SQLite extractor
 │   └── zap_wrapper.py           # ZAPv2 Traditional & Ajax Spider API wrapper
 ├── tests/                       # Complete unit and integration test suite
@@ -109,7 +111,7 @@ agentic-dast-orchestrator/
    cp .env.example .env
    ```
    - `DASHSCOPE_API_KEY`: Your Alibaba Cloud Model Studio API key.
-   - `FIRECRAWL_API_KEY`: Your Firecrawl Cloud API key (optional; built-in simulation fallback available).
+   - `FIRECRAWL_API_KEY`: Your Firecrawl Cloud API key (optional; without it Firecrawl is simply skipped. For a localhost target it also needs `PUBLIC_TUNNEL_URL`).
    - `ZAP_API_URL`: `http://127.0.0.1:18080`.
 
 3. **Start Local ZAP Daemon**:

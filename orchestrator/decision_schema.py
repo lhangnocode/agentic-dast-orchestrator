@@ -28,5 +28,9 @@ class OrchestratorDecision(BaseModel):
     )
     expected_discovery_type: Optional[str] = Field(
         default="",
-        description="Expected type of discoveries: 'form_parameters', 'dynamic_js_routes', 'admin_panels', etc."
+        description="Expected type of discoveries: 'form_parameters', 'dynamic_client_routes', 'gated_or_js_views', etc."
+    )
+    focus: Optional[str] = Field(
+        default="",
+        description="Optional short instruction for semantic tools (firecrawl_navigate): what to look for on the seeds."
     )

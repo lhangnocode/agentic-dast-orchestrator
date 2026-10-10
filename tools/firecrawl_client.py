@@ -1,66 +1,64 @@
 """
 Firecrawl Cloud Agent Client.
-Interfaces with Firecrawl /v2/agent API to perform autonomous semantic browser
-navigation, dropdown interaction, and dynamic link discovery.
+Interfaces with the Firecrawl /v2/agent API to perform semantic browser navigation
+(menus, dropdowns, modals, client-side routes) on the seeds the orchestrator selects.
+
+In strategy 2 Firecrawl is a *targeted* tool: it is only invoked after the ZAP/Wapiti
+bootstrap, on the frontier those tools could not open up (auth walls, SPA shells).
 """
 
+import json
 import logging
 import os
 import time
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, urlunparse
-from dotenv import load_dotenv
+
 import requests
+from dotenv import load_dotenv
+from pydantic import BaseModel, Field
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from pydantic import BaseModel, Field
 
 load_dotenv()
 logger = logging.getLogger("orchestrator.firecrawl")
 
+LOCAL_HOSTS = {"localhost", "127.0.0.1"}
+
 
 class DiscoveredLinksSchema(BaseModel):
     links: List[str] = Field(description="List of URLs/routes found while interacting with the page")
-    actions_taken: List[str] = Field(description="Actions the AI performed (click, scroll, submit, login...)")
+    actions_taken: List[str] = Field(description="Actions the AI performed (click, scroll, open menu...)")
 
 
-DEFAULT_AGENT_PROMPT = """
-You are a web application security discovery expert. Your goal is to explore
-the target web platform to reveal as many distinct endpoints, routes, and
-interaction points as possible (GET navigation links and POST/PUT/DELETE actions).
+AGENT_PROMPT_TEMPLATE = """
+You are a web application route discovery assistant working on an authorized test target.
+Goal: reveal as many distinct application routes and interaction points as possible
+(navigation links, client-side routes, API calls triggered by the UI).
 
-Priority execution order:
-1. AUTHENTICATION (MANDATORY FIRST STEP):
-   Navigate directly to the login page (e.g., /#/login, /login, or /user). Log in using
-   the administrative credentials:
-   - Username/Email: admin@juice-sh.op (or admin)
-   - Password: admin123
-   Submit the login form and ensure you are fully authenticated.
+Start from these pages:
+{seed_list}
+{focus_block}{auth_block}
+How to explore:
+1. Open every navigation element: header, sidebar, footer, account/avatar menus, dropdowns,
+   tabs, modals, pagination and filter controls.
+2. For single-page applications, follow client-side routes (including /#/ routes) and wait
+   for each view to render before reading its links.
+3. Open forms and dialogs to reveal where they submit, but do not submit destructive actions
+   (delete, logout, payment, account changes). Use harmless test data only, no attack payloads.
+4. Stay on the target's own host.
 
-2. USER & ADMIN MENU DISCOVERY:
-   Once logged in, click on the user profile/avatar/account menu dropdown (usually in the
-   top-right corner or sidebar) to expand dynamic items. Open and visit each link
-   inside it (e.g., Orders & Payment, Privacy & Security, Administration, Score Board,
-   Basket, User Profile, Configurations/Site Settings).
-
-3. STATE-CHANGING ACTIONS & FORMS:
-   Perform realistic interactions to trigger hidden POST/AJAX endpoints:
-   - Use the Search form: submit test queries (e.g., 'juice', 'apple', 'test').
-   - Open Customer Feedback (/contact), Complaints (/complain), Product Reviews.
-   - Interact with Add to Basket, Address management forms, Delivery methods.
-   - Open Contact, About Us, Photo Wall, Recycling pages.
-
-4. REMAINING NAVIGATION:
-   Click through remaining header, footer, and sidebar links, pagination controls,
-   and filter buttons.
-
-OUTPUT REQUIREMENTS:
-For every step, capture and record the visited URL/route (including paths,
-query parameters, and dynamic route segments). Return ALL unique URLs observed
-throughout the entire session alongside a summary of the actions taken.
-
-Only act on this authorized test target. Use safe, realistic test data without attack payloads.
+Return ALL unique URLs/routes observed (with paths, query parameters and route segments)
+and a short list of the actions taken.
 """
+
+
+def build_agent_prompt(seeds: List[str], focus: str = "", auth_instructions: str = "") -> str:
+    seed_list = "\n".join(f"- {s}" for s in seeds)
+    focus_block = f"\nPriority for this run: {focus}\n" if focus else ""
+    auth_block = f"\nSession / authentication instructions:\n{auth_instructions.strip()}\n" if auth_instructions.strip() else ""
+    return AGENT_PROMPT_TEMPLATE.format(seed_list=seed_list, focus_block=focus_block, auth_block=auth_block)
 
 
 class FirecrawlClient:
@@ -71,17 +69,27 @@ class FirecrawlClient:
         model: str = "spark-2",
         poll_timeout_seconds: int = 600,
         poll_interval_seconds: int = 10,
-        mock_fallback: bool = True,
-        public_tunnel_url: Optional[str] = None
+        public_tunnel_url: Optional[str] = None,
+        target_base: str = "http://localhost/",
+        auth_instructions: str = "",
+        max_seeds: int = 5,
+        fallback_routes_file: Optional[str] = None,
     ):
+        """
+        fallback_routes_file: optional JSON list of URLs replayed when Firecrawl cannot run
+        (no API key / unreachable). Only for offline experiments; leave unset for real runs.
+        """
         self.api_key = os.getenv("FIRECRAWL_API_KEY", "") if api_key is None else api_key
         self.api_url = api_url.rstrip("/")
         self.agent_endpoint = f"{self.api_url}/agent"
         self.model = model
         self.poll_timeout_seconds = poll_timeout_seconds
         self.poll_interval_seconds = poll_interval_seconds
-        self.mock_fallback = mock_fallback
-        self.public_tunnel_url = (public_tunnel_url or os.getenv("PUBLIC_TUNNEL_URL", "")).rstrip("/")
+        self.public_tunnel_url = (os.getenv("PUBLIC_TUNNEL_URL", "") if public_tunnel_url is None else public_tunnel_url).rstrip("/")
+        self.target_base = target_base
+        self.auth_instructions = auth_instructions
+        self.max_seeds = max_seeds
+        self.fallback_routes_file = fallback_routes_file
         self.session = self._create_session()
 
     def _create_session(self) -> requests.Session:
@@ -98,92 +106,80 @@ class FirecrawlClient:
         return session
 
     def _headers(self) -> Dict[str, str]:
-        return {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
+        return {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
 
     def is_configured(self) -> bool:
         return bool(self.api_key and self.api_key != "your_firecrawl_api_key_here")
 
+    def can_reach_target(self) -> bool:
+        """Firecrawl Cloud cannot reach a localhost target without a public tunnel."""
+        host = urlparse(self.target_base).hostname or ""
+        return host not in LOCAL_HOSTS or bool(self.public_tunnel_url)
+
+    def is_available(self) -> bool:
+        return (self.is_configured() and self.can_reach_target()) or bool(self.fallback_routes_file)
+
+    # ------------------------------------------------------------------ URL mapping
+    def _to_cloud_url(self, url: str) -> str:
+        p = urlparse(url)
+        if not self.public_tunnel_url or (p.hostname or "") not in LOCAL_HOSTS:
+            return url
+        tun = urlparse(self.public_tunnel_url)
+        return urlunparse(p._replace(scheme=tun.scheme, netloc=tun.netloc))
+
+    def _from_cloud_url(self, url: str) -> str:
+        if not self.public_tunnel_url:
+            return url
+        p = urlparse(url)
+        tun = urlparse(self.public_tunnel_url)
+        if p.netloc != tun.netloc:
+            return url
+        target = urlparse(self.target_base)
+        return urlunparse(p._replace(scheme=target.scheme, netloc=target.netloc))
+
+    # ------------------------------------------------------------------ discovery
     def run_agent_discovery(
         self,
-        target_url: str,
+        seeds: List[str],
+        focus: str = "",
         prompt: Optional[str] = None,
-        schema: Optional[Dict[str, Any]] = None
+        schema: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Submits an autonomous exploration job to Firecrawl Agent and polls for results.
-        Returns a list of discovered endpoint dicts.
+        Submits an exploration job on the given seeds and polls for results.
+        Returns a list of discovered endpoint dicts (GET, status unknown = 0).
         """
-        if not self.is_configured():
-            if self.mock_fallback:
-                logger.warning("[FIRECRAWL] API key not configured. Using fallback routes for simulation.")
-                return self._get_fallback_routes(target_url)
-            else:
-                raise ValueError("Firecrawl API key is required but not configured.")
+        seeds = [s for s in seeds if s][: max(1, self.max_seeds)] or [self.target_base]
 
-        # Handle localhost target for Firecrawl Cloud
-        cloud_target_url = target_url
-        parsed_target = urlparse(target_url)
-        is_local = parsed_target.hostname in ("localhost", "127.0.0.1")
-        if is_local:
-            if self.public_tunnel_url:
-                parsed_tun = urlparse(self.public_tunnel_url)
-                cloud_target_url = urlunparse((
-                    parsed_tun.scheme,
-                    parsed_tun.netloc,
-                    parsed_target.path,
-                    parsed_target.params,
-                    parsed_target.query,
-                    parsed_target.fragment
-                ))
-                logger.info(f"[FIRECRAWL] Mapped local target {target_url} -> public tunnel {cloud_target_url}")
-            elif self.mock_fallback:
-                logger.warning(
-                    "[FIRECRAWL] Target URL is localhost and no PUBLIC_TUNNEL_URL is configured in .env. "
-                    "Firecrawl Cloud cannot reach localhost directly without a tunnel. "
-                    "Using verified routes for simulation (to run live on Cloud, set PUBLIC_TUNNEL_URL)."
-                )
-                return self._get_fallback_routes(target_url)
-
-        agent_prompt = prompt or DEFAULT_AGENT_PROMPT
-        agent_schema = schema or DiscoveredLinksSchema.model_json_schema()
+        if not self.is_configured() or not self.can_reach_target():
+            reason = "API key not configured" if not self.is_configured() else "localhost target without PUBLIC_TUNNEL_URL"
+            logger.warning(f"[FIRECRAWL] Skipping live run: {reason}.")
+            return self._load_fallback_routes()
 
         payload = {
-            "urls": [cloud_target_url],
-            "prompt": agent_prompt,
+            "urls": [self._to_cloud_url(s) for s in seeds],
+            "prompt": prompt or build_agent_prompt(seeds, focus=focus, auth_instructions=self.auth_instructions),
             "model": self.model,
-            "schema": agent_schema
+            "schema": schema or DiscoveredLinksSchema.model_json_schema(),
         }
 
-        logger.info(f"[FIRECRAWL] Submitting Agent exploration task on {cloud_target_url}...")
+        logger.info(f"[FIRECRAWL] Submitting Agent task on {len(seeds)} seed(s)...")
         try:
-            resp = self.session.post(
-                self.agent_endpoint,
-                headers=self._headers(),
-                json=payload,
-                timeout=30
-            )
+            resp = self.session.post(self.agent_endpoint, headers=self._headers(), json=payload, timeout=30)
             if resp.status_code not in (200, 201, 202):
-                logger.error(f"[FIRECRAWL] Agent start failed with {resp.status_code}: {resp.text}")
-                if self.mock_fallback:
-                    return self._get_fallback_routes()
-                return []
+                logger.error(f"[FIRECRAWL] Agent start failed with {resp.status_code}: {resp.text[:300]}")
+                return self._load_fallback_routes()
 
             job_id = resp.json().get("id")
             if not job_id:
-                logger.error(f"[FIRECRAWL] No job id returned: {resp.text}")
+                logger.error(f"[FIRECRAWL] No job id returned: {resp.text[:300]}")
                 return []
 
             logger.info(f"[FIRECRAWL] Job started with ID: {job_id}. Polling for completion...")
             return self._poll_job(job_id)
-
         except Exception as e:
             logger.error(f"[FIRECRAWL] Request exception: {e}")
-            if self.mock_fallback:
-                return self._get_fallback_routes()
-            return []
+            return self._load_fallback_routes()
 
     def _poll_job(self, job_id: str) -> List[Dict[str, Any]]:
         elapsed = 0
@@ -198,28 +194,9 @@ class FirecrawlClient:
                     logger.debug(f"[FIRECRAWL] Poll [{elapsed}s] status={status}")
 
                     if status == "completed":
-                        result_data = data.get("data") or {}
-                        links = result_data.get("links", [])
-                        logger.info(f"[FIRECRAWL] Job completed successfully! Found {len(links)} links.")
-                        # Map tunnel URLs back to localhost if tunnel was used
-                        normalized_links = []
-                        target_origin = os.getenv("TARGET_URL", "http://localhost:3000/").rstrip("/")
-                        p_target = urlparse(target_origin)
-                        p_tunnel = urlparse(self.public_tunnel_url) if self.public_tunnel_url else None
-                        for link in links:
-                            if p_tunnel and p_tunnel.netloc in link:
-                                p_link = urlparse(link)
-                                if p_link.netloc == p_tunnel.netloc:
-                                    link = urlunparse((
-                                        p_target.scheme,
-                                        p_target.netloc,
-                                        p_link.path,
-                                        p_link.params,
-                                        p_link.query,
-                                        p_link.fragment
-                                    ))
-                            normalized_links.append(link)
-                        return [{"url": link, "method": "GET", "source": "firecrawl", "status_code": 200} for link in normalized_links]
+                        links = (data.get("data") or {}).get("links", [])
+                        logger.info(f"[FIRECRAWL] Job completed. Found {len(links)} links.")
+                        return [self._as_result(self._from_cloud_url(link)) for link in links if isinstance(link, str)]
 
                     if status in ("failed", "cancelled"):
                         logger.warning(f"[FIRECRAWL] Job ended with status: {status}")
@@ -230,53 +207,23 @@ class FirecrawlClient:
             time.sleep(self.poll_interval_seconds)
             elapsed += self.poll_interval_seconds
 
-        logger.warning(f"[FIRECRAWL] Polling timed out after {self.poll_timeout_seconds}s.")
+        logger.warning(f"[FIRECRAWL] Polling stopped after {elapsed}s without results.")
         return []
 
-    def _get_fallback_routes(self, target_url: Optional[str] = None) -> List[Dict[str, Any]]:
-        """
-        Provides empirical routes uncovered by Firecrawl agent during prior research
-        for reproducible offline benchmarking and local verification.
-        """
-        target = target_url or os.getenv("TARGET_URL", "http://localhost:3000/")
-        if "3000" in str(target) or "juice" in str(target).lower():
-            fallback_urls = [
-                "http://localhost:3000/#/search",
-                "http://localhost:3000/#/login",
-                "http://localhost:3000/#/basket",
-                "http://localhost:3000/#/contact",
-                "http://localhost:3000/#/complain",
-                "http://localhost:3000/#/score-board",
-                "http://localhost:3000/#/administration",
-                "http://localhost:3000/#/recycle",
-                "http://localhost:3000/#/order-history",
-                "http://localhost:3000/rest/user/whoami",
-                "http://localhost:3000/rest/products/search",
-                "http://localhost:3000/api/Products",
-                "http://localhost:3000/api/Feedbacks",
-                "http://localhost:3000/api/Users",
-                "http://localhost:3000/api/BasketItems",
-            ]
-        else:
-            fallback_urls = [
-                "http://localhost/siteConfigurations",
-                "http://localhost/plugins",
-                "http://localhost/users",
-                "http://localhost/usersGroups",
-                "http://localhost/trending",
-                "http://localhost/videoOnly",
-                "http://localhost/audioOnly",
-                "http://localhost/listCategories",
-                "http://localhost/mvideos",
-                "http://localhost/view/managerPlugins.php",
-                "http://localhost/view/managerUsers.php",
-                "http://localhost/view/managerVideosOrganize.php",
-                "http://localhost/plugin/PlayLists/managerPlaylists.php",
-                "http://localhost/plugin/Live/view/Live_schedule/panelIndex.php",
-                "http://localhost/objects/getAllEmails.csv.php",
-                "http://localhost/objects/videos.txt.php",
-            ]
-        return [
-            {"url": u, "method": "GET", "source": "firecrawl", "status_code": 200}
-            for u in fallback_urls
-        ]
+    def _load_fallback_routes(self) -> List[Dict[str, Any]]:
+        """Replays a recorded list of URLs, if the experiment configured one."""
+        if not self.fallback_routes_file:
+            return []
+        path = Path(self.fallback_routes_file)
+        try:
+            urls = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as e:
+            logger.error(f"[FIRECRAWL] Could not read fallback routes file {path}: {e}")
+            return []
+        logger.warning(f"[FIRECRAWL] Replaying {len(urls)} recorded route(s) from {path} (offline mode).")
+        return [self._as_result(u) for u in urls if isinstance(u, str)]
+
+    @staticmethod
+    def _as_result(url: str) -> Dict[str, Any]:
+        # Firecrawl does not report HTTP status; 0 = unknown so it is not mistaken for a verified 200
+        return {"url": url, "method": "GET", "source": "firecrawl_navigate", "status_code": 0}

@@ -75,7 +75,7 @@ class BenchmarkRunner:
             "",
             "- **Recall ($R_{EP}$)** reflects attack surface coverage against verified application routes.",
             "- **Precision ($P_{EP}$)** reflects filtering efficacy against crawler traps and regex noise.",
-            "- **Adaptive Orchestrator** leverages specialized tools (Firecrawl for UI navigation, ZAP for spidering, Wapiti for parameter mutation) guided by LLM cognitive reasoning.",
+            "- **Adaptive Orchestrator** leverages specialized tools (Firecrawl for UI navigation, ZAP for spidering, Wapiti for parameter mutation) selected by a deterministic policy.",
             ""
         ])
 

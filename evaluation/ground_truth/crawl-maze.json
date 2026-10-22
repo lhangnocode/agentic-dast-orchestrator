@@ -1,0 +1,917 @@
+{
+  "benchmark": "crawl-maze",
+  "version": "2a0dd0a75e39925ded887bcd25016e8b3ce0f2b3",
+  "base_url": "http://localhost:8090/",
+  "entries": [
+    {
+      "canonical_key": "GET /javascript/frameworks/angular/event-handler.found",
+      "canonical_hash": "9d93d364468e5f5af6db37dc3f93e9e893236696e7aa710cef1d62119c1ea18b",
+      "method": "GET",
+      "path_template": "/javascript/frameworks/angular/event-handler.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "javascript",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /javascript/frameworks/angular/router-outlet.found",
+      "canonical_hash": "cbd2e65228d19d7bd1bc320f211c48de46688f441695ec2df3183b52803996a6",
+      "method": "GET",
+      "path_template": "/javascript/frameworks/angular/router-outlet.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "javascript",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /javascript/frameworks/angularjs/ng-href.found",
+      "canonical_hash": "e879d97d0e5ef2d45dfe8e0dfa92a272fde5f8223f7aa6631f3a626c475c37d7",
+      "method": "GET",
+      "path_template": "/javascript/frameworks/angularjs/ng-href.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "javascript",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /javascript/frameworks/polymer/event-handler.found",
+      "canonical_hash": "384ed9e98c72f4bddf361d6d9c82e2652302a74e8fea6a7bc93be9de1e046aa2",
+      "method": "GET",
+      "path_template": "/javascript/frameworks/polymer/event-handler.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "javascript",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /javascript/frameworks/polymer/polymer-router.found",
+      "canonical_hash": "59f8b98ae019aa1ddac1f03ac1c13ccb2dd658759506a612ccc9f6443d2c4898",
+      "method": "GET",
+      "path_template": "/javascript/frameworks/polymer/polymer-router.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "javascript",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /javascript/frameworks/react/index.html/search.found",
+      "canonical_hash": "ec667180bcff7062965083b487e2ac39be5ba94805d3a0a53519bf453cba8521",
+      "method": "GET",
+      "path_template": "/javascript/frameworks/react/index.html/search.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "javascript",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /javascript/frameworks/react/route-path.found",
+      "canonical_hash": "6e94c5b5f0ef45b56b9cac4a0ac0eb5060bbfe671a547062fb5c9f37944a652d",
+      "method": "GET",
+      "path_template": "/javascript/frameworks/react/route-path.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "javascript",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/css/font-face.found",
+      "canonical_hash": "0888eb7383a12db8127d833197bc5113d823804bb2c5717d9c4b7c343d021189",
+      "method": "GET",
+      "path_template": "/test/css/font-face.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/headers/content-location.found",
+      "canonical_hash": "aca3534567a7eb892aa4f4e8b7faf24c3d3601276a1c18d1f83ab0411c16eba1",
+      "method": "GET",
+      "path_template": "/test/headers/content-location.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/headers/link.found",
+      "canonical_hash": "b69d3e4478fcd7f8ad07cfa87d77651b511d11dd0fb7f3a0bae32a307b0bdf50",
+      "method": "GET",
+      "path_template": "/test/headers/link.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/headers/location.found",
+      "canonical_hash": "2f1d3db40e5948aeca52978ca6dd259a08dd21a17a14c78f3e1f9692459f70a5",
+      "method": "GET",
+      "path_template": "/test/headers/location.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/headers/refresh.found",
+      "canonical_hash": "0d88e2a23608ac87b77b6e17def5fd2c38c31573a3578de294050b8e0e1fdaef",
+      "method": "GET",
+      "path_template": "/test/headers/refresh.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/a/href.found",
+      "canonical_hash": "e5ff4918a8b6af5724e0cd71b14117257ffaac4ae2b12ba5d3e09621efd62bfd",
+      "method": "GET",
+      "path_template": "/test/html/body/a/href.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/a/ping.found",
+      "canonical_hash": "6edaaac6bde3f214dd4460d4b48242ed098f63417107e063f8ff5b2c064141e3",
+      "method": "GET",
+      "path_template": "/test/html/body/a/ping.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/applet/archive.found",
+      "canonical_hash": "ca8c12c201cddd755675657d633949c344de83ba498aa0efb7b693e252238d74",
+      "method": "GET",
+      "path_template": "/test/html/body/applet/archive.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/applet/codebase.found",
+      "canonical_hash": "28d6352b3195e802e92e6a89609a8734c4e23bf04db0f3a2db7e88a430e49713",
+      "method": "GET",
+      "path_template": "/test/html/body/applet/codebase.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/audio/source/src.found",
+      "canonical_hash": "0c735580d9b81ef0a2d6f4f3d8d9c0e3b084ebbcfb48523831c3ebae73e048d0",
+      "method": "GET",
+      "path_template": "/test/html/body/audio/source/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/audio/source/srcset1x.found",
+      "canonical_hash": "229ab68c659e74e14b9f184eccf57f54337d138a39cf5511b571925f3178318f",
+      "method": "GET",
+      "path_template": "/test/html/body/audio/source/srcset1x.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/audio/source/srcset2x.found",
+      "canonical_hash": "dd355b4e89e0a05ecfe35d032d6a3961ca18bd49a072118f1b362661fc0f32ab",
+      "method": "GET",
+      "path_template": "/test/html/body/audio/source/srcset2x.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/audio/src.found",
+      "canonical_hash": "5160ba36832e44eea7d6cec8e65ee28600999906dea6f6fe600adb2dd9f17adc",
+      "method": "GET",
+      "path_template": "/test/html/body/audio/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/background.found",
+      "canonical_hash": "7d0f84c5ebeaa82222cc218d6d61dbb2d8466a300509862b445f62decf15870a",
+      "method": "GET",
+      "path_template": "/test/html/body/background.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/blockquote/cite.found",
+      "canonical_hash": "e2aa070a1a9f555c140fb3ea6f47bbb68f533bbabba511f86660d1d1e5f68b06",
+      "method": "GET",
+      "path_template": "/test/html/body/blockquote/cite.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/embed/src.found",
+      "canonical_hash": "0fa65be2cd08cfc91c281256dc722dac4bb6cc2fda2dbe09a62e06c5191d44c4",
+      "method": "GET",
+      "path_template": "/test/html/body/embed/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/form/action-get.found",
+      "canonical_hash": "809b3806d2a7dbe0b54e6480875fe635f290f75d7afb3f5c86fd7da43573c777",
+      "method": "GET",
+      "path_template": "/test/html/body/form/action-get.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/form/action-post.found",
+      "canonical_hash": "59c34b87449b570f4747eb8f6a2883160fc7d119dd99be11cbc165a157ea891a",
+      "method": "GET",
+      "path_template": "/test/html/body/form/action-post.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/form/button/formaction.found",
+      "canonical_hash": "40f0dd47644685148c8c5cca7e7ac40d44ad20dcb85e9d74d2fc54a84e42ac01",
+      "method": "GET",
+      "path_template": "/test/html/body/form/button/formaction.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/frameset/frame/src.found",
+      "canonical_hash": "e27a452de5c6fc9ff6dd4c8f9d995251c262f21f0d5db5fdb2ba79d32cacc8b9",
+      "method": "GET",
+      "path_template": "/test/html/body/frameset/frame/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/iframe/src.found",
+      "canonical_hash": "99223750829fa4264da8ae1519f25b94168c56bcca1cf0b4c683a43c9b83b89b",
+      "method": "GET",
+      "path_template": "/test/html/body/iframe/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/iframe/srcdoc.found",
+      "canonical_hash": "67cba7611b8d2a07dc7eecc6cff5ae33dec1a103df6d474476eb7e384b29a1fc",
+      "method": "GET",
+      "path_template": "/test/html/body/iframe/srcdoc.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/img/dynsrc.found",
+      "canonical_hash": "151ccb96ae17407a3e990c3e8655e850a41805587b69488ce9e2e9f938f0d4a7",
+      "method": "GET",
+      "path_template": "/test/html/body/img/dynsrc.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/img/longdesc.found",
+      "canonical_hash": "f736fcb99fa976db67af5ee765f8fc74f1222e252ea6b6e6f78a4a9608887c69",
+      "method": "GET",
+      "path_template": "/test/html/body/img/longdesc.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/img/lowsrc.found",
+      "canonical_hash": "d8b6d2afcdd39a62f2c48f153129d501692b171b297595806531a921f3bb40d3",
+      "method": "GET",
+      "path_template": "/test/html/body/img/lowsrc.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/img/src-data.found",
+      "canonical_hash": "d1567294d3ec63e8c3096e28d79e6239a7c072eeff438cad0d983d07a7f3d192",
+      "method": "GET",
+      "path_template": "/test/html/body/img/src-data.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/img/src.found",
+      "canonical_hash": "1b7a45ffa2e2bdf94d3d8cd7670721bf7a54782d081f6b09326bbcf3c6a1042f",
+      "method": "GET",
+      "path_template": "/test/html/body/img/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/img/srcset1x.found",
+      "canonical_hash": "011240e29ad9d2b2df7bdd7379dd6edbff1eccec1b9352ddc9b0766b1580320f",
+      "method": "GET",
+      "path_template": "/test/html/body/img/srcset1x.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/img/srcset2x.found",
+      "canonical_hash": "debc48f3f4efff120b7686ab8c231ff4ef54e8043ae5828164f0b72bc566d92a",
+      "method": "GET",
+      "path_template": "/test/html/body/img/srcset2x.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/input/src.found",
+      "canonical_hash": "021f2629f0f589da0321af6385e574bced225ea3f4b40345410f20fadacb62dd",
+      "method": "GET",
+      "path_template": "/test/html/body/input/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/isindex/action.found",
+      "canonical_hash": "10d5c5c51a6b1dc578d5228e88707b0e5602bd1348732069d361f1a6edb28ec6",
+      "method": "GET",
+      "path_template": "/test/html/body/isindex/action.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/map/area/ping.found",
+      "canonical_hash": "01023db296a02ea0a328da55d93f1e4909b3ea92d6a2302b56324eb3fc1e4486",
+      "method": "GET",
+      "path_template": "/test/html/body/map/area/ping.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/object/codebase.found",
+      "canonical_hash": "416dd3aa2e0338b89f17de1fb61fb0ac92d0245c4ce76763aaa5f66d6fdac812",
+      "method": "GET",
+      "path_template": "/test/html/body/object/codebase.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/object/data.found",
+      "canonical_hash": "04c814d431e61aa818f8d54af487deba0cd2cf2eaa167a67c6cbfc745af0cb5f",
+      "method": "GET",
+      "path_template": "/test/html/body/object/data.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/object/param/value.found",
+      "canonical_hash": "ce20dbec69db2658f828200e8468e38a8657d12a72bc318fb39d7fe7fc786c93",
+      "method": "GET",
+      "path_template": "/test/html/body/object/param/value.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/script/src.found",
+      "canonical_hash": "422878576da8603630ba10bb98b9bee03147ad8711c67bdf137966fc9014697d",
+      "method": "GET",
+      "path_template": "/test/html/body/script/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/svg/image/xlink.found",
+      "canonical_hash": "e79216f42430fd16240970395eeacb1f5f51de336f74efaa863eeeedb105f102",
+      "method": "GET",
+      "path_template": "/test/html/body/svg/image/xlink.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/svg/script/xlink.found",
+      "canonical_hash": "b53cbd517bd02bd66e5a565c9681ebfb3785ddc3acddee8ddf9d443cbad3ec91",
+      "method": "GET",
+      "path_template": "/test/html/body/svg/script/xlink.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/table/background.found",
+      "canonical_hash": "e129c47f4e707c43cb93d8679dcbe75a0eaeab0bb72ffb29b2c0834660d0ba69",
+      "method": "GET",
+      "path_template": "/test/html/body/table/background.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/table/td/background.found",
+      "canonical_hash": "768bec54be5270f06ea5c8e4f515fd45f0f366c67bd83246b737d036d1d255c4",
+      "method": "GET",
+      "path_template": "/test/html/body/table/td/background.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/video/poster.found",
+      "canonical_hash": "3d6997cd6846b43973b9761b8061c192e3653b557ebbb6ea4ba2300582947514",
+      "method": "GET",
+      "path_template": "/test/html/body/video/poster.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/video/src.found",
+      "canonical_hash": "4a05b712f781166dfec9ae34111b2fe39befa6427016a4e1f488b6ed9951a683",
+      "method": "GET",
+      "path_template": "/test/html/body/video/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/body/video/track/src.found",
+      "canonical_hash": "95adff5d7ae71984f57b400119bcb1eef63fc61a2363dda071ecd857114a927d",
+      "method": "GET",
+      "path_template": "/test/html/body/video/track/src.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/doctype.found",
+      "canonical_hash": "d0785e8dc89db28ef77fb46350cc0c849886361f9f54a296281b6dcb166c7425",
+      "method": "GET",
+      "path_template": "/test/html/doctype.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/base/href.found",
+      "canonical_hash": "fb30cc35478318d8f86a4ffe36ce5b2a21fbeb08f40048cc726787aceb867cf4",
+      "method": "GET",
+      "path_template": "/test/html/head/base/href.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/comment-conditional.found",
+      "canonical_hash": "17649a0d44a3fdb4d19547161a17b46819cac3bf540af8896cba24e2cbf3a546",
+      "method": "GET",
+      "path_template": "/test/html/head/comment-conditional.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/import/implementation.found",
+      "canonical_hash": "480de81b6c0c39db613e27bd370320d53474c80f869d4292b13f870e96ef93ff",
+      "method": "GET",
+      "path_template": "/test/html/head/import/implementation.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/link/href.found",
+      "canonical_hash": "dec8f17411bfc84927ce5b719852b824e00a53919a011dad7b3bf24cab5b89ef",
+      "method": "GET",
+      "path_template": "/test/html/head/link/href.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/meta/content-csp.found",
+      "canonical_hash": "00e80f54b88b9a731fc3e0112506dfcc77c5a7e07d4bda6b32089960d92ea28b",
+      "method": "GET",
+      "path_template": "/test/html/head/meta/content-csp.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/meta/content-pinned-websites.found",
+      "canonical_hash": "eb39379c12b274d6247798f74c395a8ca97dce5b77f88041e23b2b4ffa37e621",
+      "method": "GET",
+      "path_template": "/test/html/head/meta/content-pinned-websites.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/meta/content-reading-view.found",
+      "canonical_hash": "d4b6f57b71fc7f9e55ed4e55b7dbbb8fd12908e8e89254e1956bcec18a0523cc",
+      "method": "GET",
+      "path_template": "/test/html/head/meta/content-reading-view.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/meta/content-redirect.found",
+      "canonical_hash": "5dd59a2e629c703a2affa813b9f3170808b54a2f607a92214c0c3eba1e5ad86c",
+      "method": "GET",
+      "path_template": "/test/html/head/meta/content-redirect.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/head/profile.found",
+      "canonical_hash": "e4c0427f3d02d22abd6b1074cab4690957ab4972136d61a27a2c86cf2bbb6e98",
+      "method": "GET",
+      "path_template": "/test/html/head/profile.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/manifest.found",
+      "canonical_hash": "977ee6439b904841c5d20aed128ea029ff3bc60c6de6567b5558b4b113b9a67f",
+      "method": "GET",
+      "path_template": "/test/html/manifest.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/string/dot-dot-slash-prefix.found",
+      "canonical_hash": "ff17ca11188eefddc16a692287068ccbb600acd08451587583321dfc1f03cdc3",
+      "method": "GET",
+      "path_template": "/test/html/misc/string/dot-dot-slash-prefix.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/string/dot-slash-prefix.found",
+      "canonical_hash": "4507dcf8ffd6ddcad31832446434ac8e9d33ab84aa4b8546319a0fb130836d6e",
+      "method": "GET",
+      "path_template": "/test/html/misc/string/dot-slash-prefix.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/string/string-known-extension.pdf",
+      "canonical_hash": "0928cef2f231880d74aa5c4fe7cf53307ded7b9c3df8bcd8b0b6e71ecdec6475",
+      "method": "GET",
+      "path_template": "/test/html/misc/string/string-known-extension.pdf",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/string/url-string.found",
+      "canonical_hash": "45dabc8128f566ce6d929c153fde50d53280b6e432a1c45f6ae4d27d122243bd",
+      "method": "GET",
+      "path_template": "/test/html/misc/string/url-string.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/url/full-url.found",
+      "canonical_hash": "56397b89c005bcac1a1d240a216ebfd8126f1dcefc5b2561ee31943d9b051162",
+      "method": "GET",
+      "path_template": "/test/html/misc/url/full-url.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/url/path-relative-url.found",
+      "canonical_hash": "19f05fb27c13598b28a7881254ac165deb7e8164711b4dfbd0603daa79a02041",
+      "method": "GET",
+      "path_template": "/test/html/misc/url/path-relative-url.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/url/protocol-relative-url.found",
+      "canonical_hash": "7a9c4fc347c17ea21d79816c66cc22ef3e9083e15b51c93e51b611eed6a39989",
+      "method": "GET",
+      "path_template": "/test/html/misc/url/protocol-relative-url.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/html/misc/url/root-relative-url.found",
+      "canonical_hash": "0e7b295623adbda1a64f4e30175e9801b1c981fae9b97891e671de74ffa45d78",
+      "method": "GET",
+      "path_template": "/test/html/misc/url/root-relative-url.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/js-delete.found",
+      "canonical_hash": "e827e39b5240ae96ab6f3514eb07ad4f727521bff6a5b631a99dd0b6fa075679",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/js-delete.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/js-post-event-listener.found",
+      "canonical_hash": "f8ebefebe68f36e08db0d6f2afa150e1684e598b9d724759e8cef1917a40d7c5",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/js-post-event-listener.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/js-post.found",
+      "canonical_hash": "bd7ffa17d4597636d75659d429a1bdc02649af8f685f052cff6f2ea3d6cd4d1e",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/js-post.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/js-put.found",
+      "canonical_hash": "c888074881288f6030832de061f12c001fcd02d1d94e2f4db6ccbf5fee933819",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/js-put.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/listener-and-event-attribute-first.found",
+      "canonical_hash": "53b19bc2045045e5c582d471a6fd7b630673ff1c4e252e7aa47ce0205a6b2bbc",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/listener-and-event-attribute-first.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/listener-and-event-attribute-second.found",
+      "canonical_hash": "98fb5228965c029e8e2afecd90eff155ef1ae068ce6216663ab5757536f49ce3",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/listener-and-event-attribute-second.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-event-attribute.found",
+      "canonical_hash": "95a7a516f86a7a56f7d68b401f406d70a7462d797adeded0d27fa010c313524b",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-event-attribute.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-event-listener-div-dom.found",
+      "canonical_hash": "1125b5625ddeaf81a77cd470f93a20ee1b84e2ebae78286bd284e2548f00aec6",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-event-listener-div-dom.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-event-listener-div.found",
+      "canonical_hash": "83814cf9f88b063fbcb23187c396218614fdfe478d2a00a29da4ff22b43dd46a",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-event-listener-div.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-event-listener-dom.found",
+      "canonical_hash": "49aef33beb36afc74670844935f8d2fda24b9d6a585bb21e18b28ec9cc10b91d",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-event-listener-dom.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-event-listener.found",
+      "canonical_hash": "eadcd49619fb1867209a37e9126b415e44246456e2d2f24e0dff28662021669f",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-event-listener.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-redefine-event-attribute.found",
+      "canonical_hash": "e1d28dc7d961c3a83ecdb678124ce7284202acf48cd445ffe1325b4df42d5074",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-redefine-event-attribute.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-remove-button.found",
+      "canonical_hash": "b1b4d63a4c6e389dc463434e630f8f9100414d3d2cf242a28f4d448b8bddd899",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-remove-button.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/multi-step-request-remove-event-listener.found",
+      "canonical_hash": "2b637e0f8a9c48ea473e08f9f8d6d82999f906f2980d7bc80abb6b4c9708cf5a",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/multi-step-request-remove-event-listener.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/two-listeners-first.found",
+      "canonical_hash": "97f6e5eacc19f3910d94d5ad2fb71dbcc14b28027f49db1dd9e27be6ceb9154e",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/two-listeners-first.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/interactive/two-listeners-second.found",
+      "canonical_hash": "e9055f693ae6d98771c38f857ae7980e65a221ac54241cfef5515ae052c6216c",
+      "method": "GET",
+      "path_template": "/test/javascript/interactive/two-listeners-second.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/misc/automatic-post.found",
+      "canonical_hash": "c5380ecee3b47baf2c2723b158d2c2ec3450d3cbf865e1c1f5b611b5ce5db695",
+      "method": "GET",
+      "path_template": "/test/javascript/misc/automatic-post.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/misc/comment.found",
+      "canonical_hash": "9b66e218c1cae6e430ea612171d69806a1b6ee876f1f34d92b69b5b367c4d248",
+      "method": "GET",
+      "path_template": "/test/javascript/misc/comment.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/misc/string-concat-variable.found",
+      "canonical_hash": "004bb369df7c70dd17a8fc68bd14e6174343a3633302d7d62304eaa5da18eab9",
+      "method": "GET",
+      "path_template": "/test/javascript/misc/string-concat-variable.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/javascript/misc/string-variable.found",
+      "canonical_hash": "84c74dee2aba57cf93a7e3e156d1e700cbcc7f2bf3dd3d217ae67ceb3c0669ea",
+      "method": "GET",
+      "path_template": "/test/javascript/misc/string-variable.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/misc/known-files/robots.txt.found",
+      "canonical_hash": "52ad54248b84fc9f904f996a5d9c5c0031c12863520c26c97e3c19d114d2fed1",
+      "method": "GET",
+      "path_template": "/test/misc/known-files/robots.txt.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /test/misc/known-files/sitemap.xml.found",
+      "canonical_hash": "fbfbe3a5109b9b02c6e2853ee13eec1dc03ac1f246adce1761b75ea8f505e6fc",
+      "method": "GET",
+      "path_template": "/test/misc/known-files/sitemap.xml.found",
+      "kind": "expected_resource",
+      "origin": "expected-results.json",
+      "category": "test",
+      "reachable": true
+    }
+  ]
+}

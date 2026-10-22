@@ -4,13 +4,15 @@ Maintains the Canonical Attack Surface, Tool Coverage Matrix (U x T),
 Provenance, and Iterative Execution History.
 """
 
+import hashlib
 import json
 import sqlite3
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 # Tool names of the coverage matrix (mirror orchestrator.decision_schema.ToolActionEnum)
-CRAWL_TOOLS = ("zap_traditional_spider", "zap_ajax_spider", "wapiti_form_crawl", "firecrawl_navigate")
+CRAWL_TOOLS = ("zap_traditional_spider", "zap_ajax_spider", "zap_client_spider", "wapiti_form_crawl",
+               "firecrawl_navigate")
 
 # Legacy / short source labels mapped onto coverage-matrix tool names
 SOURCE_TOOL_ALIASES = {
@@ -92,8 +94,6 @@ class StateStore:
                     new_endpoints_discovered INTEGER NOT NULL,
                     marginal_gain REAL NOT NULL,
                     tool_duration_seconds REAL DEFAULT 0.0,
-                    llm_prompt_tokens INTEGER DEFAULT 0,
-                    llm_completion_tokens INTEGER DEFAULT 0,
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
@@ -132,15 +132,39 @@ class StateStore:
                 """)
                 cursor.execute("DROP TABLE execution_history_old;")
 
-            # Migration: per-run request counter (input for request-efficiency metrics)
-            cursor.execute("PRAGMA table_info(execution_history);")
-            if "requests_sent" not in {row[1] for row in cursor.fetchall()}:
-                cursor.execute("ALTER TABLE execution_history ADD COLUMN requests_sent INTEGER DEFAULT 0;")
+            # Migrations: columns added after the first schema version
+            self._add_missing_columns(cursor, "endpoints", {
+                "content_type": "TEXT DEFAULT ''",
+            })
+            self._add_missing_columns(cursor, "execution_history", {
+                "requests_sent": "INTEGER DEFAULT 0",
+                "raw_results": "INTEGER DEFAULT 0",
+                "seeds_count": "INTEGER DEFAULT 0",
+                "status": "TEXT DEFAULT 'ok'",          # ok | failed | timeout
+                "error": "TEXT",
+                "rule_id": "TEXT",                     # which stage/rule triggered the run
+                "frontier_fingerprint": "TEXT",        # tool's pending frontier right after the run
+            })
+
+            # Tools added later get PENDING coverage rows for endpoints that already exist
+            for tool in CRAWL_TOOLS:
+                cursor.execute("""
+                    INSERT OR IGNORE INTO tool_coverage (canonical_hash, tool_name, status, last_attempt_iteration)
+                    SELECT canonical_hash, ?, 'PENDING', 0 FROM endpoints
+                """, (tool,))
 
             # Indices for rapid querying
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_endpoints_path ON endpoints(path_template);")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_tool_coverage_lookup ON tool_coverage(tool_name, status);")
             conn.commit()
+
+    @staticmethod
+    def _add_missing_columns(cursor: sqlite3.Cursor, table: str, columns: Dict[str, str]) -> None:
+        cursor.execute(f"PRAGMA table_info({table});")
+        existing = {row[1] for row in cursor.fetchall()}
+        for name, ddl in columns.items():
+            if name not in existing:
+                cursor.execute(f"ALTER TABLE {table} ADD COLUMN {name} {ddl};")
 
     def insert_or_update_endpoint(self, endpoint: Dict[str, Any], current_iteration: int) -> bool:
         """
@@ -156,12 +180,13 @@ class StateStore:
         status_code = endpoint.get("status_code", 200)
         source_tool = endpoint.get("source_tool", "seed")
         raw_sample = endpoint.get("raw_sample", "")
+        content_type = (endpoint.get("content_type") or "").split(";")[0].strip().lower()
 
         is_new = False
         with self._get_connection() as conn:
             cursor = conn.cursor()
             # Check existence
-            cursor.execute("SELECT canonical_hash, status_code FROM endpoints WHERE canonical_hash = ?", (canonical_hash,))
+            cursor.execute("SELECT canonical_hash, status_code, content_type FROM endpoints WHERE canonical_hash = ?", (canonical_hash,))
             row = cursor.fetchone()
 
             if row is None:
@@ -169,9 +194,10 @@ class StateStore:
                 cursor.execute("""
                     INSERT INTO endpoints (
                         canonical_hash, canonical_key, method, path_template,
-                        query_params, normalized_url, status_code, first_seen_iteration
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, (canonical_hash, canonical_key, method, path_template, query_params, normalized_url, status_code, current_iteration))
+                        query_params, normalized_url, status_code, first_seen_iteration, content_type
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (canonical_hash, canonical_key, method, path_template, query_params, normalized_url,
+                      status_code, current_iteration, content_type))
 
                 # Initialize coverage matrix: the discovering tool already saw it, the others are PENDING
                 mapped_tool = SOURCE_TOOL_ALIASES.get(source_tool, source_tool)
@@ -186,6 +212,8 @@ class StateStore:
                 old_status = row["status_code"] or 0
                 if (200 <= status_code < 300 and not 200 <= old_status < 300) or (old_status == 0 and status_code):
                     cursor.execute("UPDATE endpoints SET status_code = ? WHERE canonical_hash = ?", (status_code, canonical_hash))
+                if content_type and not row["content_type"]:
+                    cursor.execute("UPDATE endpoints SET content_type = ? WHERE canonical_hash = ?", (content_type, canonical_hash))
 
             # Record provenance
             cursor.execute("""
@@ -229,12 +257,15 @@ class StateStore:
 
     def get_pending_frontier(self, tool_name: str, limit: Optional[int] = 30,
                              statuses: Optional[Iterable[int]] = None,
-                             sources: Optional[Iterable[str]] = None) -> List[str]:
+                             sources: Optional[Iterable[str]] = None,
+                             page_like: bool = False) -> List[str]:
         """
         Retrieves GET seed URLs that tool_name has not visited yet.
         - limit: maximum number of seeds; None = no limit.
         - statuses: only endpoints with these HTTP status codes.
         - sources: only endpoints discovered by these tools (provenance).
+        - page_like: only URLs that can be pages: HTML or not-yet-known content type
+          (excludes JSON/API responses, files, scripts), plus all client-side `#/` routes.
         Dead ends (404/405/410 and 5xx) are skipped; 2xx come first, then auth walls/redirects.
         Returns a concrete URL observed by a crawler (raw sample), not the {placeholder} template,
         so the seed can actually be requested.
@@ -250,6 +281,9 @@ class StateStore:
             filters += (" AND EXISTS (SELECT 1 FROM endpoint_sources src WHERE src.canonical_hash = e.canonical_hash"
                         f" AND src.source_tool IN ({','.join('?' * len(source_list))}))")
             params.extend(source_list)
+        if page_like:
+            filters += (" AND (e.path_template LIKE '%#%' OR COALESCE(e.content_type, '') IN "
+                        "('', 'text/html', 'application/xhtml+xml'))")
         params.append(-1 if limit is None else limit)  # SQLite: LIMIT -1 = unlimited
         with self._get_connection() as conn:
             cursor = conn.cursor()
@@ -270,6 +304,97 @@ class StateStore:
             """, params)
             return list(dict.fromkeys(row["sample_url"] or row["normalized_url"] for row in cursor.fetchall()))
 
+    def get_unknown_status_urls(self, limit: Optional[int] = None) -> List[str]:
+        """
+        GET endpoints whose HTTP status is still unknown (0) and that live on the server
+        (no `#/` client route): the HTTP probe's frontier. Returns concrete observed URLs.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT e.normalized_url,
+                       (SELECT es.raw_sample FROM endpoint_sources es
+                        WHERE es.canonical_hash = e.canonical_hash AND es.raw_sample LIKE 'http%'
+                        ORDER BY length(es.raw_sample) ASC LIMIT 1) AS sample_url
+                FROM endpoints e
+                WHERE e.method = 'GET' AND COALESCE(e.status_code, 0) = 0 AND e.path_template NOT LIKE '%#%'
+                ORDER BY e.first_seen_iteration ASC, e.path_template ASC
+                LIMIT ?
+            """, (-1 if limit is None else limit,))
+            return list(dict.fromkeys(row["sample_url"] or row["normalized_url"] for row in cursor.fetchall()))
+
+    def get_known_routes_summary(self, max_chars: int = 4000) -> str:
+        """
+        Compact, deterministic text listing what is already discovered (for the Firecrawl prompt):
+        client-side routes first, then server paths grouped by their first segment.
+        Cut at a line boundary to stay within max_chars.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT path_template FROM endpoints WHERE status_code NOT IN (404, 410)")
+            paths = sorted({row["path_template"] for row in cursor.fetchall()})
+        routes = sorted({p[p.index("#"):] for p in paths if "#" in p})
+        groups: Dict[str, List[str]] = {}
+        for p in paths:
+            if "#" in p or p == "/":
+                continue
+            head, _, rest = p.lstrip("/").partition("/")
+            groups.setdefault("/" + head, [])
+            if rest:
+                groups["/" + head].append(rest)
+        lines = []
+        if routes:
+            lines.append(f"Client-side routes ({len(routes)}): " + ", ".join(routes))
+        if groups:
+            lines.append(f"Server paths ({sum(max(1, len(v)) for v in groups.values())}):")
+            for head in sorted(groups):
+                children = sorted(set(groups[head]))
+                lines.append(f"- {head}" + (f": {', '.join(children)}" if children else ""))
+        text = ""
+        for line in lines:
+            if len(text) + len(line) + 1 > max_chars:
+                text += "(... more not listed)"
+                break
+            text += line + "\n"
+        return text.strip()
+
+    def frontier_fingerprint(self, tool_name: str) -> str:
+        """
+        Compact identity of tool_name's whole pending frontier ("<count>:<hash>").
+        Stored after each run; a different value later means the frontier changed.
+        The HTTP probe's frontier is the set of URLs with unknown status.
+        """
+        if tool_name == "http_probe":
+            frontier = sorted(self.get_unknown_status_urls())
+        else:
+            frontier = sorted(self.get_pending_frontier(tool_name, limit=None))
+        digest = hashlib.sha1("\n".join(frontier).encode("utf-8")).hexdigest()[:12]
+        return f"{len(frontier)}:{digest}"
+
+    def get_last_runs(self) -> Dict[str, Dict[str, Any]]:
+        """Most recent execution_history row per tool."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT h.* FROM execution_history h
+                JOIN (SELECT chosen_tool, MAX(id) AS max_id FROM execution_history GROUP BY chosen_tool) last
+                  ON h.id = last.max_id
+            """)
+            return {row["chosen_tool"]: dict(row) for row in cursor.fetchall()}
+
+    def get_consecutive_failures(self, tool_name: str) -> int:
+        """How many of tool_name's most recent runs in a row ended in failed/timeout."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT status FROM execution_history WHERE chosen_tool = ? ORDER BY id DESC",
+                           (tool_name,))
+            count = 0
+            for row in cursor.fetchall():
+                if (row["status"] or "ok") == "ok":
+                    break
+                count += 1
+            return count
+
     def get_tool_run_counts(self) -> Dict[str, int]:
         """How many times each tool has been executed (bootstrap + adaptive iterations)."""
         counts = {t: 0 for t in CRAWL_TOOLS}
@@ -283,32 +408,37 @@ class StateStore:
     def get_surface_profile(self) -> Dict[str, int]:
         """
         Raw shape of the discovered surface, used to detect SPAs and auth walls without
-        any knowledge of the target application.
+        any knowledge of the target application. Page/JSON counts use the observed
+        Content-Type, so files (markdown, archives, …) are not mistaken for pages.
         """
         profile = {
-            "total": 0, "get": 0, "non_get": 0, "html_pages": 0, "api_like": 0,
-            "hash_routes": 0, "parameterized": 0, "auth_walls": 0, "redirects": 0,
-            "errors": 0,
+            "total": 0, "get": 0, "non_get": 0, "html_pages": 0, "json_responses": 0, "api_like": 0,
+            "hash_routes": 0, "parameterized": 0, "auth_walls": 0, "redirects": 0, "errors": 0,
+            "unknown_status": 0,
         }
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT method, path_template, query_params, status_code FROM endpoints")
+            cursor.execute("SELECT method, path_template, query_params, status_code, content_type FROM endpoints")
             for row in cursor.fetchall():
                 path = row["path_template"] or "/"
                 status = row["status_code"] or 0
+                ctype = (row["content_type"] or "").lower()
                 segments = {s.lower() for s in path.split("#")[0].split("/") if s}
-                is_api = bool(segments & API_SEGMENTS) or path.endswith(".json")
                 profile["total"] += 1
                 profile["get" if row["method"] == "GET" else "non_get"] += 1
                 if "#" in path:
                     profile["hash_routes"] += 1
-                if is_api:
+                if bool(segments & API_SEGMENTS) or "json" in ctype:
                     profile["api_like"] += 1
-                elif row["method"] == "GET" and "#" not in path and 200 <= status < 300:
+                if "json" in ctype:
+                    profile["json_responses"] += 1
+                if "html" in ctype and "#" not in path and 200 <= status < 300:
                     profile["html_pages"] += 1
                 if row["query_params"] not in (None, "", "[]"):
                     profile["parameterized"] += 1
-                if status in (401, 403):
+                if status == 0:
+                    profile["unknown_status"] += 1
+                elif status in (401, 403):
                     profile["auth_walls"] += 1
                 elif 300 <= status < 400:
                     profile["redirects"] += 1
@@ -411,16 +541,16 @@ class StateStore:
         }
 
     def record_iteration(self, record: Dict[str, Any]) -> None:
-        """Records the outcome of an orchestration iteration."""
+        """Records the outcome of one tool run."""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO execution_history (
                     iteration, chosen_tool, reasoning, target_seeds,
                     endpoints_before, endpoints_after, new_endpoints_discovered,
-                    marginal_gain, tool_duration_seconds, llm_prompt_tokens, llm_completion_tokens,
-                    requests_sent
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    marginal_gain, tool_duration_seconds, requests_sent,
+                    raw_results, seeds_count, status, error, rule_id, frontier_fingerprint
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 record["iteration"],
                 record["chosen_tool"],
@@ -431,8 +561,12 @@ class StateStore:
                 record["new_endpoints_discovered"],
                 record["marginal_gain"],
                 record.get("tool_duration_seconds", 0.0),
-                record.get("llm_prompt_tokens", 0),
-                record.get("llm_completion_tokens", 0),
                 record.get("requests_sent", 0),
+                record.get("raw_results", 0),
+                record.get("seeds_count", len(record.get("target_seeds", []))),
+                record.get("status", "ok"),
+                record.get("error"),
+                record.get("rule_id"),
+                record.get("frontier_fingerprint"),
             ))
             conn.commit()

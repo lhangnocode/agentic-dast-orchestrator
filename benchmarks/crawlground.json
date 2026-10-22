@@ -1,0 +1,10 @@
+{
+  "service": "crawlground",
+  "ground_truth": "evaluation/ground_truth/crawlground.json",
+  "crawlground_scores": true,
+  "config": {
+    "target": {"base_url": "http://localhost:3456/"},
+    "auth": {"enabled": false},
+    "tools": {"firecrawl": {"context_file": "configs/contexts/crawlground.md", "auth_instructions": ""}}
+  }
+}

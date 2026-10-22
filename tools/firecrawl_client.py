@@ -3,8 +3,8 @@ Firecrawl Cloud Agent Client.
 Interfaces with the Firecrawl /v2/agent API to perform semantic browser navigation
 (menus, dropdowns, modals, client-side routes) on the seeds the orchestrator selects.
 
-In strategy 2 Firecrawl is a *targeted* tool: it is only invoked after the ZAP/Wapiti
-bootstrap, on the frontier those tools could not open up (auth walls, SPA shells).
+Firecrawl runs as stage 2, seeded with every page/route the ZAP/Wapiti stage found,
+and again whenever its frontier grows (rule R6).
 """
 
 import json
@@ -21,6 +21,9 @@ from pydantic import BaseModel, Field
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from tools.firecrawl_prompt import (DEFAULT_TEMPLATE, PromptParts, RenderedPrompt, read_text_file,
+                                    render_prompt, save_prompt)
+
 load_dotenv()
 logger = logging.getLogger("orchestrator.firecrawl")
 
@@ -30,35 +33,6 @@ LOCAL_HOSTS = {"localhost", "127.0.0.1"}
 class DiscoveredLinksSchema(BaseModel):
     links: List[str] = Field(description="List of URLs/routes found while interacting with the page")
     actions_taken: List[str] = Field(description="Actions the AI performed (click, scroll, open menu...)")
-
-
-AGENT_PROMPT_TEMPLATE = """
-You are a web application route discovery assistant working on an authorized test target.
-Goal: reveal as many distinct application routes and interaction points as possible
-(navigation links, client-side routes, API calls triggered by the UI).
-
-Start from these pages:
-{seed_list}
-{focus_block}{auth_block}
-How to explore:
-1. Open every navigation element: header, sidebar, footer, account/avatar menus, dropdowns,
-   tabs, modals, pagination and filter controls.
-2. For single-page applications, follow client-side routes (including /#/ routes) and wait
-   for each view to render before reading its links.
-3. Open forms and dialogs to reveal where they submit, but do not submit destructive actions
-   (delete, logout, payment, account changes). Use harmless test data only, no attack payloads.
-4. Stay on the target's own host.
-
-Return ALL unique URLs/routes observed (with paths, query parameters and route segments)
-and a short list of the actions taken.
-"""
-
-
-def build_agent_prompt(seeds: List[str], focus: str = "", auth_instructions: str = "") -> str:
-    seed_list = "\n".join(f"- {s}" for s in seeds)
-    focus_block = f"\nPriority for this run: {focus}\n" if focus else ""
-    auth_block = f"\nSession / authentication instructions:\n{auth_instructions.strip()}\n" if auth_instructions.strip() else ""
-    return AGENT_PROMPT_TEMPLATE.format(seed_list=seed_list, focus_block=focus_block, auth_block=auth_block)
 
 
 class FirecrawlClient:
@@ -72,10 +46,21 @@ class FirecrawlClient:
         public_tunnel_url: Optional[str] = None,
         target_base: str = "http://localhost/",
         auth_instructions: str = "",
-        max_seeds: int = 5,
+        max_seeds: Optional[int] = None,
         fallback_routes_file: Optional[str] = None,
+        prompt_template_file: Optional[str] = None,
+        context_file: Optional[str] = None,
+        prompts_dir: Optional[str] = "output/prompts",
+        known_routes_max_chars: int = 4000,
+        batch_size: int = 10,
+        max_credits: Optional[int] = None,
+        effort: Optional[str] = None,
     ):
         """
+        max_seeds: optional cap on seeds per run (None = all seeds, sent in jobs of `batch_size`).
+        prompt_template_file / context_file: prompt template and per-target application context.
+        known_routes_max_chars: budget for the "already known" summary inside the prompt.
+        max_credits / effort: passed to the Agent API when set (API defaults otherwise).
         fallback_routes_file: optional JSON list of URLs replayed when Firecrawl cannot run
         (no API key / unreachable). Only for offline experiments; leave unset for real runs.
         """
@@ -90,6 +75,17 @@ class FirecrawlClient:
         self.auth_instructions = auth_instructions
         self.max_seeds = max_seeds
         self.fallback_routes_file = fallback_routes_file
+        self.prompt_template_file = prompt_template_file
+        self.context_file = context_file
+        self.prompts_dir = prompts_dir
+        self.known_routes_max_chars = known_routes_max_chars
+        self.batch_size = max(1, batch_size or 1)
+        self.max_credits = max_credits
+        self.effort = effort
+        # Set by the orchestrator: callable(max_chars) -> summary of what is already discovered
+        self.known_routes_provider = None
+        self.last_prompt_files: List[str] = []
+        self.last_status = "ok"  # ok | failed | timeout
         self.session = self._create_session()
 
     def _create_session(self) -> requests.Session:
@@ -138,47 +134,86 @@ class FirecrawlClient:
         return urlunparse(p._replace(scheme=target.scheme, netloc=target.netloc))
 
     # ------------------------------------------------------------------ discovery
+    def build_prompt(self, seeds: List[str], focus: str = "") -> RenderedPrompt:
+        template = read_text_file(self.prompt_template_file, "Prompt template") or DEFAULT_TEMPLATE
+        known = self.known_routes_provider(self.known_routes_max_chars) if self.known_routes_provider else ""
+        parts = PromptParts(target_url=self.target_base, seeds=seeds,
+                            app_context=read_text_file(self.context_file, "Application context"),
+                            known_routes=known, focus=focus, auth_instructions=self.auth_instructions)
+        return render_prompt(template, parts)
+
     def run_agent_discovery(
         self,
         seeds: List[str],
         focus: str = "",
-        prompt: Optional[str] = None,
         schema: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """
-        Submits an exploration job on the given seeds and polls for results.
-        Returns a list of discovered endpoint dicts (GET, status unknown = 0).
+        Explores the seeds with the Agent, in jobs of `batch_size` seeds (sequentially),
+        each with a prompt rendered from the template. Returns discovered links (GET, status 0).
         """
-        seeds = [s for s in seeds if s][: max(1, self.max_seeds)] or [self.target_base]
+        self.last_status = "ok"
+        self.last_prompt_files = []
+        seeds = [s for s in dict.fromkeys(seeds) if s]
+        if self.max_seeds:
+            seeds = seeds[: self.max_seeds]
+        seeds = seeds or [self.target_base]
 
         if not self.is_configured() or not self.can_reach_target():
             reason = "API key not configured" if not self.is_configured() else "localhost target without PUBLIC_TUNNEL_URL"
             logger.warning(f"[FIRECRAWL] Skipping live run: {reason}.")
             return self._load_fallback_routes()
 
-        payload = {
+        batches = [seeds[i:i + self.batch_size] for i in range(0, len(seeds), self.batch_size)]
+        logger.info(f"[FIRECRAWL] {len(seeds)} seed(s) in {len(batches)} job(s) of up to {self.batch_size}.")
+        results: List[Dict[str, Any]] = []
+        statuses = []
+        for number, batch in enumerate(batches, start=1):
+            results += self._run_job(batch, focus, schema, number, len(batches))
+            statuses.append(self.last_status)
+            self.last_status = "ok"
+        # A run is only "ok" if every job was; otherwise report the first problem (retry rule input)
+        self.last_status = next((st for st in statuses if st != "ok"), "ok")
+        return results
+
+    def _run_job(self, seeds: List[str], focus: str, schema: Optional[Dict[str, Any]],
+                 number: int, total: int) -> List[Dict[str, Any]]:
+        prompt = self.build_prompt(seeds, focus)
+        saved = save_prompt(prompt, self.prompts_dir)
+        if saved:
+            self.last_prompt_files.append(str(saved))
+        payload: Dict[str, Any] = {
             "urls": [self._to_cloud_url(s) for s in seeds],
-            "prompt": prompt or build_agent_prompt(seeds, focus=focus, auth_instructions=self.auth_instructions),
+            "prompt": prompt.text,
             "model": self.model,
             "schema": schema or DiscoveredLinksSchema.model_json_schema(),
         }
+        if self.max_credits:
+            payload["maxCredits"] = self.max_credits
+        if self.effort:
+            payload["effort"] = self.effort
 
-        logger.info(f"[FIRECRAWL] Submitting Agent task on {len(seeds)} seed(s)...")
+        logger.info(f"[FIRECRAWL] Job {number}/{total}: {len(seeds)} seed(s), prompt {len(prompt.text)} chars "
+                    f"(sha256 {prompt.sha256[:12]}{', saved to ' + str(saved) if saved else ''}).")
+        logger.debug(f"[FIRECRAWL] Prompt:\n{prompt.text}")
         try:
             resp = self.session.post(self.agent_endpoint, headers=self._headers(), json=payload, timeout=30)
             if resp.status_code not in (200, 201, 202):
                 logger.error(f"[FIRECRAWL] Agent start failed with {resp.status_code}: {resp.text[:300]}")
+                self.last_status = "failed"
                 return self._load_fallback_routes()
 
             job_id = resp.json().get("id")
             if not job_id:
                 logger.error(f"[FIRECRAWL] No job id returned: {resp.text[:300]}")
+                self.last_status = "failed"
                 return []
 
             logger.info(f"[FIRECRAWL] Job started with ID: {job_id}. Polling for completion...")
             return self._poll_job(job_id)
         except Exception as e:
             logger.error(f"[FIRECRAWL] Request exception: {e}")
+            self.last_status = "failed"
             return self._load_fallback_routes()
 
     def _poll_job(self, job_id: str) -> List[Dict[str, Any]]:
@@ -199,8 +234,12 @@ class FirecrawlClient:
                         return [self._as_result(self._from_cloud_url(link)) for link in links if isinstance(link, str)]
 
                     if status in ("failed", "cancelled"):
-                        logger.warning(f"[FIRECRAWL] Job ended with status: {status}")
-                        break
+                        # A job stopped by its credit limit still returns best-effort `partial` data
+                        partial = (data.get("partial") or {}).get("links", []) if isinstance(data.get("partial"), dict) else []
+                        logger.warning(f"[FIRECRAWL] Job ended with status: {status} "
+                                       f"({data.get('stopReason') or 'no reason'}); {len(partial)} partial link(s).")
+                        self.last_status = "failed"
+                        return [self._as_result(self._from_cloud_url(link)) for link in partial if isinstance(link, str)]
             except Exception as e:
                 logger.warning(f"[FIRECRAWL] Error polling job {job_id}: {e}")
 
@@ -208,6 +247,7 @@ class FirecrawlClient:
             elapsed += self.poll_interval_seconds
 
         logger.warning(f"[FIRECRAWL] Polling stopped after {elapsed}s without results.")
+        self.last_status = "timeout"
         return []
 
     def _load_fallback_routes(self) -> List[Dict[str, Any]]:

@@ -33,6 +33,7 @@ from normalization.patterns import (
     NUMERIC_SEGMENT,
     NUMERIC_WITH_EXT_SEGMENT,
     OPAQUE_TOKEN_SEGMENT,
+    STATIC_DOCUMENT_EXTENSIONS,
     ROUTE_PLACEHOLDER_SEGMENT,
     UNRENDERED_VARS_REGEX,
     UUID_SEGMENT,
@@ -150,13 +151,24 @@ def is_crawler_trap_or_junk(url: str, profile: Optional[NormalizationProfile] = 
     if re.search(r"\.[A-Za-z0-9]{1,5}:\d+(:\d+)?$", path):
         return True, "stack_trace_frame"
 
-    # 8. Bundler / dependency directories leaked from source maps
+    # 8. Artefacts around static documents (files, not pages)
+    segments = [x for x in path.split("/") if x]
+    if any(_is_static_document(seg) for seg in segments[:-1]):
+        return True, "path_nested_under_file"
+    if segments and _is_static_document(segments[-1]):
+        raw = up.urlparse(url)
+        if raw.fragment.startswith(("/", "!/")):
+            return True, "client_route_on_file"
+        if raw.query:
+            return True, "query_on_static_document"
+
+    # 9. Bundler / dependency directories leaked from source maps
     if "node_modules" in path:
         return True, "bundle_module_leak_junk"
     if re.search(r"(assets|public|images|static)/.*\1/", path + "/"):
         return True, "asset_dir_phantom"
 
-    # 9. Recursive crawler traps (e.g. /dir/dir/dir/...) and absurdly deep paths
+    # 10. Recursive crawler traps (e.g. /dir/dir/dir/...) and absurdly deep paths
     parts = [x for x in path.split("/") if x]
     if len(parts) > MAX_PATH_SEGMENTS:
         return True, "path_too_deep"
@@ -164,6 +176,17 @@ def is_crawler_trap_or_junk(url: str, profile: Optional[NormalizationProfile] = 
         return True, "recursive_path_trap"
 
     return False, ""
+
+
+def _is_static_document(segment: str) -> bool:
+    dot = segment.rfind(".")
+    return dot > 0 and segment[dot:].lower() in STATIC_DOCUMENT_EXTENSIONS
+
+
+def _is_slug(segment: str) -> bool:
+    """'03-intersection-observer' is a readable name, not a random token: >= 2 alphabetic words."""
+    words = [w for w in re.split(r"[-_.]", segment) if len(w) >= 3 and w.isalpha()]
+    return len(words) >= 2
 
 
 def _generalize_segment(seg: str) -> str:
@@ -178,7 +201,7 @@ def _generalize_segment(seg: str) -> str:
         return "{id}"
     if HEX_HASH_SEGMENT.match(seg):
         return "{hash}"
-    if OPAQUE_TOKEN_SEGMENT.match(seg):
+    if OPAQUE_TOKEN_SEGMENT.match(seg) and not _is_slug(seg):
         return "{token}"
     return seg
 

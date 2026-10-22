@@ -1,0 +1,1618 @@
+{
+  "benchmark": "juice-shop",
+  "version": "v20.1.1",
+  "base_url": "http://localhost:3000/",
+  "entries": [
+    {
+      "canonical_key": "GET #/2fa/enter",
+      "canonical_hash": "b8c22bdbdd008f6bbcdbb4c76e8aabbc4d3d33d7065aa8c53a8942051f581163",
+      "method": "GET",
+      "path_template": "#/2fa/enter",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/about",
+      "canonical_hash": "d6fa3e73ae91614fbe37be006f916b93a75b1e48697bfbe8e4a45e75eba0cd0a",
+      "method": "GET",
+      "path_template": "#/about",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/accounting",
+      "canonical_hash": "326c13a05730fb5548d11b4550ad328832478dc987b0c9faf8f743b01f22fe0d",
+      "method": "GET",
+      "path_template": "#/accounting",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/address/create",
+      "canonical_hash": "6a93108187910fa3642660a17471325e103c0a985f1928fba906e5221937731b",
+      "method": "GET",
+      "path_template": "#/address/create",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/address/edit/{id}",
+      "canonical_hash": "c2b96b946d92daea889bd9d9037a6a58063a80877dffd506dbb49ac1da5bd3ba",
+      "method": "GET",
+      "path_template": "#/address/edit/{id}",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/address/saved",
+      "canonical_hash": "1a62d3089bedbc6fe3d6f6b29f75d26b2477c2f9595016493c53617409b909db",
+      "method": "GET",
+      "path_template": "#/address/saved",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/address/select",
+      "canonical_hash": "1d381e28c604498846e79a9c7a53e0ca385c4178fa32cf57fcf7455f4729ce4c",
+      "method": "GET",
+      "path_template": "#/address/select",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/administration",
+      "canonical_hash": "dc328b96a7287093825b768df60632a678e3bbd01c7538ab90d811f07923e4ae",
+      "method": "GET",
+      "path_template": "#/administration",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/basket",
+      "canonical_hash": "6f3dfd00413812fef9627c7f7e8cec6ce9bbe20d66d0e8ebc09c6fe50cbecb9c",
+      "method": "GET",
+      "path_template": "#/basket",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/bee-haven",
+      "canonical_hash": "f3710ed7e407cf5bef63f27af87b828740c39a41867b95dd4fb508ac9c024bfe",
+      "method": "GET",
+      "path_template": "#/bee-haven",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/chatbot",
+      "canonical_hash": "21953dc89844dc2138a77c1373a2c158ed3dd3fec78d8c629625713dee4ecc71",
+      "method": "GET",
+      "path_template": "#/chatbot",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/chatbot/conversation/{id}",
+      "canonical_hash": "674651e9420367f858dde3a686a13509172b94d0ecfa5c55421a5077c5d4bf45",
+      "method": "GET",
+      "path_template": "#/chatbot/conversation/{id}",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/coding-challenge/{id}",
+      "canonical_hash": "ac8b87f563a4d4dce699f00d6e698f57401844ed17e4be406aeaa0ed623ade60",
+      "method": "GET",
+      "path_template": "#/coding-challenge/{id}",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/complain",
+      "canonical_hash": "9f0ac0668b07580fd58462790ee08f78b3f85856ed89e09804b673dcbebf9895",
+      "method": "GET",
+      "path_template": "#/complain",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/contact",
+      "canonical_hash": "7c1099d556c4e9c534e6ff3374ab1094fb73cc6d65948cbfb9e044f6a8f6df96",
+      "method": "GET",
+      "path_template": "#/contact",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/delivery-method",
+      "canonical_hash": "9076371103034a65a16cda05fc3929262ba94f9f7021a77b060fb81c06ed04f3",
+      "method": "GET",
+      "path_template": "#/delivery-method",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/deluxe-membership",
+      "canonical_hash": "2063a52245e0648bcca4b6297c68708fdbcf5c828336e79c68ae2bb1d3e7c84d",
+      "method": "GET",
+      "path_template": "#/deluxe-membership",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/forgot-password",
+      "canonical_hash": "73008d6daf7241bceba54e85f04ad7bda2d591165f53e1272618543c5f8f815d",
+      "method": "GET",
+      "path_template": "#/forgot-password",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/hacking-instructor",
+      "canonical_hash": "8097e8ab979f4bd8c5d16361f598ac35be22b78df7a6a54fba7f95be0e7fc283",
+      "method": "GET",
+      "path_template": "#/hacking-instructor",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/juicy-nft",
+      "canonical_hash": "892a3f657cd942c70ce79fe1b87af060ccd54ef335d826bf699a5382a9b1d0d7",
+      "method": "GET",
+      "path_template": "#/juicy-nft",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/login",
+      "canonical_hash": "fd4c64e034056e3bf7cd87cf3f90f5b9125dc2dac115b420a1f0c7acb7522239",
+      "method": "GET",
+      "path_template": "#/login",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/order-completion/{id}",
+      "canonical_hash": "40bcb3b25f19678a22721e73f1fd0c7f17353e3a64414c155f00973981ad37ac",
+      "method": "GET",
+      "path_template": "#/order-completion/{id}",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/order-history",
+      "canonical_hash": "f29fc5a6c992aa9336e050a91c8f61d154750beffa9415893a4ddc4baf312448",
+      "method": "GET",
+      "path_template": "#/order-history",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/order-summary",
+      "canonical_hash": "1c052cd1117f92a9f1ee85c9d23e5121b52fa09e41494d3c231972a2c5553230",
+      "method": "GET",
+      "path_template": "#/order-summary",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/payment/{id}",
+      "canonical_hash": "23844547daeda76633c0f2b0ceb1257b1cf18723a3f9e626eb83f6d103556339",
+      "method": "GET",
+      "path_template": "#/payment/{id}",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/photo-wall",
+      "canonical_hash": "843bf9e3e2c052346d90f81fa6ed0fc645526f2ff81079736004d85e176da7b6",
+      "method": "GET",
+      "path_template": "#/photo-wall",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/privacy-security",
+      "canonical_hash": "7a9a5f24797c820138d1ab6c0a901dd0f5c2f12d23faff641e6d6bb2ce2112bc",
+      "method": "GET",
+      "path_template": "#/privacy-security",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/privacy-security/change-password",
+      "canonical_hash": "39662aec98934f801d4c6dbeb5944e1243570b7dd2d50cdfcfbe51e02010c68e",
+      "method": "GET",
+      "path_template": "#/privacy-security/change-password",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/privacy-security/data-export",
+      "canonical_hash": "617b731efe63e73c654890881213e2c0b50c0edfa615d345bc5f81f80f878523",
+      "method": "GET",
+      "path_template": "#/privacy-security/data-export",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/privacy-security/last-login-ip",
+      "canonical_hash": "4ee1c056247440757f1caace734e09dad6502c0b1308ec5852ac854c6a764707",
+      "method": "GET",
+      "path_template": "#/privacy-security/last-login-ip",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/privacy-security/privacy-policy",
+      "canonical_hash": "0a22ba90cc800c6f1902b9dd6b9845f6ce1f13e7ea80e7b230a84af3bf3a0d94",
+      "method": "GET",
+      "path_template": "#/privacy-security/privacy-policy",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/privacy-security/two-factor-authentication",
+      "canonical_hash": "401da7c65f5e3e341f59f0b1d4baa9c58ffc3b3b66769b5d11c2ff986405a227",
+      "method": "GET",
+      "path_template": "#/privacy-security/two-factor-authentication",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/recycle",
+      "canonical_hash": "7e782a671b1f0756b218213c4c43cad6b46c85ed482cd1efbc59985d22b739d0",
+      "method": "GET",
+      "path_template": "#/recycle",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/register",
+      "canonical_hash": "f33810b405029a194680e6094ceef749f60652dbe5c637cea1855b7006d289b7",
+      "method": "GET",
+      "path_template": "#/register",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/saved-payment-methods",
+      "canonical_hash": "8361d21c05e9e79e4fc7e261cc2ce9cdac6892117684719ab2f30097a43462ea",
+      "method": "GET",
+      "path_template": "#/saved-payment-methods",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/score-board",
+      "canonical_hash": "5b1852c6675929240e3df9922e1569f36201c5329e78b4ef113af7b66ac96d2e",
+      "method": "GET",
+      "path_template": "#/score-board",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/search",
+      "canonical_hash": "6afeea28f9124f29627accc114934c5d52492af2ed57e34de7ea0cae18da265b",
+      "method": "GET",
+      "path_template": "#/search",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/track-result",
+      "canonical_hash": "b9477978c5016a9d9dcb7377c37c3bfb8bc2d472ed6fb9c8def18b39b315f098",
+      "method": "GET",
+      "path_template": "#/track-result",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/track-result/new",
+      "canonical_hash": "42c57cfff3991d79f38e51bb0695df349e0e33a898862ae4858c4a8eb74f3fc9",
+      "method": "GET",
+      "path_template": "#/track-result/new",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/wallet",
+      "canonical_hash": "25c1a167b7107793f7e2c385bb8a77fba522f6324e7749ee92751e065a3c05ca",
+      "method": "GET",
+      "path_template": "#/wallet",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/wallet-web3",
+      "canonical_hash": "5c77bde8683474abe3e2f8aaebba729e136e8ebcaf9cc47508994d5c703cc892",
+      "method": "GET",
+      "path_template": "#/wallet-web3",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/web3-sandbox",
+      "canonical_hash": "783ae54f6a0845c61a93cbd54f6dbe45feb1fb36e317959db720fbec60a09cbe",
+      "method": "GET",
+      "path_template": "#/web3-sandbox",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET #/{id}",
+      "canonical_hash": "229f774b7072e34341baf233f642a0d08f3cfe75c58b6fa28a9a2de89be7b8bf",
+      "method": "GET",
+      "path_template": "#/{id}",
+      "kind": "client_route",
+      "origin": "app.routing.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Addresss/{id}",
+      "canonical_hash": "ddc6848e784b4ef884c04c04d1c02ea5c7d137b94d11a14c43b83fb828abf33c",
+      "method": "DELETE",
+      "path_template": "/api/Addresss/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/BasketItems/{id}",
+      "canonical_hash": "adc66d6c2f918e32bbe18d81ba5884fcb37e1b773947de2bbedb24f5908309c6",
+      "method": "DELETE",
+      "path_template": "/api/BasketItems/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Cards/{id}",
+      "canonical_hash": "aac68be73054cbf78648a93965d9bc849ba10ff490693b1fd517f69f410651dd",
+      "method": "DELETE",
+      "path_template": "/api/Cards/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Challenges/{id}",
+      "canonical_hash": "0765cfdb037e5f5a89191ad01429021c6d4e2007b5957e6c12fc3e26d68277bd",
+      "method": "DELETE",
+      "path_template": "/api/Challenges/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Complaints/{id}",
+      "canonical_hash": "e5d45a492283b4c93337a7c24b82493beeea7e18f2f1d590fc19593d74a0175a",
+      "method": "DELETE",
+      "path_template": "/api/Complaints/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Feedbacks/{id}",
+      "canonical_hash": "771a6b2d5dc82518a2478be9cc32a8c2b907ce121f7b33ae006d5fb56a3313ae",
+      "method": "DELETE",
+      "path_template": "/api/Feedbacks/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Hints/{id}",
+      "canonical_hash": "66e7263fb45a499875c222ce10628c16938dbd18856dd3998b7b5aac7e7e2026",
+      "method": "DELETE",
+      "path_template": "/api/Hints/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/PrivacyRequests/{id}",
+      "canonical_hash": "e09f08f16ee8e0bd9b69f72d71a4db5b4c3840f58c69411370faaa8de2b8c17c",
+      "method": "DELETE",
+      "path_template": "/api/PrivacyRequests/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Products/{id}",
+      "canonical_hash": "cced2bc5042f0b4b1f0f0cb6ac99f520997b55cd696e290454e9a5fc5411c4f0",
+      "method": "DELETE",
+      "path_template": "/api/Products/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Quantitys/{id}",
+      "canonical_hash": "ad06e6a0dc4e7848dadf8bdb2ef05482c5a0dcff32afc518f05d48cf62fe2659",
+      "method": "DELETE",
+      "path_template": "/api/Quantitys/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Recycles/{id}",
+      "canonical_hash": "ea6e9f491980302f5960d4493fd6c6493ae68b5b9cfa9a309e642705135ffd54",
+      "method": "DELETE",
+      "path_template": "/api/Recycles/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/SecurityAnswers/{id}",
+      "canonical_hash": "66f7f732aff6437e8d7dc72f83de3765476162741142221028ac43ddbebbd7d6",
+      "method": "DELETE",
+      "path_template": "/api/SecurityAnswers/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/SecurityQuestions/{id}",
+      "canonical_hash": "d210d04ba13a6d5e10315e8bceb69d0ac853f6f0406deabc09803d609831c047",
+      "method": "DELETE",
+      "path_template": "/api/SecurityQuestions/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "DELETE /api/Users/{id}",
+      "canonical_hash": "0226ec5ac3c14d67e5f3e92caf3008b60746f7f2a159d525ba482bbd1552d7ca",
+      "method": "DELETE",
+      "path_template": "/api/Users/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Addresss",
+      "canonical_hash": "099171a5eca0bf5ca1800d3b83612827220d9395884ae3eeeb9104236a73d64a",
+      "method": "GET",
+      "path_template": "/api/Addresss",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Addresss/{id}",
+      "canonical_hash": "085ded885d69b401cde7bbb08a5f05adacafcfc98c0601e5ebd110483209a041",
+      "method": "GET",
+      "path_template": "/api/Addresss/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/BasketItems",
+      "canonical_hash": "fa824bc8741f7f5adddb40ba20fd914bebc75c838e77fb4693eafddca3b4f412",
+      "method": "GET",
+      "path_template": "/api/BasketItems",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/BasketItems/{id}",
+      "canonical_hash": "86a096e49a1a483585c9bacfa4987d66657357cc6554dd4ea3d8a1763651bc50",
+      "method": "GET",
+      "path_template": "/api/BasketItems/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Cards",
+      "canonical_hash": "d73709744f12323b0085e320083bdb11e3f5b9d323fc431d0d210432792cfffe",
+      "method": "GET",
+      "path_template": "/api/Cards",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Cards/{id}",
+      "canonical_hash": "c36bc728b4edb1311b546ef3dae4e60f3f15787bc89e7ff34055a91166c1db23",
+      "method": "GET",
+      "path_template": "/api/Cards/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Challenges",
+      "canonical_hash": "6a549b834509461fdc2fecd841814e2bf3c0a26fa243231c2a79d7e412a05a06",
+      "method": "GET",
+      "path_template": "/api/Challenges",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Challenges/{id}",
+      "canonical_hash": "8a4b19470195779210d16706a5b5ee1abe4d292489640a4eb01d126558b23380",
+      "method": "GET",
+      "path_template": "/api/Challenges/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Complaints",
+      "canonical_hash": "0482fd4b03c126b9e55d91f90ac780853e91b912c4eb9cc2488874daf045e404",
+      "method": "GET",
+      "path_template": "/api/Complaints",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Complaints/{id}",
+      "canonical_hash": "c973f33ae164962a2f2dad02d92538e3e63caae76998565c9481869c2ec98d8c",
+      "method": "GET",
+      "path_template": "/api/Complaints/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Deliverys",
+      "canonical_hash": "2cbc282069acf6fa506b7e4c1d63065113f4bd9e7ce6e6f5b9ab335753718904",
+      "method": "GET",
+      "path_template": "/api/Deliverys",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Deliverys/{id}",
+      "canonical_hash": "5e510290f550edc0a1784ca05b76cd171ce68e2ce9523ffc72f2ce882f0d2cb9",
+      "method": "GET",
+      "path_template": "/api/Deliverys/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Feedbacks",
+      "canonical_hash": "216b1400b7505ba417f1b24520a06ac12733b0fe410c3ef6d2d8bd7f469cb5e4",
+      "method": "GET",
+      "path_template": "/api/Feedbacks",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Feedbacks/{id}",
+      "canonical_hash": "5cdf210520b0790d0f0208de8112819a4115844d2b23b13591d92b2b3734c2ea",
+      "method": "GET",
+      "path_template": "/api/Feedbacks/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Hints",
+      "canonical_hash": "8473643353742a2248df1ad740c292f934f340b3def3f37111abde03eac73c44",
+      "method": "GET",
+      "path_template": "/api/Hints",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Hints/{id}",
+      "canonical_hash": "d21b939d136c57d733c661197e0394fd3edebeb8ce5409629022374b7fb168f4",
+      "method": "GET",
+      "path_template": "/api/Hints/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/PrivacyRequests",
+      "canonical_hash": "37c49df70e51381d6f5dd0050a9edc8d8d70c5537b8469bb0934a49d11bc44af",
+      "method": "GET",
+      "path_template": "/api/PrivacyRequests",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/PrivacyRequests/{id}",
+      "canonical_hash": "23cf4e1a5fcd92bee4a518890a8c1aca32a31d231c906c838ee8f9471e5ee23e",
+      "method": "GET",
+      "path_template": "/api/PrivacyRequests/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Products",
+      "canonical_hash": "cab2d0b35bb36cf1b835f462cab3dbf2a71d15ca98caa49c431ee1bac6ff9f3c",
+      "method": "GET",
+      "path_template": "/api/Products",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Products/{id}",
+      "canonical_hash": "90cb46a3ba151d0496a1336b80c15b8fda8ff13a7be44d6f908fe607d365565b",
+      "method": "GET",
+      "path_template": "/api/Products/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Quantitys",
+      "canonical_hash": "64c483ca7e23ebd6de4645db5fef83b97f28db37e3cee3f195c41955da77c051",
+      "method": "GET",
+      "path_template": "/api/Quantitys",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Quantitys/{id}",
+      "canonical_hash": "4ef3518d5886333a3082272b3b150ccaa72c8374e281393ea7c349dd0f5241af",
+      "method": "GET",
+      "path_template": "/api/Quantitys/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Recycles",
+      "canonical_hash": "773d7642731a547a925758e8accd95925aab0f359abc6da8f1050ba27bd188a0",
+      "method": "GET",
+      "path_template": "/api/Recycles",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Recycles/{id}",
+      "canonical_hash": "63a73490c8fb018c4d4d9fdf5a908693d73b3b319b56a355bab6343e8afdf0c5",
+      "method": "GET",
+      "path_template": "/api/Recycles/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/SecurityAnswers",
+      "canonical_hash": "afa1824553084139564d4b7404f9ccbf4c778b141d90770313f1eba801abb8b4",
+      "method": "GET",
+      "path_template": "/api/SecurityAnswers",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/SecurityAnswers/{id}",
+      "canonical_hash": "9ff72cc7520b654b3b4ccc402c840a540511b289ba8ea6c36519a3a672b5a129",
+      "method": "GET",
+      "path_template": "/api/SecurityAnswers/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/SecurityQuestions",
+      "canonical_hash": "6e39ceddd25f0748c9a656771b971fc241853e7d594f0079e797a0361d8403bf",
+      "method": "GET",
+      "path_template": "/api/SecurityQuestions",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/SecurityQuestions/{id}",
+      "canonical_hash": "832343124d44796de08c9a7d09a865dfe87df5732ff58b5cd874da6c4490cc26",
+      "method": "GET",
+      "path_template": "/api/SecurityQuestions/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Users",
+      "canonical_hash": "2d6397205e98ec25459539772e3573c5812f9f5350842319776287529f3a0efc",
+      "method": "GET",
+      "path_template": "/api/Users",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /api/Users/{id}",
+      "canonical_hash": "e38ed1e66a168b6a5e40841d2c926fb1177e3502fed86961bbbbf89c7ae6821c",
+      "method": "GET",
+      "path_template": "/api/Users/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /metrics",
+      "canonical_hash": "e64b00a2e68292cd1ad0ee33cb63ab24cc61a712602095ee988ee6049434404c",
+      "method": "GET",
+      "path_template": "/metrics",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /profile",
+      "canonical_hash": "00db03803fcb445718672487cb51945f58804d5eeb1b7bffeefd90b955f976e7",
+      "method": "GET",
+      "path_template": "/profile",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /promotion",
+      "canonical_hash": "bb187aa47963d76ee6793775b22335cfc60ff199041a9949e2bc97ce52cc08ab",
+      "method": "GET",
+      "path_template": "/promotion",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /redirect",
+      "canonical_hash": "dc2694ec32ebe352c516aeb839b0945a3744080a7af24f01c0f0819f6cc0d1b9",
+      "method": "GET",
+      "path_template": "/redirect",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/2fa/status",
+      "canonical_hash": "0cfbfe30324fbb267850843399bbc70d8886f789d31d45f4dc72e155be81c1dc",
+      "method": "GET",
+      "path_template": "/rest/2fa/status",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/admin/application-configuration",
+      "canonical_hash": "1b69ced805034c9b947663cd9fb71b93a55e22b09743fd9624bd4b1443622c06",
+      "method": "GET",
+      "path_template": "/rest/admin/application-configuration",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/admin/application-version",
+      "canonical_hash": "5a46932e99b33fe6e4b0e6d1072cd82a781d7603f81aea74cc87f25e54e47402",
+      "method": "GET",
+      "path_template": "/rest/admin/application-version",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/basket/{id}",
+      "canonical_hash": "ada19d1342ac92d23f4cde40af86ac238cd59c8060cf3420f79c6332177422c0",
+      "method": "GET",
+      "path_template": "/rest/basket/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/captcha",
+      "canonical_hash": "302578e1feb54b911618a8a86db8c731332319db3aa7f3e871b7e5661022c8a4",
+      "method": "GET",
+      "path_template": "/rest/captcha",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/continue-code",
+      "canonical_hash": "cd963dbb07d821d2addacf867d378c5dc9ce5c52b4c7834334d95d40269d06dc",
+      "method": "GET",
+      "path_template": "/rest/continue-code",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/continue-code-findIt",
+      "canonical_hash": "74c47dc66ea0eb142ef350b8b6819bc7a60321381281a442b83f2ec92517bf29",
+      "method": "GET",
+      "path_template": "/rest/continue-code-findIt",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/continue-code-fixIt",
+      "canonical_hash": "c27a6b177fc3a97095056641aebcb60e665cf92312e38943a634f3a6ee7f695d",
+      "method": "GET",
+      "path_template": "/rest/continue-code-fixIt",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/country-mapping",
+      "canonical_hash": "342b3edf073106a324fbea14f81355bb04b021803cf2e85fa18335e56db57235",
+      "method": "GET",
+      "path_template": "/rest/country-mapping",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/deluxe-membership",
+      "canonical_hash": "8091aa375efa11b11c7c967c9285afe8bc07fe2a1d83d83ab9cf11f3a1ecc159",
+      "method": "GET",
+      "path_template": "/rest/deluxe-membership",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/image-captcha",
+      "canonical_hash": "5266039fcc1a44324773882aac0112c2cb207e0d0dce99e6afd665e3c4f73c4f",
+      "method": "GET",
+      "path_template": "/rest/image-captcha",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/languages",
+      "canonical_hash": "a575fd0fc9fb12dfb6813469c89a68b051e5948a0bc9d4f409f5ee9281cb04c0",
+      "method": "GET",
+      "path_template": "/rest/languages",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/memories",
+      "canonical_hash": "1a935f8e88603f40f31efb642913af8bcd70d512aae19bbcb6f4e365f81dec58",
+      "method": "GET",
+      "path_template": "/rest/memories",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/order-history",
+      "canonical_hash": "82f55fb5898d0df66a342d256adc93999984c7b571f3fbc1ad454b8f0383572d",
+      "method": "GET",
+      "path_template": "/rest/order-history",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/order-history/orders",
+      "canonical_hash": "2a9e068ef09145cf7dbdad9f4e4016885cdbc583bc74b448927f52d75a6f3bb5",
+      "method": "GET",
+      "path_template": "/rest/order-history/orders",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/products/search",
+      "canonical_hash": "d9c4b649b31c29290444c9a2ba7636352700b8e640c05e6eef0cbdfd90d9e83c",
+      "method": "GET",
+      "path_template": "/rest/products/search",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/products/{id}/reviews",
+      "canonical_hash": "40ec0ddd3facac3badb09ad8bc48ea31f11882e05b832d124c52a41b4671b97c",
+      "method": "GET",
+      "path_template": "/rest/products/{id}/reviews",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/repeat-notification",
+      "canonical_hash": "edd2e11d1b38315719baba57762805c2e98ab3f194df572dd16bd5369410bdf6",
+      "method": "GET",
+      "path_template": "/rest/repeat-notification",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/saveLoginIp",
+      "canonical_hash": "2824ad554a1ee06f34c191f5c4960e38464f614bbd81f37f87a2e7e4fb54deda",
+      "method": "GET",
+      "path_template": "/rest/saveLoginIp",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/track-order/{id}",
+      "canonical_hash": "93b6f869efc80495ce75c59e80bfc4926fdb5b82e91d5142c34e06f1e4124aa1",
+      "method": "GET",
+      "path_template": "/rest/track-order/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/user/authentication-details",
+      "canonical_hash": "a17743ad2982797bda7a203b5110c81ac55da9e52117876c081f095f0a6865c5",
+      "method": "GET",
+      "path_template": "/rest/user/authentication-details",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/user/change-password",
+      "canonical_hash": "2b0c9067cacdf31b7fb1ce48e6a2afa1799efa47cd367ffb12bcd87785da0aa7",
+      "method": "GET",
+      "path_template": "/rest/user/change-password",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/user/security-question",
+      "canonical_hash": "3d19b6bba2be8fdf19b1618be6f5e11ccce6a50ec72ead755022a8c9d66fba98",
+      "method": "GET",
+      "path_template": "/rest/user/security-question",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/user/whoami",
+      "canonical_hash": "306da5879b5a6ee4b8c4676c4ea04e98ef93e845542e4a9b1893271ada5988e1",
+      "method": "GET",
+      "path_template": "/rest/user/whoami",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/wallet/balance",
+      "canonical_hash": "5ac1374bc50bd5ea20de075e168096b964617d6a5173cc5ac4d8ddfb0b14830f",
+      "method": "GET",
+      "path_template": "/rest/wallet/balance",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/web3/nftMintListen",
+      "canonical_hash": "07afa20469ebdcf6a66962312789138a8c5494ed8f070889dfd853cc9f798a23",
+      "method": "GET",
+      "path_template": "/rest/web3/nftMintListen",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /rest/web3/nftUnlocked",
+      "canonical_hash": "330b4456fdb0c65b1a253c4e4d89520f01aadd6fd14f8e460c14549bdac1dc4f",
+      "method": "GET",
+      "path_template": "/rest/web3/nftUnlocked",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /snippets/fixes/{id}",
+      "canonical_hash": "62021e95270fe71a0b1f78f1d3405718c4d4c4cb6bf88c8f231a3a327b272d02",
+      "method": "GET",
+      "path_template": "/snippets/fixes/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /snippets/{id}",
+      "canonical_hash": "90c6602dff65ddd548b92835f005eaa77dfc894ffa3989650680936920c835ae",
+      "method": "GET",
+      "path_template": "/snippets/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /video",
+      "canonical_hash": "5daaee49851f4277d0603b1da38d43cee7adc71663a8ede7f26d09405739bae4",
+      "method": "GET",
+      "path_template": "/video",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "GET /we/may/also/instruct/you/to/refuse/all/reasonably/necessary/responsibility",
+      "canonical_hash": "ebccf36c07b9d459a3313a803876dd0d2478780e47580fe08fb1db5e38389f25",
+      "method": "GET",
+      "path_template": "/we/may/also/instruct/you/to/refuse/all/reasonably/necessary/responsibility",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PATCH /rest/products/reviews",
+      "canonical_hash": "30cc893827e8b0eb8c11a253eb4e1c6e25ce5b28809ff2bfdfb55beff328a444",
+      "method": "PATCH",
+      "path_template": "/rest/products/reviews",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Addresss",
+      "canonical_hash": "00b00b2a1a913e27ba8e99915b71628eb9e4279a2cbd384e40dd81419ee04a50",
+      "method": "POST",
+      "path_template": "/api/Addresss",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/BasketItems",
+      "canonical_hash": "1abf5e6931a8c88aa293d56f29ae4b1aa5c4393557eab58c4fabf2b199da6aea",
+      "method": "POST",
+      "path_template": "/api/BasketItems",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Cards",
+      "canonical_hash": "46197e5958a5ab51a7811693642a4a21db3d37f6e3f8e2c72ae5c194188aed6d",
+      "method": "POST",
+      "path_template": "/api/Cards",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Challenges",
+      "canonical_hash": "c0a221bdd0f1d8a00fe50533e106d0948557526802a2c217c6e2edeba84d8bbe",
+      "method": "POST",
+      "path_template": "/api/Challenges",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Complaints",
+      "canonical_hash": "f8b2e179c7f13f23ac0fe6046d512ed34ca181e8928a1b3532598f16b03dbb0c",
+      "method": "POST",
+      "path_template": "/api/Complaints",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Feedbacks",
+      "canonical_hash": "5675e8b4ed2b7554785d108ea19e633d223ee98bdbf567fd60e97193e6ebcd3d",
+      "method": "POST",
+      "path_template": "/api/Feedbacks",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Hints",
+      "canonical_hash": "56c2b17016b0382721d28371cc66c4fb58ca0f66bfc2bfe9c93088d59f8fabbc",
+      "method": "POST",
+      "path_template": "/api/Hints",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/PrivacyRequests",
+      "canonical_hash": "7e442e64d133b748d7fe1c2a4458168e0f6752cc88fa3a29edc24daf5d43cbf4",
+      "method": "POST",
+      "path_template": "/api/PrivacyRequests",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Products",
+      "canonical_hash": "052653409fa150491d63d365cfb9ced271c98ef1133b7e19fbb70a54a2e6d7f6",
+      "method": "POST",
+      "path_template": "/api/Products",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Quantitys",
+      "canonical_hash": "11c507ff4d8077b36aaaa64decbaaf179d6da36464e6dbcf9fce5a973db76427",
+      "method": "POST",
+      "path_template": "/api/Quantitys",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Recycles",
+      "canonical_hash": "d52d654090fc72bd1848d4042059f9faab03254a2abbe7beb0f387a298df872c",
+      "method": "POST",
+      "path_template": "/api/Recycles",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/SecurityAnswers",
+      "canonical_hash": "e03898e4eea7962147b833176d677a83553df00a1a45d89d71c872c9ceb9f7a4",
+      "method": "POST",
+      "path_template": "/api/SecurityAnswers",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/SecurityQuestions",
+      "canonical_hash": "7872861d336f53608f170801b6feb4148b124682ced5c53c23d365cb54c131e8",
+      "method": "POST",
+      "path_template": "/api/SecurityQuestions",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /api/Users",
+      "canonical_hash": "e32c2d0c36e276443242f598a9bcdd994ebb17ce48da4bc037d6339bbef9bb18",
+      "method": "POST",
+      "path_template": "/api/Users",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /b2b/v2/orders",
+      "canonical_hash": "c1aa8826caec73b92b972ed37388e81cc5305b724c190a11d4a0f5968bb59f59",
+      "method": "POST",
+      "path_template": "/b2b/v2/orders",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /file-upload",
+      "canonical_hash": "4cbf79d589371fc641a5a0c52d8555bf494df3d40e797ee5a7aec7f73e111242",
+      "method": "POST",
+      "path_template": "/file-upload",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /profile",
+      "canonical_hash": "789f01749c86361be990e751c0c3bc7c36c27dccbbf0657eb39b27f683cfa949",
+      "method": "POST",
+      "path_template": "/profile",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /profile/image/file",
+      "canonical_hash": "be54c4825f31b705979c38a512d4978f6f22f3360b0cceec7bbbacd6b2a4e845",
+      "method": "POST",
+      "path_template": "/profile/image/file",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /profile/image/url",
+      "canonical_hash": "a8b133d79f6bbe8a8dfb3e7dbebf68811d43cedac8ee8f0e98f9834dfc4bc34b",
+      "method": "POST",
+      "path_template": "/profile/image/url",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/2fa/disable",
+      "canonical_hash": "42f5e4e83aa18b7f780fb16495855e2a7b8b130771dd34b9cdbad2c6930bf941",
+      "method": "POST",
+      "path_template": "/rest/2fa/disable",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/2fa/setup",
+      "canonical_hash": "d2538e50a9322d17dcd80e79907f6ba15a9bb050b9768cc03b10f80857c32519",
+      "method": "POST",
+      "path_template": "/rest/2fa/setup",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/2fa/verify",
+      "canonical_hash": "e8f3fe1c15360ba7b6063658a5b38786d52186ee7d6065e49d4b43a87b875622",
+      "method": "POST",
+      "path_template": "/rest/2fa/verify",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/basket/{id}/checkout",
+      "canonical_hash": "43e9f3d2fc330ae6cf4e63e2c5d440e9f55d096f0736428e4e1ab6f94bfa2743",
+      "method": "POST",
+      "path_template": "/rest/basket/{id}/checkout",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/chat",
+      "canonical_hash": "1f4d66ea248c65431c905dcfd13ac249083f0152eb178e3ce29decdfeea08b2b",
+      "method": "POST",
+      "path_template": "/rest/chat",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/deluxe-membership",
+      "canonical_hash": "2bab8ce8586f160d0521a340fab66c2fdc49a7496083b7664568d17800b79050",
+      "method": "POST",
+      "path_template": "/rest/deluxe-membership",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/memories",
+      "canonical_hash": "571caec6eb080b712d719bb09ac0da89864e7a6da9a9eba15483c25249ee0d84",
+      "method": "POST",
+      "path_template": "/rest/memories",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/products/reviews",
+      "canonical_hash": "39614c263bb3be8fb990c0cac9537fffce10ca0db11cd1f445a8f13405d4e503",
+      "method": "POST",
+      "path_template": "/rest/products/reviews",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/user/data-export",
+      "canonical_hash": "f4582ede71f1d7a20ba5ed0d2a1840ce4f5a525b970f78241292826fe953208d",
+      "method": "POST",
+      "path_template": "/rest/user/data-export",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/user/login",
+      "canonical_hash": "373dab81aede534001313189fed2d30255e4a31c5093a0d4268140c8d45c722f",
+      "method": "POST",
+      "path_template": "/rest/user/login",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/user/reset-password",
+      "canonical_hash": "cc02f785ca55fcb79d13ad7b292b59659e26f9ece9ed763602da5cae514dfd65",
+      "method": "POST",
+      "path_template": "/rest/user/reset-password",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/web3/submitKey",
+      "canonical_hash": "d91be156489805e2adf45d2b2244bd07ade5d4e0c8591a7056f284416126de6a",
+      "method": "POST",
+      "path_template": "/rest/web3/submitKey",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/web3/walletExploitAddress",
+      "canonical_hash": "f6813f7654dd49c02c796867e1a5ad33d44555a6e86ba38e610d3632d9216e6a",
+      "method": "POST",
+      "path_template": "/rest/web3/walletExploitAddress",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /rest/web3/walletNFTVerify",
+      "canonical_hash": "70443d40e275f8b174ceaa2dec4dd2e3396f39190717d447becb5226a8124151",
+      "method": "POST",
+      "path_template": "/rest/web3/walletNFTVerify",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /snippets/fixes",
+      "canonical_hash": "1879895d5a51ac66e108fec583b1df63e16950c79a1c717747de8315bdaf2ecd",
+      "method": "POST",
+      "path_template": "/snippets/fixes",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "POST /snippets/verdict",
+      "canonical_hash": "04e62772a0e93a1ec77a714cdb8614bb8874719bbe31fa89b151eb4305d3bba2",
+      "method": "POST",
+      "path_template": "/snippets/verdict",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Addresss/{id}",
+      "canonical_hash": "87d442893b4b7302cb1e7a7573bf03dfd7f490bfdcb1e16bd60164c7af35124c",
+      "method": "PUT",
+      "path_template": "/api/Addresss/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/BasketItems/{id}",
+      "canonical_hash": "ee5a75aa0a028df468f5b4e6f232410736a34b011f1b0b6283ea84e4269c2575",
+      "method": "PUT",
+      "path_template": "/api/BasketItems/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Cards/{id}",
+      "canonical_hash": "43f2ae0d5f418f057c340e5507a4215fab3b7e7eda26d1beed33e1889f5799e4",
+      "method": "PUT",
+      "path_template": "/api/Cards/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Challenges/{id}",
+      "canonical_hash": "e3c4dba7c3e1a29350869486908b24a7c87847fd9943a9bbdf58ecd811c82d2f",
+      "method": "PUT",
+      "path_template": "/api/Challenges/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Complaints/{id}",
+      "canonical_hash": "a9e5132ad652fc81b37f25047a332d2a54cf8716da3f70763de71bfd3c0c3440",
+      "method": "PUT",
+      "path_template": "/api/Complaints/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Feedbacks/{id}",
+      "canonical_hash": "eef4c1077605e944b2e5ab2306d01cce4835d84f0d9278e4f95666f511886920",
+      "method": "PUT",
+      "path_template": "/api/Feedbacks/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Hints/{id}",
+      "canonical_hash": "bbb89586f9ad6ce953e3397ebc42175c98498a21bde2e59ea5a7c3d50e8824b0",
+      "method": "PUT",
+      "path_template": "/api/Hints/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/PrivacyRequests/{id}",
+      "canonical_hash": "89092e9e5d89f11787972cdf55cd26304c87141c7eb42f05137e49ea90baaf96",
+      "method": "PUT",
+      "path_template": "/api/PrivacyRequests/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Products/{id}",
+      "canonical_hash": "a22a103cd494f2932652066d986436e82a03dd26e3442e2d574248f02f27cba9",
+      "method": "PUT",
+      "path_template": "/api/Products/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Quantitys/{id}",
+      "canonical_hash": "5f7e327e9c80abab75ea089adb315e34293029bc5bbfb4b5645888a6fb4b3f07",
+      "method": "PUT",
+      "path_template": "/api/Quantitys/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Recycles/{id}",
+      "canonical_hash": "8aadaa79bc068e92f04ab75f602b07b0828766be6c21f92995f9cce81d4f428d",
+      "method": "PUT",
+      "path_template": "/api/Recycles/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/SecurityAnswers/{id}",
+      "canonical_hash": "c7d690619c7b51a7a4da92c4bfd449e2ffd25c5abeff14149f173af8456acd11",
+      "method": "PUT",
+      "path_template": "/api/SecurityAnswers/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/SecurityQuestions/{id}",
+      "canonical_hash": "58761b1dc7a04db2c98e320db4a1f979e150798b7014ff253c115d1991b8b8c9",
+      "method": "PUT",
+      "path_template": "/api/SecurityQuestions/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /api/Users/{id}",
+      "canonical_hash": "6dd6d0e73ff14d46a1d3ccf7c09a23a2fc3aa3294efc36b7e93634362f1752e4",
+      "method": "PUT",
+      "path_template": "/api/Users/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /rest/basket/{id}/coupon/{id}",
+      "canonical_hash": "d04e4cfbda348fb0c02960825a270af19a6e95236537a45d78d3e6c6daa1b714",
+      "method": "PUT",
+      "path_template": "/rest/basket/{id}/coupon/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /rest/continue-code-findIt/apply/{id}",
+      "canonical_hash": "01bae37261ab199c53187602bbb1d219ed634ef4af19f2885a2a934c7fa76966",
+      "method": "PUT",
+      "path_template": "/rest/continue-code-findIt/apply/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /rest/continue-code-fixIt/apply/{id}",
+      "canonical_hash": "1b3d37ad6a778d676fe0103a7fb13f3c2e13291e7a50c6cd6acb385ab03368dd",
+      "method": "PUT",
+      "path_template": "/rest/continue-code-fixIt/apply/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /rest/continue-code/apply/{id}",
+      "canonical_hash": "e194801a08c1f8bdc085924241923c1649d3b656968b62335e6a27e8e15000a6",
+      "method": "PUT",
+      "path_template": "/rest/continue-code/apply/{id}",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /rest/order-history/{id}/delivery-status",
+      "canonical_hash": "183ae6eec7e281da6906d949931c014ea21bb358af9bfe2c9bff9e8be92152d4",
+      "method": "PUT",
+      "path_template": "/rest/order-history/{id}/delivery-status",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /rest/products/{id}/reviews",
+      "canonical_hash": "708ea8d8b4c3ff11c89528cc55533eb8121170b71a9cb7e70cbeaaadd8c0e2a5",
+      "method": "PUT",
+      "path_template": "/rest/products/{id}/reviews",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    },
+    {
+      "canonical_key": "PUT /rest/wallet/balance",
+      "canonical_hash": "0063a421be8f77039fb8ab43ff91d982e50d759f7503d3b50585ace5389d4906",
+      "method": "PUT",
+      "path_template": "/rest/wallet/balance",
+      "kind": "server_endpoint",
+      "origin": "server.ts",
+      "reachable": null
+    }
+  ]
+}

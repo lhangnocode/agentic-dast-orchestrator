@@ -39,6 +39,13 @@ def test_rule1_crawler_trap_filtering():
     assert is_crawler_trap_or_junk("javascript:void(0)")[0] is True
     assert is_crawler_trap_or_junk("http://localhost:3000/juice-shop/build/routes/fileServer.js:53:13")[0] is True
     assert is_crawler_trap_or_junk("http://localhost:3000/ftp/legal.md")[0] is False
+    # Artefacts seen in live Juice Shop runs (Wapiti headless / Client Spider on sitemap.xml)
+    assert is_crawler_trap_or_junk("http://localhost:3000/sitemap.xml#/about")[1] == "client_route_on_file"
+    assert is_crawler_trap_or_junk("http://localhost:3000/sitemap.xml/socket.io?EIO=4")[1] == "path_nested_under_file"
+    assert is_crawler_trap_or_junk("http://localhost:3000/sitemap.xml?email=a&password=b")[1] == "query_on_static_document"
+    assert is_crawler_trap_or_junk("http://localhost:3000/sitemap.xml")[0] is False
+    assert is_crawler_trap_or_junk("http://localhost:3000/rest/data.json?page=2")[0] is False   # JSON APIs keep params
+    assert is_crawler_trap_or_junk("http://localhost:3000/#/about")[0] is False
     # Target-specific junk only applies when the profile declares it
     assert is_crawler_trap_or_junk("http://localhost/webSiteRootURL/api")[0] is False
     assert is_crawler_trap_or_junk("http://localhost/webSiteRootURL/api", AVIDEO_LIKE_PROFILE)[0] is True
@@ -52,6 +59,9 @@ def test_rule3_generic_path_generalization():
     assert generalize_path("/rest/basket/undefined") == "/rest/basket/{id}"
     assert generalize_path("/files/d41d8cd98f00b204e9800998ecf8427e") == "/files/{hash}"
     assert generalize_path("/users/:userId") == "/users/{id}"
+    assert generalize_path("/t/a8Fk29dLqP0zXv7RtY2bNc4M") == "/t/{token}"                 # random token
+    assert generalize_path("/score/dynamic-content/03-intersection-observer") == \
+        "/score/dynamic-content/03-intersection-observer"                                 # readable slug
     assert generalize_path("//admin//") == "/admin"
     assert generalize_path("/channel/admin") == "/channel/admin"  # no site rule by default
 

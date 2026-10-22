@@ -33,6 +33,11 @@ storage/*.db
 output/temp/
 output/logs/
 output/experiments/
+output/zap/
+output/benchmarks/
+output/prompts/
+output/*.out
+output/cloudflared.log
 .pytest_cache/
 .coverage
 htmlcov/

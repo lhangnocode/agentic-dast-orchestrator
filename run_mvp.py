@@ -64,7 +64,7 @@ def run_baseline(config: dict, tools: list, baseline_name: str) -> dict:
 
 
 BASELINES = {
-    "zap-only": (["zap_traditional_spider", "zap_ajax_spider"], "zap_standalone"),
+    "zap-only": (["zap_traditional_spider", "zap_client_spider"], "zap_standalone"),
     "wapiti-only": (["wapiti_form_crawl"], "wapiti_standalone"),
     "firecrawl-only": (["firecrawl_navigate"], "firecrawl_standalone"),
 }

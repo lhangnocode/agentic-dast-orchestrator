@@ -25,25 +25,37 @@
     },
     "cookies": {
       "token": "${AUTH_TOKEN}"
+    },
+    "browser_login": {
+      "enabled": true,
+      "login_page_url": "http://localhost:3000/#/login",
+      "username": "${AUTH_USER}",
+      "password": "${AUTH_PASSWORD}",
+      "login_page_wait_sec": 5,
+      "browser_id": "firefox-headless",
+      "context_name": "dast-orchestrator",
+      "user_name": "crawler"
     }
   },
   "orchestrator": {
-    "max_iterations": 8,
-    "max_request_budget": 1500,
-    "marginal_gain_threshold": 0.03,
-    "early_stop_patience": 2,
-    "max_runs_per_tool": 3,
-    "seed_limit": null,
-    "max_llm_token_budget": 200000,
-    "compactor_max_endpoints": 60,
-    "bootstrap": {
-      "tools": [
+    "max_iterations": 30,
+    "parallel": true,
+    "stages": [
+      [
         "zap_traditional_spider",
-        "zap_ajax_spider",
+        "zap_client_spider",
         "wapiti_form_crawl"
       ],
-      "parallel": true,
-      "exchange_round": true
+      [
+        "firecrawl_navigate"
+      ]
+    ],
+    "rules": {
+      "browser_spider": "zap_client_spider",
+      "max_retries": 1,
+      "max_runs_per_tool": 10,
+      "disabled_rules": [],
+      "spa_html_page_max": 3
     }
   },
   "normalization": {
@@ -84,6 +96,26 @@
         "click_elems_once": true,
         "random_inputs": true,
         "max_seeds": null
+      },
+      "client_spider": {
+        "browser_id": "firefox-headless",
+        "number_of_browsers": 2,
+        "max_depth": 0,
+        "max_children": 0,
+        "max_duration_min": 0,
+        "initial_load_time_sec": 0,
+        "page_load_time_sec": 0,
+        "action_wait_time_sec": 0,
+        "shutdown_time_sec": 5,
+        "scope_check": "Flexible",
+        "logout_avoidance": true,
+        "max_seeds": null,
+        "per_seed_max_duration_min": null
+      },
+      "client_map_export": {
+        "container_dir": "/zap/wrk",
+        "host_dir": "output/zap",
+        "file_name": "client_map.yaml"
       }
     },
     "wapiti": {
@@ -106,11 +138,23 @@
       "enabled": true,
       "api_url": "https://api.firecrawl.dev/v2",
       "model": "spark-2",
-      "max_seeds": 5,
       "auth_instructions": "Before exploring, open the login page (/#/login) and sign in with email ${AUTH_USER} and password ${AUTH_PASSWORD}. Stay logged in for the whole session and never click logout.",
       "fallback_routes_file": null,
       "poll_timeout_seconds": 600,
-      "poll_interval_seconds": 10
+      "poll_interval_seconds": 10,
+      "prompt_template": "configs/prompts/firecrawl_agent.md",
+      "context_file": "configs/contexts/juice-shop.md",
+      "prompts_dir": "output/prompts",
+      "known_routes_max_chars": 4000,
+      "batch_size": 10,
+      "max_seeds": null,
+      "max_credits": null,
+      "effort": null
+    },
+    "http_probe": {
+      "enabled": true,
+      "timeout_sec": 10,
+      "max_workers": 8
     }
   },
   "storage": {
@@ -121,6 +165,7 @@
   },
   "logging": {
     "log_level": "INFO",
-    "log_file": "output/logs/orchestrator.log"
+    "log_file": "output/logs/orchestrator.log",
+    "run_events_file": "output/logs/run_events.jsonl"
   }
 }

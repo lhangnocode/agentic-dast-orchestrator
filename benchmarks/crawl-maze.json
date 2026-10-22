@@ -1,0 +1,9 @@
+{
+  "service": "crawl-maze",
+  "ground_truth": "evaluation/ground_truth/crawl-maze.json",
+  "config": {
+    "target": {"base_url": "http://localhost:8090/"},
+    "auth": {"enabled": false},
+    "tools": {"firecrawl": {"context_file": "configs/contexts/crawl-maze.md", "auth_instructions": ""}}
+  }
+}

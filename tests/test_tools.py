@@ -1,6 +1,6 @@
 import json
 
-from tools.firecrawl_client import FirecrawlClient, build_agent_prompt
+from tools.firecrawl_client import FirecrawlClient
 from tools.registry import ToolRegistry
 from tools.wapiti_wrapper import WapitiWrapper
 from tools.zap_wrapper import ZapWrapper
@@ -29,12 +29,6 @@ def test_firecrawl_fallback_file_replay(tmp_path):
     results = client.run_agent_discovery(["http://localhost:3000/"])
     assert results == [{"url": "http://localhost:3000/#/about", "method": "GET",
                         "source": "firecrawl_navigate", "status_code": 0}]
-
-
-def test_firecrawl_prompt_is_generic_and_targeted():
-    prompt = build_agent_prompt(["http://localhost/admin"], focus="open the settings menu")
-    assert "http://localhost/admin" in prompt and "open the settings menu" in prompt
-    assert "password" not in prompt.lower()
 
 
 def test_zap_wrapper_unreachable_safe():
@@ -73,7 +67,7 @@ def test_registry_respects_disabled_tools(tmp_path):
         },
     }
     registry = ToolRegistry.from_config(config)
-    assert registry.available_tools() == []
+    assert registry.available_tools() == ["http_probe"]  # the probe needs no external service
     assert "wapiti_form_crawl" in registry.disabled
 
 

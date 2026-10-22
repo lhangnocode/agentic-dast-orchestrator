@@ -15,6 +15,11 @@ STATIC_EXTENSIONS = {
     ".ogg", ".wav", ".map", ".swf", ".webp", ".avif", ".bmp"
 }
 
+# Static documents that are files, not pages: an SPA route, child path or form query on them
+# is a crawler artefact (e.g. a headless browser left on /sitemap.xml then followed in-app links)
+STATIC_DOCUMENT_EXTENSIONS = {".xml", ".txt", ".md", ".pdf", ".csv", ".yml", ".yaml", ".log", ".bak",
+                              ".kdbx", ".pyc", ".gg", ".zip", ".gz"}
+
 # HTML tags erroneously extracted as links by regex-based crawlers
 JUNK_TAGS = {
     "a", "b", "p", "h1", "h2", "h3", "h4", "h5", "h6",

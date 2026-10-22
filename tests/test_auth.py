@@ -77,3 +77,75 @@ def test_zap_auth_headers_include_cookie():
     zap.set_auth({"Authorization": "Bearer jwt"}, {"token": "jwt", "lang": "en"})
     assert zap.auth_headers == {"Authorization": "Bearer jwt", "Cookie": "token=jwt; lang=en"}
     assert AuthContext(cookies={"a": "1"}).cookie_header() == "a=1"
+
+
+class _AuthFakeZap:
+    """zapv2 stand-in for browser-login setup; `accepted` decides what the login traffic looks like."""
+
+    def __init__(self, accepted):
+        self.calls = []
+        status = "200 OK" if accepted else "401 Unauthorized"
+        outer = self
+
+        class Ns:
+            def __init__(self, name, returns=None):
+                self.name, self.returns = name, returns or {}
+
+            def __getattr__(self, attr):
+                def call(*a, **k):
+                    outer.calls.append((f"{self.name}.{attr}", a))
+                    return self.returns.get(attr, "1")
+                return call
+
+        self.context = Ns("context", {"new_context": "1"})
+        self.context.context_list = []
+        self.authentication = Ns("authentication")
+        self.sessionManagement = Ns("sessionManagement")
+        self.users = Ns("users", {"new_user": "7"})
+
+        class Core:
+            def number_of_messages(self, baseurl=None):
+                return 0
+
+            def messages(self, baseurl, start, count):
+                return [{"requestHeader": "POST http://host.docker.internal:3000/rest/user/login HTTP/1.1",
+                         "responseHeader": f"HTTP/1.1 {status}"}]
+        self.core = Core()
+
+
+def _zap_with(fake):
+    zap = ZapWrapper(target_base="http://localhost:3000/", target_host_alias="host.docker.internal")
+    zap._client = fake
+    return zap
+
+
+def test_browser_login_success_sets_crawl_user():
+    fake = _AuthFakeZap(accepted=True)
+    zap = _zap_with(fake)
+    assert zap.setup_browser_login("http://localhost:3000/#/login", "u@example.test", "pw") is True
+    assert zap.client_spider_user == ("dast-orchestrator", "crawler")
+    method = next(a for name, a in fake.calls if name == "authentication.set_authentication_method")
+    assert method[1] == "browserBasedAuthentication"
+    assert "loginPageUrl=http%3A%2F%2Fhost.docker.internal%3A3000%2F%23%2Flogin" in method[2]
+    assert ("sessionManagement.set_session_management_method", ("1", "autoDetectSessionManagement")) in fake.calls
+
+
+def test_browser_login_failure_keeps_header_fallback():
+    fake = _AuthFakeZap(accepted=False)
+    zap = _zap_with(fake)
+    assert zap.setup_browser_login("http://localhost:3000/#/login", "u@example.test", "bad") is False
+    assert zap.client_spider_user is None
+    assert any(name == "context.remove_context" for name, _ in fake.calls)
+
+
+def test_browser_login_settings_from_config(monkeypatch):
+    from tools.registry import _browser_login_settings
+    monkeypatch.setenv("AUTH_USER", "u@example.test")
+    monkeypatch.setenv("AUTH_PASSWORD", "pw")
+    cfg = {"auth": {"enabled": True, "browser_login": {"enabled": True,
+                                                        "login_page_url": "http://localhost:3000/#/login"}}}
+    s = _browser_login_settings(cfg)
+    assert s["username"] == "u@example.test" and s["password"] == "pw"
+    monkeypatch.delenv("AUTH_USER")
+    assert _browser_login_settings(cfg) is None                     # unresolved -> no browser login
+    assert _browser_login_settings({"auth": {"enabled": False}}) is None

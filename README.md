@@ -4,7 +4,7 @@
 
 ## 1. Overview & Architecture
 
-The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framework designed to address the coverage vs. redundancy dilemma in modern web security testing. Rather than executing crawlers in isolated silos or static pipelines, this architecture pairs a **Local Deterministic State Machine** with a **Cloud Cognitive Decision Layer** (Alibaba Cloud Model Studio / Qwen):
+The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framework designed to address the coverage vs. redundancy dilemma in modern web security testing. Rather than executing crawlers in isolated silos or static pipelines, this architecture runs a **local deterministic state machine**: fixed stages, then rules that select the next crawler from observed crawl state (no LLM in tool selection):
 
 ```text
                         ┌────────────────────────┐
@@ -35,23 +35,17 @@ The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framewo
                                     │
                                     ▼
                       ┌───────────────────────────┐
-                      │ Context Compactor (<1k tok│
-                      └─────────────┬─────────────┘
-                                    │
-                                    ▼
-                      ┌───────────────────────────┐
-                      │ Alibaba Cloud / Qwen-Plus │
+                      │ Deterministic tool policy │ (observed signals → next tool)
                       └───────────────────────────┘
 ```
 
 ### Key Capabilities
-- **Strategy 2 – classic crawlers first**: a deterministic bootstrap with no LLM. In round 1, ZAP (Traditional + Ajax Spider) and Wapiti crawl from the base URL. In round 2 (exchange), each engine is re-seeded with ALL URLs the other engine found, with no seed limit. The orchestrator then picks the next tool from the surface they mapped.
-- **Semantic UI Pathfinder (Firecrawl Cloud)**: a targeted, expensive tool. It only runs on what the classic crawlers could not open (auth walls/redirects, JS-only menus).
-- **High-Speed Link Spider (OWASP ZAP)**: Crawls traditional anchor structures and handles dynamic JavaScript DOM events with Ajax Spider.
-- **Parameter & Form Specialist (Wapiti)**: Extracts complex multi-field forms and parameter mutations strictly in crawl-only mode (`-m ""`).
-- **Cognitive Decision Layer (Qwen-Plus)**: Evaluates marginal gains ($MG$), state saturation, and dynamically steers seed frontiers to the optimal tool.
-- **Strict Normalization (Rules 1–3)**: Filters traps/wildcards, deduplicates multi-source HTTP messages, and clusters endpoints into canonical path templates (`SHA256(Method + Path_Template + Query_Keys)`).
-- **Independent Benchmark Evaluator**: Evaluates Recall ($R_{EP}$), Precision ($P_{EP}$), $F_1$, and Request Efficiency ($E_{REQ}$) against an independent ground truth.
+- **Staged pipeline + deterministic rules (no LLM)**: stage 1 runs ZAP traditional spider → ZAP Client Spider in parallel with Wapiti; stage 2 runs Firecrawl on everything stage 1 found; afterwards a rule engine (`orchestrator/rules.py`) re-runs a tool whenever its unvisited frontier changed, retries failed runs, probes unknown statuses, and stops at saturation. See `docs/tool-capabilities.md`.
+- **SPA routes via the ZAP Client Spider**: the Client Map export (parsed robustly, ZAP can emit invalid YAML) yields `#/` routes that HTTP-level crawlers never see; ZAP browser-based login lets it crawl logged-in views.
+- **Firecrawl prompt templates**: `configs/prompts/firecrawl_agent.md` + per-target context (`configs/contexts/<target>.md`) + a summary of what is already known; safety rules are enforced by code.
+- **Parameter & Form Specialist (Wapiti)**: forms and parameters, crawl-only (`-m ""`), headless for SPAs.
+- **Strict Normalization**: junk/trap filtering, multi-source dedup, canonical templates (`SHA256(Method + Path_Template + Query_Keys)`), SPA hash routes as `GET #/route`.
+- **Benchmarks**: pinned Juice Shop, Crawlground and Security Crawl Maze with ground truth built from source, repeated isolated runs, recall per kind with 95% CIs (`docs/benchmarks.md`).
 
 ---
 
@@ -59,37 +53,41 @@ The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framewo
 
 ```text
 agentic-dast-orchestrator/
+├── benchmarks/                  # docker-compose (pinned targets) + per-benchmark profiles
 ├── configs/
-│   └── app_config.json          # Target, auth, normalization rules, tool options and budgets
+│   ├── app_config.json          # Target, auth, stages/rules, normalization, tool options
+│   ├── contexts/                # Per-target application context for Firecrawl prompts
+│   └── prompts/firecrawl_agent.md  # Firecrawl prompt template
+├── docs/                        # tool-capabilities.md (rule derivation), benchmarks.md (protocol)
 ├── evaluation/
-│   ├── benchmark_runner.py      # Experiment comparative evaluation runner
-│   └── metrics.py               # Recall, Precision, F1, Request Efficiency metrics
-├── ground_truth/
-│   └── avideo_routes.json       # 112 canonical verified AVideo attack surfaces
-├── llm/
-│   └── qwen_client.py           # DashScope OpenAI-compatible client (returns None on failure)
-├── normalization/
-│   ├── normalizer.py            # Rules 1-4 + NormalizationProfile (target-specific rules come from config)
-│   └── patterns.py              # Generic junk/trap regexes and dynamic-segment patterns
+│   ├── ground_truth.py          # Ground-truth builders (pinned sources)
+│   ├── ground_truth/            # Generated ground-truth files
+│   ├── crawl_metrics.py         # Run metrics + aggregation (mean, SD, 95% CI)
+│   ├── run_benchmark.py         # Repeated, isolated benchmark runs
+│   ├── benchmark_runner.py      # Legacy AVideo evaluator
+│   └── metrics.py               # Legacy recall/precision helpers
+├── normalization/               # Normalizer + generic patterns
 ├── orchestrator/
-│   ├── compactor.py             # YAML state abstract builder (<1,000 tokens)
-│   ├── decision_schema.py       # Pydantic schemas for structured LLM decisions
-│   ├── loop.py                  # Bootstrap (ZAP+Wapiti) then adaptive rounds state machine
-│   ├── policy.py                # Deterministic fallback policy + generic SPA/auth-wall detection
-│   └── safety_firewall.py       # SSRF prevention and seed whitelist sanitization
-├── storage/
-│   └── state_store.py           # Relational SQLite state store (Endpoints, Matrix, History)
+│   ├── auth.py                  # Login + header/cookie distribution
+│   ├── loop.py                  # Stages, rule rounds, ingest, export
+│   ├── rules.py                 # Snapshot + rule engine (R1–R7)
+│   ├── run_log.py               # JSONL run events
+│   ├── policy.py                # Surface signals (SPA likelihood) for logging
+│   ├── decision_schema.py       # Tool names
+│   └── safety_firewall.py       # Scope / logout / SSRF filtering of seeds
+├── storage/state_store.py       # SQLite: endpoints, provenance, coverage matrix, history
 ├── tools/
-│   ├── firecrawl_client.py      # Firecrawl /v2/agent wrapper (targeted seeds, generic prompt)
-│   ├── registry.py              # Builds tools from config, availability checks, uniform run()
-│   ├── wapiti_wrapper.py        # Wapiti crawl-only CLI & SQLite extractor
-│   └── zap_wrapper.py           # ZAPv2 Traditional & Ajax Spider API wrapper
-├── tests/                       # Complete unit and integration test suite
-├── docker-compose.yml           # Containerized ZAP and Orchestrator
-├── Dockerfile                   # Orchestrator container image
-├── Makefile                     # Make targets for development and execution
-├── requirements.txt             # Lightweight Python dependencies
-└── run_mvp.py                   # Top-level CLI entrypoint
+│   ├── zap_wrapper.py           # ZAP traditional / Client / AJAX spiders, browser login
+│   ├── client_map.py            # Client Map export parser
+│   ├── wapiti_wrapper.py        # Wapiti crawl-only
+│   ├── firecrawl_client.py      # Firecrawl Agent (batched jobs)
+│   ├── firecrawl_prompt.py      # Prompt rendering, limits, safety section
+│   ├── http_probe.py            # Status/content-type probe
+│   └── registry.py              # Builds tools from config, uniform run()
+├── tests/                       # Unit + end-to-end tests (fake tools)
+├── docker-compose.yml           # ZAP daemon (+ orchestrator image)
+├── Makefile
+└── run_mvp.py                   # CLI entrypoint
 ```
 
 ---
@@ -110,7 +108,6 @@ agentic-dast-orchestrator/
    ```bash
    cp .env.example .env
    ```
-   - `DASHSCOPE_API_KEY`: Your Alibaba Cloud Model Studio API key.
    - `FIRECRAWL_API_KEY`: Your Firecrawl Cloud API key (optional; without it Firecrawl is simply skipped. For a localhost target it also needs `PUBLIC_TUNNEL_URL`).
    - `ZAP_API_URL`: `http://127.0.0.1:18080`.
 
@@ -141,10 +138,10 @@ agentic-dast-orchestrator/
 The `run_mvp.py` CLI supports both the full adaptive orchestrator and isolated baseline scans for empirical comparison:
 
 ```bash
-# 1. Full Adaptive Orchestration (Qwen + Firecrawl + ZAP + Wapiti)
+# 1. Full Adaptive Orchestration (ZAP + Wapiti + Firecrawl, deterministic tool selection)
 python3 run_mvp.py --mode adaptive --max-iter 6
 
-# 2. Standalone ZAP Baseline (Traditional + Ajax Spider)
+# 2. Standalone ZAP Baseline (Traditional + Client Spider)
 python3 run_mvp.py --mode zap-only
 
 # 3. Standalone Wapiti Baseline (Crawl-only -m "")

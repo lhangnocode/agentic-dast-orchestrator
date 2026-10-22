@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional
 
 from orchestrator.auth import AuthContext, expand_placeholders, prepare_auth
 from tools.firecrawl_client import FirecrawlClient
+from tools.http_probe import HttpProbe
 from tools.wapiti_wrapper import WapitiWrapper
 from tools.zap_wrapper import ZapWrapper
 
@@ -22,9 +23,11 @@ logger = logging.getLogger("orchestrator.tools")
 
 ZAP_TRADITIONAL = "zap_traditional_spider"
 ZAP_AJAX = "zap_ajax_spider"
+ZAP_CLIENT = "zap_client_spider"
 WAPITI = "wapiti_form_crawl"
 FIRECRAWL = "firecrawl_navigate"
-ALL_TOOLS = (ZAP_TRADITIONAL, ZAP_AJAX, WAPITI, FIRECRAWL)
+HTTP_PROBE = "http_probe"
+ALL_TOOLS = (ZAP_TRADITIONAL, ZAP_AJAX, ZAP_CLIENT, WAPITI, FIRECRAWL, HTTP_PROBE)
 
 
 @dataclass
@@ -34,6 +37,7 @@ class ToolRun:
     results: List[Dict[str, Any]] = field(default_factory=list)
     requests_sent: int = 0
     duration_seconds: float = 0.0
+    status: str = "ok"  # ok | failed | timeout
     error: Optional[str] = None
 
 
@@ -46,12 +50,39 @@ def _resolve_binary(binary: str) -> Optional[str]:
     return str(candidate) if candidate.is_file() and os.access(candidate, os.X_OK) else None
 
 
+def _browser_login_settings(config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """ZAP browser-based login settings from auth.browser_login, with ${VAR} credentials resolved."""
+    auth_cfg = config.get("auth", {})
+    b = auth_cfg.get("browser_login", {})
+    if not auth_cfg.get("enabled") or not b.get("enabled") or not b.get("login_page_url"):
+        return None
+    username = expand_placeholders(b.get("username", "${AUTH_USER}"))
+    password = expand_placeholders(b.get("password", "${AUTH_PASSWORD}"))
+    if "${" in username + password or not username:
+        logger.warning("[TOOLS] auth.browser_login: credentials unresolved (set AUTH_USER/AUTH_PASSWORD); "
+                       "ZAP will use header/cookie injection only.")
+        return None
+    settings = {
+        "login_page_url": b["login_page_url"],
+        "username": username,
+        "password": password,
+        "context_name": b.get("context_name", "dast-orchestrator"),
+        "user_name": b.get("user_name", "crawler"),
+        "login_page_wait_sec": b.get("login_page_wait_sec", 5),
+        "browser_id": b.get("browser_id", "firefox-headless"),
+    }
+    if b.get("step_delay_sec"):
+        settings["step_delay_sec"] = b["step_delay_sec"]
+    return settings
+
+
 class ToolRegistry:
     def __init__(self, zap: ZapWrapper, wapiti: WapitiWrapper, firecrawl: FirecrawlClient,
-                 disabled: Optional[List[str]] = None):
+                 disabled: Optional[List[str]] = None, probe: Optional[HttpProbe] = None):
         self.zap = zap
         self.wapiti = wapiti
         self.firecrawl = firecrawl
+        self.probe = probe or HttpProbe()
         self.disabled = set(disabled or [])
 
     @classmethod
@@ -75,8 +106,11 @@ class ToolRegistry:
             target_host_alias=zap_cfg.get("target_host_alias", ""),
             spider_options=zap_cfg.get("spider"),
             ajax_options=zap_cfg.get("ajax_spider"),
+            client_options=zap_cfg.get("client_spider"),
+            client_map_export=zap_cfg.get("client_map_export"),
         )
         zap.set_auth(auth.headers, auth.cookies)
+        zap.browser_login = _browser_login_settings(config)
 
         w = tools_cfg.get("wapiti", {})
 
@@ -114,19 +148,31 @@ class ToolRegistry:
             public_tunnel_url=tunnel,
             target_base=base_url,
             auth_instructions=expand_placeholders(f.get("auth_instructions", "")),
-            max_seeds=f.get("max_seeds", 5),
+            max_seeds=f.get("max_seeds"),
             fallback_routes_file=f.get("fallback_routes_file"),
+            prompt_template_file=f.get("prompt_template", "configs/prompts/firecrawl_agent.md"),
+            context_file=f.get("context_file"),
+            prompts_dir=f.get("prompts_dir", "output/prompts"),
+            known_routes_max_chars=f.get("known_routes_max_chars", 4000),
+            batch_size=f.get("batch_size", 10),
+            max_credits=f.get("max_credits"),
+            effort=f.get("effort"),
         )
-        disabled = [t for t, cfg in (("zap", zap_cfg), ("wapiti", w), ("firecrawl", f)) if cfg.get("enabled") is False]
+        p = tools_cfg.get("http_probe", {})
+        probe = HttpProbe(headers=auth.headers, cookies=auth.cookies, timeout_sec=p.get("timeout_sec", 10),
+                          max_workers=p.get("max_workers", 8))
+
+        disabled = [t for t, cfg in (("zap", zap_cfg), ("wapiti", w), ("firecrawl", f), ("http", p))
+                    if cfg.get("enabled") is False]
         disabled_tools = [tool for tool in ALL_TOOLS if tool.split("_")[0] in disabled]
-        return cls(zap, wapiti, firecrawl, disabled=disabled_tools)
+        return cls(zap, wapiti, firecrawl, disabled=disabled_tools, probe=probe)
 
     def available_tools(self) -> List[str]:
         """Tools that are enabled and can actually run right now."""
         available = []
         zap_up = self.zap.is_alive()
         if zap_up:
-            available += [ZAP_TRADITIONAL, ZAP_AJAX]
+            available += [ZAP_TRADITIONAL, ZAP_AJAX, ZAP_CLIENT]
         else:
             logger.warning("[TOOLS] ZAP daemon unreachable: ZAP spiders unavailable (run `make up`).")
         if _resolve_binary(self.wapiti.binary_path):
@@ -135,6 +181,7 @@ class ToolRegistry:
             logger.warning(f"[TOOLS] Wapiti binary '{self.wapiti.binary_path}' not found: Wapiti unavailable.")
         if self.firecrawl.is_available():
             available.append(FIRECRAWL)
+        available.append(HTTP_PROBE)  # plain requests, always runnable
         return [t for t in available if t not in self.disabled]
 
     def run(self, tool: str, seeds: List[str], base_url: str, focus: str = "") -> ToolRun:
@@ -144,19 +191,28 @@ class ToolRegistry:
         try:
             if tool == ZAP_TRADITIONAL:
                 run.results = self.zap.run_traditional_spider(seeds)
-                run.requests_sent = self.zap.last_request_count
+                run.requests_sent, run.status = self.zap.last_request_count, self.zap.last_status
             elif tool == ZAP_AJAX:
                 run.results = self.zap.run_ajax_spider(seeds)
-                run.requests_sent = self.zap.last_request_count
+                run.requests_sent, run.status = self.zap.last_request_count, self.zap.last_status
+            elif tool == ZAP_CLIENT:
+                run.results = self.zap.run_client_spider(seeds)
+                run.requests_sent, run.status = self.zap.last_request_count, self.zap.last_status
             elif tool == WAPITI:
                 run.results = self.wapiti.run_crawl_only(base_url=base_url, seeds=seeds)
-                run.requests_sent = self.wapiti.last_request_count
+                run.requests_sent, run.status = self.wapiti.last_request_count, self.wapiti.last_status
+            elif tool == HTTP_PROBE:
+                run.results = self.probe.run(seeds)
+                run.requests_sent, run.status = self.probe.last_request_count, self.probe.last_status
             elif tool == FIRECRAWL:
                 run.results = self.firecrawl.run_agent_discovery(seeds=seeds, focus=focus)
+                run.status = self.firecrawl.last_status
             else:
                 run.error = f"unknown tool {tool}"
         except Exception as e:
             logger.error(f"[TOOLS] {tool} failed: {e}")
             run.error = str(e)
+        if run.error:
+            run.status = "failed"
         run.duration_seconds = time.time() - start
         return run

@@ -61,6 +61,7 @@ class WapitiWrapper:
         self.headers = dict(headers or {})
         self.cookies = dict(cookies or {})
         self.last_request_count = 0
+        self.last_status = "ok"  # ok | failed | timeout
 
         self.session_db_path.parent.mkdir(parents=True, exist_ok=True)
         self.report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -77,6 +78,7 @@ class WapitiWrapper:
         Executes Wapiti crawl-only mode using subprocess (without shell=True).
         Extracts discovered HTTP endpoints and form structures from SQLite session DB.
         """
+        self.last_status = "ok"
         if flush_session and self.session_db_path.exists():
             try:
                 if self.session_db_path.is_dir():
@@ -151,8 +153,10 @@ class WapitiWrapper:
             if res.returncode != 0:
                 logger.warning(f"[WAPITI] Returned code {res.returncode}: {res.stderr[:200]}")
         except subprocess.TimeoutExpired:
+            self.last_status = "timeout"
             logger.warning("[WAPITI] Execution exceeded max_scan_time timeout.")
         except Exception as e:
+            self.last_status = "failed"
             logger.error(f"[WAPITI] Subprocess invocation failed: {e}")
 
         return self.extract_endpoints_from_db()

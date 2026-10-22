@@ -1,8 +1,6 @@
-# Core Agent & LLM Client (Alibaba Cloud Model Studio / DashScope via OpenAI-compatible API)
-openai>=1.40.0
+# Core
 pydantic>=2.7.0
 python-dotenv>=1.0.0
-pyyaml>=6.0.0
 
 # DAST Tools & Automation
 zaproxy>=0.5.0

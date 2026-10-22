@@ -1,0 +1,23 @@
+# Benchmark targets at pinned versions (see evaluation/ground_truth.py for the matching ground truth).
+# Start:  docker compose -f benchmarks/docker-compose.yml up -d --build
+# The runner (python -m evaluation.run_benchmark) restarts a service before every run.
+services:
+  juice-shop:
+    image: bkimminich/juice-shop:v20.1.1
+    container_name: bench_juice_shop
+    ports:
+      - "3000:3000"
+
+  crawlground:
+    # zaproxy/crawlground @ 2026-09-30
+    build: https://github.com/zaproxy/crawlground.git#7c7ba5931345bb8bd3a7cc2d5187f156ec0db512
+    container_name: bench_crawlground
+    ports:
+      - "3456:3456"
+
+  crawl-maze:
+    # google/security-crawl-maze @ 2026-03-26 (the image builds the Angular/Polymer/React cases)
+    build: https://github.com/google/security-crawl-maze.git#2a0dd0a75e39925ded887bcd25016e8b3ce0f2b3
+    container_name: bench_crawl_maze
+    ports:
+      - "8090:8080"

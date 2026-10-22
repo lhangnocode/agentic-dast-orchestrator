@@ -1,4 +1,4 @@
-.PHONY: test run evaluate zap-only wapiti-only firecrawl-only up down clean
+.PHONY: test run evaluate zap-only wapiti-only firecrawl-only up down clean bench-up bench-down bench-gt bench
 
 PYTHONPATH := .
 VENV_PYTHON := .venv/bin/python3
@@ -23,6 +23,7 @@ evaluate:
 	PYTHONPATH=$(PYTHONPATH) $(VENV_PYTHON) evaluation/benchmark_runner.py --input output/normalized_endpoints.json
 
 up:
+	mkdir -p output/zap
 	docker compose up -d zap
 
 down:
@@ -31,3 +32,20 @@ down:
 clean:
 	rm -rf output/temp output/logs storage/*.db .pytest_cache
 	find . -type d -name "__pycache__" -exec rm -rf {} +
+
+# Benchmarks (docs/benchmarks.md). Example: make bench BENCH=juice-shop RUNS=5 LABEL=client-spider
+BENCH ?= juice-shop
+RUNS ?= 5
+LABEL ?= default
+
+bench-up:
+	docker compose -f benchmarks/docker-compose.yml up -d --build
+
+bench-down:
+	docker compose -f benchmarks/docker-compose.yml down
+
+bench-gt:
+	PYTHONPATH=$(PYTHONPATH) $(VENV_PYTHON) -m evaluation.ground_truth $(BENCH)
+
+bench:
+	PYTHONPATH=$(PYTHONPATH) $(VENV_PYTHON) -m evaluation.run_benchmark --benchmark $(BENCH) --runs $(RUNS) --label $(LABEL)

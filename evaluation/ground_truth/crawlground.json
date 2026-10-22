@@ -1,0 +1,597 @@
+{
+  "benchmark": "crawlground",
+  "version": "7c7ba5931345bb8bd3a7cc2d5187f156ec0db512",
+  "base_url": "http://localhost:3456/",
+  "entries": [
+    {
+      "canonical_key": "GET /score/buttons/01-html-button",
+      "canonical_hash": "d74da400946efe0975bde780a362acd9306c7591217a34758e5d6271d31c4d9d",
+      "method": "GET",
+      "path_template": "/score/buttons/01-html-button",
+      "kind": "marker",
+      "origin": "tests/buttons/01-html-button.js",
+      "category": "buttons",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/buttons/02-div-onclick",
+      "canonical_hash": "a4fbcde842242508d4857af704b4aba48f5c57ef7c7c5e482b94f474b30fc1e2",
+      "method": "GET",
+      "path_template": "/score/buttons/02-div-onclick",
+      "kind": "marker",
+      "origin": "tests/buttons/02-div-onclick.js",
+      "category": "buttons",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/01-fetch-injected",
+      "canonical_hash": "13e27bd23b316e37c800c14510c36423be96dc7c8720a4fe72f6f20d05269591",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/01-fetch-injected",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/01-fetch-injected.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/02-fetch-injected",
+      "canonical_hash": "89c33d1f7fdf7789fef27d9019e361a647081eac418f34b775235c47c7db95bc",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/02-fetch-injected",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/02-fetch-injected.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/03-intersection-observer",
+      "canonical_hash": "c72a902875ea950943b718904a96d38ce9f21f64eee293daea0c2db2d88c2a52",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/03-intersection-observer",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/03-intersection-observer.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/04-details-toggle",
+      "canonical_hash": "e0ffbd04ceca94b41d79ff05368819c782a7d86bff992a692dc9fe648916006a",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/04-details-toggle",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/04-details-toggle.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/05-sse-injected",
+      "canonical_hash": "368a44544b16161779a80e5d51ad14e0cdb0ab082dbca0187d63797d4c114b6d",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/05-sse-injected",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/05-sse-injected.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/06-websocket-injected",
+      "canonical_hash": "8c6c6572299a5ce5eb8f239c833e4a08d75b03a5235948c79fb4f1770001f2c9",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/06-websocket-injected",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/06-websocket-injected.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/07-load-more",
+      "canonical_hash": "9c6dbde69208543d47baa693af90372d0d743a45f462bfd5f33fd1bee1992601",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/07-load-more",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/07-load-more.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/08-template-element",
+      "canonical_hash": "767fc8116f283c39a84edd4dd3d80f10d529eee8c52217a8cded71baac3abf45",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/08-template-element",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/08-template-element.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/09-infinite-scroll",
+      "canonical_hash": "31b95b4f92ece3cbe733be10e3e73cfe969790ba03d940013180519c2fab4ec1",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/09-infinite-scroll",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/09-infinite-scroll.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/dynamic-content/10-localstorage",
+      "canonical_hash": "b47453bbb6c7d48014f6c96b3f9dfc6b80872137408ab6cba77252884058ef43",
+      "method": "GET",
+      "path_template": "/score/dynamic-content/10-localstorage",
+      "kind": "marker",
+      "origin": "tests/dynamic-content/10-localstorage.js",
+      "category": "dynamic-content",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/01-get-form",
+      "canonical_hash": "cd3584d2d2e94837d9d00299ec37b886e89cd90da3c6ef8883a47f22940ac5cb",
+      "method": "GET",
+      "path_template": "/score/forms/01-get-form",
+      "kind": "marker",
+      "origin": "tests/forms/01-get-form.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/02-post-form",
+      "canonical_hash": "43dcfebd8ca4d5dc049c5d1e72eba581d2c03b5d8172176a1aea2921ab3bec8c",
+      "method": "GET",
+      "path_template": "/score/forms/02-post-form",
+      "kind": "marker",
+      "origin": "tests/forms/02-post-form.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/03-image-input",
+      "canonical_hash": "10756eac2f67eb48cbb305b2ffa66c37911d731de336c6a6795472587090c9c7",
+      "method": "GET",
+      "path_template": "/score/forms/03-image-input",
+      "kind": "marker",
+      "origin": "tests/forms/03-image-input.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/04-select-field",
+      "canonical_hash": "e22603f68d779664a1bfa05fd1ff219a423fb12539f565de4558095cc10fe3a6",
+      "method": "GET",
+      "path_template": "/score/forms/04-select-field",
+      "kind": "marker",
+      "origin": "tests/forms/04-select-field.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/05-fetch-post",
+      "canonical_hash": "ec1b7fff82bd67ef9537f99347700f01a8dac0aaad1140b3dd2a1a9330b3294b",
+      "method": "GET",
+      "path_template": "/score/forms/05-fetch-post",
+      "kind": "marker",
+      "origin": "tests/forms/05-fetch-post.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/06-radio-buttons",
+      "canonical_hash": "c3b20b8c65abf05ad1370bc5d577268740afd76b3f22c0de8bf88f2497b903eb",
+      "method": "GET",
+      "path_template": "/score/forms/06-radio-buttons",
+      "kind": "marker",
+      "origin": "tests/forms/06-radio-buttons.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/07-checkboxes",
+      "canonical_hash": "ffe9308137646aba8173fb87966b4fa54e85ac0a46d7012f96314e7247dcc628",
+      "method": "GET",
+      "path_template": "/score/forms/07-checkboxes",
+      "kind": "marker",
+      "origin": "tests/forms/07-checkboxes.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/08-formaction-override",
+      "canonical_hash": "3151d070d1061e97c32753b0edc5f32fcc9db02222a2729ed0bcc78d7b364fab",
+      "method": "GET",
+      "path_template": "/score/forms/08-formaction-override",
+      "kind": "marker",
+      "origin": "tests/forms/08-formaction-override.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/09-js-form-submit",
+      "canonical_hash": "ddd73fec0dda7124788a8aaff12c3744b21c167a06c37727072b9d5d0248b469",
+      "method": "GET",
+      "path_template": "/score/forms/09-js-form-submit",
+      "kind": "marker",
+      "origin": "tests/forms/09-js-form-submit.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/10-multistep-wizard",
+      "canonical_hash": "6a4fe60a122f523820a15046e3615bac0ca2e75a68a50d59971158b67e4cf2dd",
+      "method": "GET",
+      "path_template": "/score/forms/10-multistep-wizard",
+      "kind": "marker",
+      "origin": "tests/forms/10-multistep-wizard.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/11-fetch-get",
+      "canonical_hash": "2469649cbfa976ba478fe110c7b2eb488facfbae6d0a60735151b66c379b6e42",
+      "method": "GET",
+      "path_template": "/score/forms/11-fetch-get",
+      "kind": "marker",
+      "origin": "tests/forms/11-fetch-get.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/forms/12-xhr-post",
+      "canonical_hash": "fddb06cb104124e212d5e191c1036444a00d71d5a22d271730d523358e3b52d0",
+      "method": "GET",
+      "path_template": "/score/forms/12-xhr-post",
+      "kind": "marker",
+      "origin": "tests/forms/12-xhr-post.js",
+      "category": "forms",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/frames/01-iframe-srcdoc",
+      "canonical_hash": "79a01416cbbec4eeb63134fd4000e3fc978e22fa40b157ffeb55e6760cd99b92",
+      "method": "GET",
+      "path_template": "/score/frames/01-iframe-srcdoc",
+      "kind": "marker",
+      "origin": "tests/frames/01-iframe-srcdoc.js",
+      "category": "frames",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/frames/02-shadow-dom",
+      "canonical_hash": "05648ed30ccfb084c043432d399d9d049e775f41461af94415c79f29f65e7ef0",
+      "method": "GET",
+      "path_template": "/score/frames/02-shadow-dom",
+      "kind": "marker",
+      "origin": "tests/frames/02-shadow-dom.js",
+      "category": "frames",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/frames/03-iframe-src",
+      "canonical_hash": "75033c809753c264aa854299b1da798f796bdc27826e2f00b47f78a25a98ea28",
+      "method": "GET",
+      "path_template": "/score/frames/03-iframe-src",
+      "kind": "marker",
+      "origin": "tests/frames/03-iframe-src.js",
+      "category": "frames",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/frames/04-shadow-dom-closed",
+      "canonical_hash": "86eef8bb91d47b9a726fea6c8d1ad0316498f9f6127f3e22e0d4074cd9b1ca7d",
+      "method": "GET",
+      "path_template": "/score/frames/04-shadow-dom-closed",
+      "kind": "marker",
+      "origin": "tests/frames/04-shadow-dom-closed.js",
+      "category": "frames",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/01-mouseover-injected",
+      "canonical_hash": "fab158eabc6945fb6b4a3aaf6ceb61e05af3b02838d0a2fb3740b00b9d7d439c",
+      "method": "GET",
+      "path_template": "/score/js-events/01-mouseover-injected",
+      "kind": "marker",
+      "origin": "tests/js-events/01-mouseover-injected.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/02-onclick-prevent-default",
+      "canonical_hash": "8d3de2425f862d079c182294dce9f5a9eebb9234b289f9bf4dbe635e1d4e1726",
+      "method": "GET",
+      "path_template": "/score/js-events/02-onclick-prevent-default",
+      "kind": "marker",
+      "origin": "tests/js-events/02-onclick-prevent-default.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/03-focus-injected",
+      "canonical_hash": "10c857b9756f9e386bd9b580f503a69a25ff50d1c950b51dd19d19d882f0fd66",
+      "method": "GET",
+      "path_template": "/score/js-events/03-focus-injected",
+      "kind": "marker",
+      "origin": "tests/js-events/03-focus-injected.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/04-css-hover-dropdown",
+      "canonical_hash": "60c1f3e2c6b75b2a8686250c04eaef556784213d6d98ca0f28efd35c4330da96",
+      "method": "GET",
+      "path_template": "/score/js-events/04-css-hover-dropdown",
+      "kind": "marker",
+      "origin": "tests/js-events/04-css-hover-dropdown.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/05-multilevel-dropdown",
+      "canonical_hash": "4cde1f21db10018d7ce45c800d83f553d8584999ca30a63f1675734975831b9b",
+      "method": "GET",
+      "path_template": "/score/js-events/05-multilevel-dropdown",
+      "kind": "marker",
+      "origin": "tests/js-events/05-multilevel-dropdown.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/06-dialog-modal",
+      "canonical_hash": "0ab93658de4d66c30e1c69c890edc5d972b3d692a143d2521d9fd28322071e55",
+      "method": "GET",
+      "path_template": "/score/js-events/06-dialog-modal",
+      "kind": "marker",
+      "origin": "tests/js-events/06-dialog-modal.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/07-dblclick",
+      "canonical_hash": "b3d6ad5be6f09f374e4a84a41f133608409cd7f8d1ee8664d4395a155d4fcbec",
+      "method": "GET",
+      "path_template": "/score/js-events/07-dblclick",
+      "kind": "marker",
+      "origin": "tests/js-events/07-dblclick.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/08-keydown-enter",
+      "canonical_hash": "9a6f471260879e445d92f789db922da48e43d4ee54cf03f21153187517d62264",
+      "method": "GET",
+      "path_template": "/score/js-events/08-keydown-enter",
+      "kind": "marker",
+      "origin": "tests/js-events/08-keydown-enter.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/09-contextmenu",
+      "canonical_hash": "4a05ce3bfad551061934b4a4a14b20fc96e8419dfeb2b10dfd242ec58a3f2648",
+      "method": "GET",
+      "path_template": "/score/js-events/09-contextmenu",
+      "kind": "marker",
+      "origin": "tests/js-events/09-contextmenu.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/10-tab-panel",
+      "canonical_hash": "317caa537a544a21944a361fd38208c5acc082728aaa30438d8f39cdd279fe88",
+      "method": "GET",
+      "path_template": "/score/js-events/10-tab-panel",
+      "kind": "marker",
+      "origin": "tests/js-events/10-tab-panel.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/11-popover",
+      "canonical_hash": "8ec47953825c66b6ff45b13f5c96f83c0dbc395935f48eccfa0aa6e95ecf4e55",
+      "method": "GET",
+      "path_template": "/score/js-events/11-popover",
+      "kind": "marker",
+      "origin": "tests/js-events/11-popover.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/12-pointer-events",
+      "canonical_hash": "f82a572ef3540df89d48eb0ee6ec82714573da192bfb3cd286338e3a81a98378",
+      "method": "GET",
+      "path_template": "/score/js-events/12-pointer-events",
+      "kind": "marker",
+      "origin": "tests/js-events/12-pointer-events.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/13-long-press",
+      "canonical_hash": "39e9cfc853383a747bcb866d5de2cea40e413064ced103f8932f5d75a421fb10",
+      "method": "GET",
+      "path_template": "/score/js-events/13-long-press",
+      "kind": "marker",
+      "origin": "tests/js-events/13-long-press.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/js-events/14-custom-event",
+      "canonical_hash": "a3d6d1fd36ca6433dab8a9506f5d5b8673660c4770c0081c41594e0f7c0aee1b",
+      "method": "GET",
+      "path_template": "/score/js-events/14-custom-event",
+      "kind": "marker",
+      "origin": "tests/js-events/14-custom-event.js",
+      "category": "js-events",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/links/01-anchor-href",
+      "canonical_hash": "b7d624b9d6e6b72ce2f332222124e4c9b09276578c9e6e776ef0d01f3d5da124",
+      "method": "GET",
+      "path_template": "/score/links/01-anchor-href",
+      "kind": "marker",
+      "origin": "tests/links/01-anchor-href.js",
+      "category": "links",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/links/02-js-built-href",
+      "canonical_hash": "078e7e3b7e4297e1254cafe084b82916b50bf17cddd690888d880fbef91d6f1e",
+      "method": "GET",
+      "path_template": "/score/links/02-js-built-href",
+      "kind": "marker",
+      "origin": "tests/links/02-js-built-href.js",
+      "category": "links",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/links/03-noscript",
+      "canonical_hash": "3699e4a105f31f6eb5e5302d147ba3fc5ca5ffb8334e1a3a0f0c9ac10da37029",
+      "method": "GET",
+      "path_template": "/score/links/03-noscript",
+      "kind": "marker",
+      "origin": "tests/links/03-noscript.js",
+      "category": "links",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/links/04-svg-anchor",
+      "canonical_hash": "039b3dca5adfa888bfc1ba8f6a3bc522e6e70995576cda4779337ce64c0fcbad",
+      "method": "GET",
+      "path_template": "/score/links/04-svg-anchor",
+      "kind": "marker",
+      "origin": "tests/links/04-svg-anchor.js",
+      "category": "links",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/links/05-target-blank",
+      "canonical_hash": "af3fa1addbee258717d4517d5ffd2c4b9b3ebad0c0df380e7ad6771ad9db39e4",
+      "method": "GET",
+      "path_template": "/score/links/05-target-blank",
+      "kind": "marker",
+      "origin": "tests/links/05-target-blank.js",
+      "category": "links",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/links/06-javascript-href",
+      "canonical_hash": "774d17bdc5f39d25a7442bb02a42fda3dfbfb426d272a0b81dc8aa25172bb46c",
+      "method": "GET",
+      "path_template": "/score/links/06-javascript-href",
+      "kind": "marker",
+      "origin": "tests/links/06-javascript-href.js",
+      "category": "links",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/links/07-image-map",
+      "canonical_hash": "e47f6ae75820f6d4e031ac345f23352f5936d79b2406294fe9aeaba038b4de91",
+      "method": "GET",
+      "path_template": "/score/links/07-image-map",
+      "kind": "marker",
+      "origin": "tests/links/07-image-map.js",
+      "category": "links",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/01-meta-refresh",
+      "canonical_hash": "a90246549d71124fb84c5fe6debb4116f3594d571432f8f2adf5596c542e9e87",
+      "method": "GET",
+      "path_template": "/score/navigation/01-meta-refresh",
+      "kind": "marker",
+      "origin": "tests/navigation/01-meta-refresh.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/02-window-location-timeout",
+      "canonical_hash": "09dc0c35fa59255169c176010c7d3c518f0fcba713f308ec9b137728ea4f5787",
+      "method": "GET",
+      "path_template": "/score/navigation/02-window-location-timeout",
+      "kind": "marker",
+      "origin": "tests/navigation/02-window-location-timeout.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/03-history-push-state",
+      "canonical_hash": "418a1fae4da0eb2aa222b37a75a474c25052f970c915970ca19bc65d3cdcfb84",
+      "method": "GET",
+      "path_template": "/score/navigation/03-history-push-state",
+      "kind": "marker",
+      "origin": "tests/navigation/03-history-push-state.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/04-hash-routing",
+      "canonical_hash": "129d658dfcb8449642bf6768ee20e182f794d4b3b1f8b6d40371b732c72b220a",
+      "method": "GET",
+      "path_template": "/score/navigation/04-hash-routing",
+      "kind": "marker",
+      "origin": "tests/navigation/04-hash-routing.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/05-window-replace",
+      "canonical_hash": "5e731da56a6338cfa8b823c5a05215404886c513595de38d895a7d228d432092",
+      "method": "GET",
+      "path_template": "/score/navigation/05-window-replace",
+      "kind": "marker",
+      "origin": "tests/navigation/05-window-replace.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/06-http-redirect",
+      "canonical_hash": "41059d0aa34e2a3e1b3f6cd045d28e3dfaffae36d6ff9d8b9f1e246ba325df6b",
+      "method": "GET",
+      "path_template": "/score/navigation/06-http-redirect",
+      "kind": "marker",
+      "origin": "tests/navigation/06-http-redirect.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/07-base-href",
+      "canonical_hash": "e20599836b50e65c27868f5eaacb946680d2f2f62cf8504062687ae88de65acd",
+      "method": "GET",
+      "path_template": "/score/navigation/07-base-href",
+      "kind": "marker",
+      "origin": "tests/navigation/07-base-href.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/08-window-open",
+      "canonical_hash": "bccf36fbcf32fe565d294e8b01438801e135ad79e3f4ef73dcb06f91f4866c03",
+      "method": "GET",
+      "path_template": "/score/navigation/08-window-open",
+      "kind": "marker",
+      "origin": "tests/navigation/08-window-open.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/navigation/09-history-replace-state",
+      "canonical_hash": "d162f0338560cc0dbc955ea2612cab67a26bdab045fc0d9a773c46fedcc64f38",
+      "method": "GET",
+      "path_template": "/score/navigation/09-history-replace-state",
+      "kind": "marker",
+      "origin": "tests/navigation/09-history-replace-state.js",
+      "category": "navigation",
+      "reachable": true
+    },
+    {
+      "canonical_key": "GET /score/other/01-bot-detection-globals",
+      "canonical_hash": "804fd2fc4b826eb4a10588dcda1cf5b0b18b031317f4c44db25ada16d8e3883e",
+      "method": "GET",
+      "path_template": "/score/other/01-bot-detection-globals",
+      "kind": "marker",
+      "origin": "tests/other/01-bot-detection-globals.js",
+      "category": "other",
+      "reachable": true
+    }
+  ]
+}

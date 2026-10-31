@@ -15,7 +15,7 @@ TEMPLATE = (ROOT / "configs" / "prompts" / "firecrawl_agent.md").read_text()
 
 def _parts(**kw):
     base = dict(target_url="http://localhost:3000/", seeds=["http://localhost:3000/", "http://localhost:3000/#/login"],
-                app_context="Shop app. Workflow: basket -> checkout.", known_routes="Client-side routes (1): #/login",
+                known_routes="Client-side routes (1): #/login",
                 focus="new pages", auth_instructions="Sign in as the test user.")
     base.update(kw)
     return PromptParts(**base)
@@ -23,17 +23,25 @@ def _parts(**kw):
 
 def test_template_renders_every_section_in_order():
     text = render_prompt(TEMPLATE, _parts()).text
-    for value in ("http://localhost:3000/#/login", "basket -> checkout", "#/login", "new pages",
+    for value in ("http://localhost:3000/#/login", "#/login", "new pages",
                   "Sign in as the test user.", SAFETY_CONSTRAINTS):
         assert value in text
     headings = [line for line in text.splitlines() if line.startswith("# ")]
-    assert [h.split(".")[0] for h in headings] == [f"# {i}" for i in range(1, 11)]
+    assert [h.split(".")[0] for h in headings] == [f"# {i}" for i in range(1, 9)]
     assert "${" not in text
+    for field in ("visited_urls", "interaction_urls", "seen_urls"):   # matches the response schema
+        assert field in text
+
+
+def test_prompt_holds_no_application_context():
+    text = render_prompt(TEMPLATE, _parts()).text
+    assert "app_context" not in text and "About this application" not in text and "Workflows" not in text
+    assert not (ROOT / "configs" / "contexts").exists()
 
 
 def test_user_text_with_braces_and_dollars_is_safe():
-    ctx = "Prices like $5 and ${not_a_var} and {curly} stay as written."
-    assert ctx in render_prompt(TEMPLATE, _parts(app_context=ctx)).text
+    focus = "Prices like $5 and ${not_a_var} and {curly} stay as written."
+    assert focus in render_prompt(TEMPLATE, _parts(focus=focus)).text
 
 
 def test_safety_rules_cannot_be_removed_by_editing_the_template():
@@ -41,22 +49,19 @@ def test_safety_rules_cannot_be_removed_by_editing_the_template():
     assert SAFETY_CONSTRAINTS in text
 
 
-def test_missing_context_file_gives_empty_section_and_warning(caplog):
+def test_missing_template_file_gives_empty_text_and_warning(caplog):
     with caplog.at_level(logging.WARNING):
-        assert read_text_file("/nonexistent/context.md", "Application context") == ""
+        assert read_text_file("/nonexistent/template.md", "Prompt template") == ""
     assert "not found" in caplog.text
-    assert "(no application context provided)" in render_prompt(TEMPLATE, _parts(app_context="")).text
 
 
 def test_long_inputs_are_cut_in_priority_order():
     known = "\n".join(f"- /api/resource{i}: a, b, c" for i in range(2000))
     many_seeds = [f"http://localhost:3000/page{i}" for i in range(400)]
-    context = "Important workflow description. " * 20
-    rendered = render_prompt(TEMPLATE, _parts(known_routes=known, seeds=many_seeds, app_context=context))
+    rendered = render_prompt(TEMPLATE, _parts(known_routes=known, seeds=many_seeds))
     assert len(rendered.text) <= MAX_PROMPT_CHARS
-    assert rendered.truncated[0] == "known_routes"
-    assert "app_context" not in rendered.truncated        # context survives intact
-    assert context.strip() in rendered.text
+    assert rendered.truncated == ["known_routes", "seeds"]
+    assert SAFETY_CONSTRAINTS in rendered.text
 
 
 def test_prompt_is_saved_by_hash(tmp_path):
@@ -65,11 +70,10 @@ def test_prompt_is_saved_by_hash(tmp_path):
     assert path.name.startswith(rendered.sha256[:16]) and path.read_text() == rendered.text
 
 
-def test_template_and_context_files_hold_no_credentials():
+def test_template_holds_no_credentials():
     secrets = [v for k, v in os.environ.items() if k in ("AUTH_USER", "AUTH_PASSWORD") and v]
-    for f in ("configs/prompts/firecrawl_agent.md", "configs/contexts/juice-shop.md"):
-        content = (ROOT / f).read_text()
-        assert not any(sec in content for sec in secrets)
+    content = (ROOT / "configs/prompts/firecrawl_agent.md").read_text()
+    assert not any(sec in content for sec in secrets)
 
 
 def test_known_routes_summary_is_bounded_and_grouped():
@@ -181,3 +185,44 @@ def test_client_keeps_links_of_a_job_that_sent_no_request(tmp_path):
     saved = json.loads(Path(client.last_response_files[0]).read_text())
     assert saved["requests_observed"] == 0 and "startup_seconds" not in saved
     assert client.last_first_request_at is None
+
+
+def test_response_lists_are_ingested_once_with_their_kind():
+    from tools.firecrawl_client import DiscoveredLinksSchema, extract_urls
+    assert set(DiscoveredLinksSchema.model_json_schema()["properties"]) == {"visited_urls", "interaction_urls", "seen_urls"}
+    data = {"visited_urls": ["https://t/a", "https://t/b"], "interaction_urls": ["https://t/b", "https://t/c"],
+            "seen_urls": ["https://t/d", "https://t/a"], "links": ["https://t/e"]}
+    assert extract_urls(data) == [("https://t/b", "interaction"), ("https://t/c", "interaction"),
+                                  ("https://t/a", "visited"), ("https://t/d", "seen"), ("https://t/e", "unspecified")]
+    assert extract_urls(None) == [] and extract_urls({"seen_urls": None}) == []
+
+
+def test_client_returns_every_list_and_partial_results(tmp_path):
+    global outer
+
+    class _Session(_FakeSession):
+        def __init__(self, answer):
+            super().__init__()
+            self.answer = answer
+
+        def get(self, url, headers=None, timeout=None):
+            return type("R", (), {"status_code": 200, "json": lambda s: self.answer})()
+
+    tun = "https://abc.trycloudflare.com"
+    for answer, status in (
+        ({"status": "completed", "data": {"visited_urls": [tun + "/a"], "interaction_urls": [tun + "/b"],
+                                          "seen_urls": [tun + "/c"]}}, "ok"),
+        ({"status": "failed", "stopReason": "credits", "partial": {"interaction_urls": [tun + "/b"]}}, "failed"),
+    ):
+        client = FirecrawlClient(api_key="key", target_base="http://localhost:3000/", public_tunnel_url=tun,
+                                 prompts_dir=str(tmp_path), poll_interval_seconds=0,
+                                 prompt_template_file=str(ROOT / "configs/prompts/firecrawl_agent.md"))
+        client.session = outer = _Session(answer)
+        results = client.run_agent_discovery(["http://localhost:3000/"])
+        assert client.last_status == status
+        kinds = {r["url"]: r["firecrawl_kind"] for r in results}
+        if status == "ok":
+            assert kinds == {"http://localhost:3000/a": "visited", "http://localhost:3000/b": "interaction",
+                             "http://localhost:3000/c": "seen"}
+        else:
+            assert kinds == {"http://localhost:3000/b": "interaction"}

@@ -31,8 +31,31 @@ LOCAL_HOSTS = {"localhost", "127.0.0.1"}
 
 
 class DiscoveredLinksSchema(BaseModel):
-    links: List[str] = Field(description="List of URLs/routes found while interacting with the page")
-    actions_taken: List[str] = Field(description="Actions the AI performed (click, scroll, open menu...)")
+    """Three flat lists (cheap to produce) that keep apart how the agent got each URL."""
+    visited_urls: List[str] = Field(
+        description="Pages loaded directly or by following a plain link, including every starting page opened")
+    interaction_urls: List[str] = Field(
+        description="Pages or requests reached only by an interaction: click, hover, scroll, menu, dialog, form submit")
+    seen_urls: List[str] = Field(
+        description="URLs seen in links, attributes, scripts or text but not opened")
+
+
+# Response field -> how the URL was found. A URL in several lists keeps the first kind listed here.
+# `links` is the field of the previous schema, still read so recorded responses replay.
+RESULT_FIELDS = (("interaction_urls", "interaction"), ("visited_urls", "visited"),
+                 ("seen_urls", "seen"), ("links", "unspecified"))
+
+
+def extract_urls(data: Any) -> List[tuple]:
+    """(url, kind) pairs from a job's `data` or `partial`, each URL once."""
+    if not isinstance(data, dict):
+        return []
+    found: Dict[str, str] = {}
+    for key, kind in RESULT_FIELDS:
+        for url in data.get(key) or []:
+            if isinstance(url, str) and url and url not in found:
+                found[url] = kind
+    return list(found.items())
 
 
 class FirecrawlClient:
@@ -49,7 +72,6 @@ class FirecrawlClient:
         max_seeds: Optional[int] = None,
         fallback_routes_file: Optional[str] = None,
         prompt_template_file: Optional[str] = None,
-        context_file: Optional[str] = None,
         prompts_dir: Optional[str] = "output/prompts",
         responses_dir: Optional[str] = None,
         traffic_log: Optional[str] = None,
@@ -60,10 +82,10 @@ class FirecrawlClient:
     ):
         """
         max_seeds: optional cap on seeds per run (None = all seeds, sent in jobs of `batch_size`).
-        prompt_template_file / context_file: prompt template and per-target application context.
+        prompt_template_file: the prompt template (configs/prompts/firecrawl_agent.md).
         known_routes_max_chars: budget for the "already known" summary inside the prompt.
         max_credits / effort: passed to the Agent API when set (API defaults otherwise).
-        responses_dir: when set, every job's final API response (links, actions_taken, status...) is
+        responses_dir: when set, every job's final API response (URL lists, status...) is
         saved there as <job id>.json together with its seeds and prompt hash.
         traffic_log: JSONL log of the logging proxy behind the tunnel (tools/traffic_proxy.py). When set,
         each job's first observed request (and request count) is read from it: Firecrawl's startup time.
@@ -82,7 +104,6 @@ class FirecrawlClient:
         self.max_seeds = max_seeds
         self.fallback_routes_file = fallback_routes_file
         self.prompt_template_file = prompt_template_file
-        self.context_file = context_file
         self.prompts_dir = prompts_dir
         self.responses_dir = responses_dir
         self.traffic_log = traffic_log
@@ -148,7 +169,6 @@ class FirecrawlClient:
         template = read_text_file(self.prompt_template_file, "Prompt template") or DEFAULT_TEMPLATE
         known = self.known_routes_provider(self.known_routes_max_chars) if self.known_routes_provider else ""
         parts = PromptParts(target_url=self.target_base, seeds=seeds,
-                            app_context=read_text_file(self.context_file, "Application context"),
                             known_routes=known, focus=focus, auth_instructions=self.auth_instructions)
         return render_prompt(template, parts)
 
@@ -231,7 +251,7 @@ class FirecrawlClient:
             return self._load_fallback_routes()
 
     def _save_response(self, meta: Dict[str, Any], outcome: str, data: Optional[Dict[str, Any]]) -> None:
-        """Keeps the whole API answer (incl. actions_taken), which the results only use `links` of."""
+        """Keeps the whole API answer, as returned, next to the job's seeds and prompt hash."""
         try:
             traffic = self._job_traffic(meta.get("submitted_at"))
         except Exception as e:   # never let bookkeeping lose a finished job's results
@@ -280,22 +300,22 @@ class FirecrawlClient:
                     logger.debug(f"[FIRECRAWL] Poll [{elapsed}s] status={status}")
 
                     if status == "completed":
-                        result = data.get("data") or {}
-                        links = result.get("links", [])
-                        actions = result.get("actions_taken") or []
-                        logger.info(f"[FIRECRAWL] Job completed. Found {len(links)} links, "
-                                    f"{len(actions)} action(s) reported.")
+                        found = extract_urls(data.get("data"))
+                        counts = {k: sum(1 for _, kind in found if kind == k)
+                                  for k in ("visited", "interaction", "seen", "unspecified")}
+                        logger.info(f"[FIRECRAWL] Job completed. Found {len(found)} URL(s): "
+                                    + ", ".join(f"{v} {k}" for k, v in counts.items() if v) + ".")
                         self._save_response(meta, "completed", data)
-                        return [self._as_result(self._from_cloud_url(link)) for link in links if isinstance(link, str)]
+                        return [self._as_result(self._from_cloud_url(u), kind) for u, kind in found]
 
                     if status in ("failed", "cancelled"):
                         # A job stopped by its credit limit still returns best-effort `partial` data
-                        partial = (data.get("partial") or {}).get("links", []) if isinstance(data.get("partial"), dict) else []
+                        partial = extract_urls(data.get("partial"))
                         logger.warning(f"[FIRECRAWL] Job ended with status: {status} "
-                                       f"({data.get('stopReason') or 'no reason'}); {len(partial)} partial link(s).")
+                                       f"({data.get('stopReason') or 'no reason'}); {len(partial)} partial URL(s).")
                         self.last_status = "failed"
                         self._save_response(meta, status, data)
-                        return [self._as_result(self._from_cloud_url(link)) for link in partial if isinstance(link, str)]
+                        return [self._as_result(self._from_cloud_url(u), kind) for u, kind in partial]
             except Exception as e:
                 logger.warning(f"[FIRECRAWL] Error polling job {job_id}: {e}")
 
@@ -321,6 +341,8 @@ class FirecrawlClient:
         return [self._as_result(u) for u in urls if isinstance(u, str)]
 
     @staticmethod
-    def _as_result(url: str) -> Dict[str, Any]:
-        # Firecrawl does not report HTTP status; 0 = unknown so it is not mistaken for a verified 200
-        return {"url": url, "method": "GET", "source": "firecrawl_navigate", "status_code": 0}
+    def _as_result(url: str, kind: str = "unspecified") -> Dict[str, Any]:
+        # Firecrawl does not report HTTP status; 0 = unknown so it is not mistaken for a verified 200.
+        # `firecrawl_kind` (visited / interaction / seen) is Firecrawl's own account, kept in the traces.
+        return {"url": url, "method": "GET", "source": "firecrawl_navigate", "status_code": 0,
+                "firecrawl_kind": kind}

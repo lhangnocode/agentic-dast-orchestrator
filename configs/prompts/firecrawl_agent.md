@@ -8,32 +8,32 @@ Application: ${target_url}
 Start from these pages:
 ${seeds}
 
-# 3. About this application
-${app_context}
-
-# 4. Already discovered (spend your effort elsewhere)
+# 3. Already discovered (do not re-explore these, but still report any you open)
 ${known_routes}
 
-# 5. Focus for this run
+# 4. Focus for this run
 ${focus}
 
-# 6. How to explore
+# 5. How to explore
 - Open every navigation element: header, sidebar, footer, account/avatar menus, dropdowns, tabs,
   dialogs, pagination and filters.
 - For single-page applications, follow client-side routes (including `/#/` routes) and wait for each
   view to finish rendering before reading its links.
 - Open forms and dialogs to see where they lead.
 
-# 7. Workflows
-Walk through the key workflows described in section 3 from start to finish, recording each page and
-route you pass through.
-
-# 8. Signing in
+# 6. Signing in
 ${auth_instructions}
 
-# 9. Safety rules
+# 7. Safety rules
 ${constraints}
 
-# 10. What to return
-Return every unique URL or route you observed, including path, query parameters and `/#/` route
-segments, plus a short list of the actions you took.
+# 8. What to return
+Put every URL in exactly one of three lists, using full URLs including query parameters and `/#/`
+route segments:
+- `visited_urls`: every page you loaded by opening it directly or by following a plain link,
+  including every starting page you opened.
+- `interaction_urls`: every page or request you reached only by interacting with the page: clicking a
+  button or other control, hovering, scrolling, opening a menu or dialog, submitting a form, a script
+  or redirect that ran after an action.
+- `seen_urls`: URLs you saw in links, attributes, scripts or text but did not open.
+List only what you actually did. If you are not sure you opened a URL, put it in `seen_urls`.

@@ -1,14 +1,14 @@
 """
-Builds the Firecrawl Agent prompt from a template file plus per-target context.
+Builds the Firecrawl Agent prompt from a template file. The prompt holds no per-target hints: only the
+target URL, the seeds, what is already known, the rule's focus and the login instructions.
 
 - Template: configs/prompts/firecrawl_agent.md, filled with `string.Template.safe_substitute`
-  (`${target_url}`, `${seeds}`, `${app_context}`, `${known_routes}`, `${focus}`,
-  `${auth_instructions}`, `${constraints}`), so `{`, `}` or `$` in user text never break it.
+  (`${target_url}`, `${seeds}`, `${known_routes}`, `${focus}`, `${auth_instructions}`,
+  `${constraints}`), so `{`, `}` or `$` in user text never break it.
 - Safety constraints are owned by this module, not the template: they replace `${constraints}`
   and are appended if the template does not contain the placeholder.
 - The Agent API accepts at most 10,000 prompt characters. If the prompt is longer, the
-  known-routes summary is shortened first, then the seed list (seeds are also sent as `urls`);
-  the application context is only cut as a last resort, with a warning.
+  known-routes summary is shortened first, then the seed list (seeds are also sent as `urls`).
 """
 
 import hashlib
@@ -26,7 +26,7 @@ SAFETY_CONSTRAINTS = """\
 - Stay on the target's own host; do not follow links to other sites.
 - Do not log out, delete data, change passwords or account settings, or start payments.
 - Use only harmless test input. Never enter scripts, injection strings or other attack payloads.
-- Prefer opening and reading views over submitting forms; submit only what a workflow above needs."""
+- Prefer opening and reading views over submitting forms; submit a form only to reach a new page."""
 
 TRUNCATION_NOTE = "\n(... shortened to fit the prompt limit)"
 
@@ -36,10 +36,7 @@ Map the pages and routes of the authorized application ${target_url}. Discovery 
 Start from:
 ${seeds}
 
-About the application:
-${app_context}
-
-Already discovered:
+Already discovered (do not re-explore, but still report any you open):
 ${known_routes}
 
 Focus: ${focus}
@@ -50,7 +47,9 @@ Signing in: ${auth_instructions}
 Safety rules:
 ${constraints}
 
-Return every unique URL or route you observed and a short list of the actions you took.
+Report each URL once: `visited_urls` (pages you opened directly or via a plain link, incl. starting pages),
+`interaction_urls` (reached only by clicking, hovering, scrolling, opening menus/dialogs or submitting forms),
+`seen_urls` (seen in links, attributes, scripts or text but not opened). List only what you actually did.
 """
 
 
@@ -58,7 +57,6 @@ Return every unique URL or route you observed and a short list of the actions yo
 class PromptParts:
     target_url: str
     seeds: List[str]
-    app_context: str = ""
     known_routes: str = ""
     focus: str = ""
     auth_instructions: str = ""
@@ -89,11 +87,10 @@ def _seed_list(seeds: List[str], keep: Optional[int] = None) -> str:
     return "\n".join(lines)
 
 
-def _fill(template: str, parts: PromptParts, seeds_text: str, known_routes: str, app_context: str) -> str:
+def _fill(template: str, parts: PromptParts, seeds_text: str, known_routes: str) -> str:
     text = Template(template).safe_substitute(
         target_url=parts.target_url,
         seeds=seeds_text,
-        app_context=app_context or "(no application context provided)",
         known_routes=known_routes or "(nothing recorded yet)",
         focus=parts.focus or "general exploration of the application",
         auth_instructions=parts.auth_instructions or "(no login required)",
@@ -107,10 +104,9 @@ def _fill(template: str, parts: PromptParts, seeds_text: str, known_routes: str,
 def render_prompt(template: str, parts: PromptParts, max_chars: int = MAX_PROMPT_CHARS) -> RenderedPrompt:
     truncated: List[str] = []
     known = parts.known_routes
-    context = parts.app_context
     keep_seeds: Optional[int] = None
 
-    text = _fill(template, parts, _seed_list(parts.seeds), known, context)
+    text = _fill(template, parts, _seed_list(parts.seeds), known)
     # 1. shorten the known-routes summary (line by line, keep the start)
     while len(text) > max_chars and known:
         overflow = len(text) - max_chars + len(TRUNCATION_NOTE)
@@ -120,20 +116,13 @@ def render_prompt(template: str, parts: PromptParts, max_chars: int = MAX_PROMPT
         known = ("\n".join(lines) + TRUNCATION_NOTE) if lines else ""
         if "known_routes" not in truncated:
             truncated.append("known_routes")
-        text = _fill(template, parts, _seed_list(parts.seeds, keep_seeds), known, context)
+        text = _fill(template, parts, _seed_list(parts.seeds, keep_seeds), known)
     # 2. list fewer seeds in the text (they are all sent as `urls` anyway)
     while len(text) > max_chars and (keep_seeds is None or keep_seeds > 1):
         keep_seeds = max(1, (len(parts.seeds) if keep_seeds is None else keep_seeds) // 2)
         if "seeds" not in truncated:
             truncated.append("seeds")
-        text = _fill(template, parts, _seed_list(parts.seeds, keep_seeds), known, context)
-    # 3. last resort: the user's context
-    if len(text) > max_chars and context:
-        cut = max(0, len(context) - (len(text) - max_chars) - len(TRUNCATION_NOTE))
-        context = context[:cut] + TRUNCATION_NOTE
-        truncated.append("app_context")
-        logger.warning("[FIRECRAWL] Application context was shortened to fit the 10,000-character prompt limit.")
-        text = _fill(template, parts, _seed_list(parts.seeds, keep_seeds), known, context)
+        text = _fill(template, parts, _seed_list(parts.seeds, keep_seeds), known)
 
     if truncated:
         logger.info(f"[FIRECRAWL] Prompt shortened ({', '.join(truncated)}) to {len(text)} characters.")

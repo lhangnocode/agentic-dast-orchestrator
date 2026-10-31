@@ -2,7 +2,6 @@
   "service": "juice-shop",
   "ground_truth": "evaluation/ground_truth/juice-shop.json",
   "config": {
-    "target": {"base_url": "http://localhost:3000/"},
-    "tools": {"firecrawl": {"context_file": "configs/contexts/juice-shop.md"}}
+    "target": {"base_url": "http://localhost:3000/"}
   }
 }

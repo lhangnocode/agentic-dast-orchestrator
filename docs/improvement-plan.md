@@ -144,6 +144,10 @@ pages are detected from the link graph).
 
 ### 3.2 Firecrawl reporting (item P2)
 
+**Done 2026-10-31 (simplified):** context files removed; schema = three flat lists `visited_urls`,
+`interaction_urls`, `seen_urls`, without `{action, from_page}` details or an action log, to save credits;
+`batch_size` stays 10. The traffic-based accuracy metric below is still to do.
+
 - **Schema:** replace `links` with
   - `visited_urls`: pages actually loaded;
   - `interaction_urls`: `{url, action, from_page}` for URLs reached by clicking, submitting, scrolling or a

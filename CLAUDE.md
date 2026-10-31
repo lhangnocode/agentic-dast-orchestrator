@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Research prototype for endpoint and route discovery in DAST. Crawl-only tools (OWASP ZAP traditional spider and Client Spider, Wapiti with `-m ""`, the Firecrawl Cloud agent, and a plain HTTP probe) are orchestrated by **deterministic rules**; no LLM chooses tools. Results are normalized into canonical endpoints and stored in SQLite. The code is target-agnostic: everything specific to one target lives in `configs/app_config.json`, `configs/contexts/<target>.md` and `benchmarks/<target>.json` (the current target is OWASP Juice Shop at `http://localhost:3000/`). The optimization target is maximum recall of SPA routes and server pages/endpoints, without a time budget.
+Research prototype for endpoint and route discovery in DAST. Crawl-only tools (OWASP ZAP traditional spider and Client Spider, Wapiti with `-m ""`, the Firecrawl Cloud agent, and a plain HTTP probe) are orchestrated by **deterministic rules**; no LLM chooses tools. Results are normalized into canonical endpoints and stored in SQLite. The code is target-agnostic: everything specific to one target lives in `configs/app_config.json` and `benchmarks/<target>.json` (the current target is OWASP Juice Shop at `http://localhost:3000/`). The optimization target is maximum recall of SPA routes and server pages/endpoints, without a time budget.
 
 ## Commands
 
@@ -46,11 +46,12 @@ Key boundaries:
   - **Client Spider** (`client` add-on, alpha in ZAP 2.17.0): one scan per seed. After the run, the Client Map is exported to `/zap/wrk` (volume → `output/zap`) and parsed by `tools/client_map.py`. That parser is **line/indent-based** because ZAP can export invalid YAML; the fixture with the broken region is `tests/fixtures/client_map_juice_shop.yaml`. The Client Map is the only ZAP source of `#/` routes. `client_spider.per_seed_max_duration_min` caps each scan when a run has several seeds.
   - The AJAX Spider remains selectable (`orchestrator.rules.browser_spider`, plus the stage list).
 - **Wapiti**: `headless: "hidden"` (Playwright Firefox) is the default. Hash-route seeds are dropped when headless is off.
-- **Firecrawl**: the prompt is rendered by `tools/firecrawl_prompt.py` from `configs/prompts/firecrawl_agent.md` (sections 1–10, `string.Template.safe_substitute`) plus `tools.firecrawl.context_file` (`configs/contexts/<target>.md`) and the store's `get_known_routes_summary`.
+- **Firecrawl**: the prompt is rendered by `tools/firecrawl_prompt.py` from `configs/prompts/firecrawl_agent.md` (sections 1–8, `string.Template.safe_substitute`) plus the store's `get_known_routes_summary`. It holds no per-target hints (the per-target context files were removed on 2026-10-31).
+  - The response schema (`DiscoveredLinksSchema`) has three lists: `visited_urls`, `interaction_urls`, `seen_urls`. All are ingested; each result carries `firecrawl_kind` (visited / interaction / seen; `unspecified` for the old `links` field). It is Firecrawl's own account, not verified.
   - The safety rules are owned by code and appended if the template drops `${constraints}`.
-  - The prompt must stay ≤ 10,000 chars. Known routes are cut first, then the seed list; the context is cut only as a last resort.
+  - The prompt must stay ≤ 10,000 chars. Known routes are cut first, then the seed list.
   - Seeds are sent in jobs of `batch_size`. `max_credits` and `effort` go to the API when set, and `partial` results of credit-limited jobs are kept.
-  - Rendered prompts are saved by hash in `prompts_dir`; each job's full API response (incl. `actions_taken`) goes to `responses_dir/<job id>.json`.
+  - Rendered prompts are saved by hash in `prompts_dir`; each job's full API response goes to `responses_dir/<job id>.json`.
   - Without a key, or for a localhost target without `PUBLIC_TUNNEL_URL`, Firecrawl is unavailable.
 - **HTTP probe** (`tools/http_probe.py`): one GET per unknown-status URL, with no redirects followed and no `#/` routes. It is always available.
 - Time limits: `0`/`null` durations (`spider/ajax_spider/client_spider.max_duration_min`, Wapiti `max_scan_time`) mean no limit.

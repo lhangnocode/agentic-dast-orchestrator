@@ -68,7 +68,9 @@ used different `--set` overrides.
 
 Firecrawl needs `FIRECRAWL_API_KEY` and a running tunnel (`PUBLIC_TUNNEL_URL`) pointing at the
 benchmark's port. Rendered prompts are stored per run with their hash, and each Firecrawl job's full
-API response (`links`, `actions_taken`, status, seeds, prompt hash) in `firecrawl_responses/<job id>.json`.
+API response (URL lists, status, seeds, prompt hash) in `firecrawl_responses/<job id>.json`. Responses
+before 2026-10-31 have `links` + `actions_taken`; later ones have `visited_urls`, `interaction_urls` and
+`seen_urls` (see *Threats to validity*).
 
 **Observing Firecrawl's traffic.** Only Firecrawl reaches the target through the tunnel, so a logging
 proxy between the tunnel and the target records exactly its requests:
@@ -188,6 +190,15 @@ scrolling or clicking anything. Consequences:
   (`2.17.0`) does not pin its add-ons: ZAP installs add-on updates when its container is created. Runs
   from 2026-10-23 on record the versions in `run_meta.json` (`client` 0.34.0, released 2026-10-21); the
   2026-10-16 runs used an earlier, unrecorded `client` version.
-- **Tool state between runs**: ZAP is restarted before every run (see above). Results produced
-  before this change (Crawlground `firecrawl-smoke`, `with-firecrawl` on 2026-10-13) may contain
-  URLs carried over from earlier runs and should not be used.
+- **Tool state between runs**: ZAP is restarted before every run (see above). The early Crawlground test
+  runs made before this change (`smoke`, `no-firecrawl`, `firecrawl-smoke`, `with-firecrawl`, 2026-10-12/13,
+  one run each) were deleted on 2026-10-31; none of them was part of a series summary.
+- **Firecrawl prompt change (2026-10-31)**: every Firecrawl-only and full-pipeline run up to the 2026-10-27
+  Crawl Maze series used a per-target context file (`configs/contexts/<target>.md`, rendered into prompt
+  sections 3 and 7) with hand-written hints about each benchmark, e.g. Crawlground's "trigger each control
+  once", which the other tools never got. The context files and those sections were removed, the "How to
+  explore" section was kept unchanged, and the response schema changed from `links` + free-text
+  `actions_taken` to three lists (`visited_urls`, `interaction_urls`, `seen_urls`; no action log, to save
+  credits). Recall still counts every reported URL. Runs after this change go into **new labels** and are
+  not pooled with earlier runs; the earlier runs stay as the baseline. Job size is unchanged
+  (`batch_size` 10).

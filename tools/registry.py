@@ -160,7 +160,6 @@ class ToolRegistry:
             max_seeds=f.get("max_seeds"),
             fallback_routes_file=f.get("fallback_routes_file"),
             prompt_template_file=f.get("prompt_template", "configs/prompts/firecrawl_agent.md"),
-            context_file=f.get("context_file"),
             prompts_dir=f.get("prompts_dir", "output/prompts"),
             responses_dir=f.get("responses_dir"),
             traffic_log=f.get("traffic_log"),

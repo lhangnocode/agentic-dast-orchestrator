@@ -28,7 +28,8 @@ def test_firecrawl_fallback_file_replay(tmp_path):
     client = FirecrawlClient(api_key="", fallback_routes_file=str(routes))
     results = client.run_agent_discovery(["http://localhost:3000/"])
     assert results == [{"url": "http://localhost:3000/#/about", "method": "GET",
-                        "source": "firecrawl_navigate", "status_code": 0}]
+                        "source": "firecrawl_navigate", "status_code": 0,
+                        "firecrawl_kind": "unspecified"}]
 
 
 def test_zap_wrapper_unreachable_safe():

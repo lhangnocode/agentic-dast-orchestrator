@@ -42,7 +42,7 @@ The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framewo
 ### Key Capabilities
 - **Staged pipeline + deterministic rules (no LLM)**: stage 1 runs ZAP traditional spider → ZAP Client Spider in parallel with Wapiti; stage 2 runs Firecrawl on everything stage 1 found; afterwards a rule engine (`orchestrator/rules.py`) re-runs a tool whenever its unvisited frontier changed, retries failed runs, probes unknown statuses, and stops at saturation. See `docs/tool-capabilities.md`.
 - **SPA routes via the ZAP Client Spider**: the Client Map export (parsed robustly, ZAP can emit invalid YAML) yields `#/` routes that HTTP-level crawlers never see; ZAP browser-based login lets it crawl logged-in views.
-- **Firecrawl prompt templates**: `configs/prompts/firecrawl_agent.md` + per-target context (`configs/contexts/<target>.md`) + a summary of what is already known; safety rules are enforced by code.
+- **Firecrawl prompt templates**: `configs/prompts/firecrawl_agent.md` (no per-target hints) + a summary of what is already known; Firecrawl reports visited / reached-by-interaction / only-seen URLs separately; safety rules are enforced by code.
 - **Parameter & Form Specialist (Wapiti)**: forms and parameters, crawl-only (`-m ""`), headless for SPAs.
 - **Strict Normalization**: junk/trap filtering, multi-source dedup, canonical templates (`SHA256(Method + Path_Template + Query_Keys)`), SPA hash routes as `GET #/route`.
 - **Benchmarks**: pinned Juice Shop, Crawlground and Security Crawl Maze with ground truth built from source, repeated isolated runs, recall per kind with 95% CIs (`docs/benchmarks.md`).
@@ -56,7 +56,6 @@ agentic-dast-orchestrator/
 ├── benchmarks/                  # docker-compose (pinned targets) + per-benchmark profiles
 ├── configs/
 │   ├── app_config.json          # Target, auth, stages/rules, normalization, tool options
-│   ├── contexts/                # Per-target application context for Firecrawl prompts
 │   └── prompts/firecrawl_agent.md  # Firecrawl prompt template
 ├── docs/                        # tool-capabilities.md (rule derivation), benchmarks.md (protocol)
 ├── evaluation/

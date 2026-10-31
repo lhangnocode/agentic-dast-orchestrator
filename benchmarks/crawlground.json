@@ -5,6 +5,6 @@
   "config": {
     "target": {"base_url": "http://localhost:3456/"},
     "auth": {"enabled": false},
-    "tools": {"firecrawl": {"context_file": "configs/contexts/crawlground.md", "auth_instructions": ""}}
+    "tools": {"firecrawl": {"auth_instructions": ""}}
   }
 }

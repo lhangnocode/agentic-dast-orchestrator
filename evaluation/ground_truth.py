@@ -35,11 +35,16 @@ BENCHMARKS = {
         "version": "7c7ba5931345bb8bd3a7cc2d5187f156ec0db512",
         "base_url": "http://localhost:3456/",
         "tree": "https://api.github.com/repos/zaproxy/crawlground/git/trees/{version}?recursive=1",
+        # The server scores any GET or POST to /score/<category>/<test>, whatever the query string
+        "match": "path",
     },
     "crawl-maze": {
         "version": "2a0dd0a75e39925ded887bcd25016e8b3ce0f2b3",
         "base_url": "http://localhost:8090/",
         "raw": "https://raw.githubusercontent.com/google/security-crawl-maze/{version}/{path}",
+        # expected-results.json lists paths only: a resource counts as found when its path is requested
+        # (e.g. action-post.found is reached by a POST, form actions may carry a query string)
+        "match": "path",
     },
 }
 
@@ -179,7 +184,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out = Path(args.out) if args.out else OUT_DIR / f"{args.benchmark}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     doc = {"benchmark": args.benchmark, "version": spec["version"], "base_url": spec["base_url"],
-           "entries": entries}
+           "match": spec.get("match", "hash"), "entries": entries}
     out.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
     kinds = {}
     for e in entries:

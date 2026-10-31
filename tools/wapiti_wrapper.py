@@ -9,7 +9,10 @@ import json
 import logging
 import os
 import sqlite3
+import re
 import subprocess
+import threading
+import time
 import urllib.parse as up
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -62,6 +65,7 @@ class WapitiWrapper:
         self.cookies = dict(cookies or {})
         self.last_request_count = 0
         self.last_status = "ok"  # ok | failed | timeout
+        self.last_first_request_at: Optional[float] = None
 
         self.session_db_path.parent.mkdir(parents=True, exist_ok=True)
         self.report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -139,19 +143,11 @@ class WapitiWrapper:
         env["PYTHONUTF8"] = "1"
         env["PYTHONIOENCODING"] = "utf-8"
 
+        self.last_first_request_at = None
         try:
-            res = subprocess.run(
-                cmd,
-                env=env,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=self.max_scan_time + 60 if self.max_scan_time else None
-            )
-            if res.returncode != 0:
-                logger.warning(f"[WAPITI] Returned code {res.returncode}: {res.stderr[:200]}")
+            returncode, stderr = self._run_streaming(cmd, env, self.max_scan_time + 60 if self.max_scan_time else None)
+            if returncode != 0:
+                logger.warning(f"[WAPITI] Returned code {returncode}: {stderr[:200]}")
         except subprocess.TimeoutExpired:
             self.last_status = "timeout"
             logger.warning("[WAPITI] Execution exceeded max_scan_time timeout.")
@@ -160,6 +156,48 @@ class WapitiWrapper:
             logger.error(f"[WAPITI] Subprocess invocation failed: {e}")
 
         return self.extract_endpoints_from_db()
+
+    CRAWLED_LINE = re.compile(r"^\[\+\] [A-Z]+ https?://")
+
+    def _run_streaming(self, cmd: List[str], env: Dict[str, str], timeout: Optional[float],
+                       poll_sec: float = 0.1):
+        """
+        Runs Wapiti and times its first crawled resource. Wapiti writes the "[+] <METHOD> <url>" lines
+        only to its --log file (live), so the file is watched from its size at launch, every `poll_sec`.
+        """
+        log = self.log_path
+        offset = log.stat().st_size if log.exists() else 0
+        proc = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                encoding="utf-8", errors="replace")
+        out: List[str] = []
+        err: List[str] = []
+        readers = [threading.Thread(target=lambda: out.append(proc.stdout.read()), daemon=True),
+                   threading.Thread(target=lambda: err.append(proc.stderr.read()), daemon=True)]
+        for t in readers:
+            t.start()
+
+        def first_crawled_line() -> bool:
+            try:
+                with open(log, encoding="utf-8", errors="replace") as f:
+                    f.seek(offset)
+                    return any(self.CRAWLED_LINE.match(line) for line in f)
+            except OSError:
+                return False
+
+        deadline = time.time() + timeout if timeout else None
+        try:
+            while proc.poll() is None:
+                if self.last_first_request_at is None and first_crawled_line():
+                    self.last_first_request_at = time.time()
+                if deadline and time.time() > deadline:
+                    proc.kill()
+                    proc.wait()
+                    raise subprocess.TimeoutExpired(cmd, timeout)
+                time.sleep(poll_sec)
+        finally:
+            for t in readers:
+                t.join(5)
+        return proc.returncode, "".join(err)
 
     def extract_endpoints_from_db(self) -> List[Dict[str, Any]]:
         """

@@ -124,6 +124,22 @@ def test_history_and_run_log(monkeypatch):
         assert {e["run_id"] for e in events} == {summary["run_id"]}
 
 
+def test_tool_run_trace_files(monkeypatch):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        monkeypatch.chdir(tmpdir)
+        config = _config(Path(tmpdir))
+        config["logging"] = {"tool_runs_dir": str(Path(tmpdir) / "tool_runs")}
+        registry = FakeRegistry(ALL)
+        AdaptiveOrchestrator(config, tools=registry).run()
+        files = sorted((Path(tmpdir) / "tool_runs").glob("*.json"))
+        assert len(files) == len(registry.calls)
+        first = json.loads(files[0].read_text())
+        assert first["iteration"] == 1 and first["rule_id"] == "stage1" and first["seeds"] == [BASE]
+        assert first["raw_results"] and first["new_endpoints"]
+        assert set(first["pending_frontier_after"]) == set(ALL)
+        assert first["processed_after"][first["tool"]] >= 1
+
+
 def test_parallel_lanes_keep_zap_tools_sequential(monkeypatch):
     with tempfile.TemporaryDirectory() as tmpdir:
         orch, registry, summary = _run(monkeypatch, Path(tmpdir), parallel=True)

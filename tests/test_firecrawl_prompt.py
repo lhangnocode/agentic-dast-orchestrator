@@ -119,3 +119,65 @@ def test_client_batches_all_seeds_and_passes_credit_limit(tmp_path):
     assert "#/login" in outer.posts[0]["prompt"] and "new pages" in outer.posts[0]["prompt"]
     assert {r["url"] for r in results} == {"http://localhost:3000/#/new"}  # mapped back from the tunnel
     assert len(client.last_prompt_files) == 3 and client.last_status == "ok"
+
+
+def test_client_saves_full_job_response(tmp_path):
+    global outer
+    client = FirecrawlClient(api_key="key", target_base="http://localhost:3000/",
+                             public_tunnel_url="https://abc.trycloudflare.com", batch_size=10,
+                             prompts_dir=str(tmp_path / "prompts"), responses_dir=str(tmp_path / "responses"),
+                             poll_interval_seconds=0,
+                             prompt_template_file=str(ROOT / "configs/prompts/firecrawl_agent.md"))
+    client.session = outer = _FakeSession()
+    client.run_agent_discovery(["http://localhost:3000/a", "http://localhost:3000/b"])
+
+    assert len(client.last_response_files) == 1
+    import json
+    saved = json.loads(Path(client.last_response_files[0]).read_text())
+    assert saved["job_id"] == "job1" and saved["outcome"] == "completed"
+    assert saved["seeds"] == ["http://localhost:3000/a", "http://localhost:3000/b"]
+    assert len(saved["prompt_sha256"]) == 64
+    assert saved["response"]["data"]["links"] == ["https://abc.trycloudflare.com/#/new"]  # raw API answer kept
+
+
+def test_client_reads_job_startup_from_traffic_log(tmp_path):
+    global outer
+    import json
+    import time
+    from datetime import datetime, timezone
+    log = tmp_path / "traffic.jsonl"
+    soon = time.time() + 30   # a request the proxy logged after the job was submitted
+    log.write_text("\n".join(json.dumps({"ts": datetime.fromtimestamp(t, timezone.utc).isoformat(), "path": "/"})
+                             for t in (time.time() - 600, soon, soon + 5)) + "\n")
+    client = FirecrawlClient(api_key="key", target_base="http://localhost:3000/",
+                             public_tunnel_url="https://abc.trycloudflare.com", prompts_dir=str(tmp_path / "p"),
+                             responses_dir=str(tmp_path / "r"), traffic_log=str(log), poll_interval_seconds=0,
+                             prompt_template_file=str(ROOT / "configs/prompts/firecrawl_agent.md"))
+    client.session = outer = _FakeSession()
+    client.run_agent_discovery(["http://localhost:3000/a"])
+    saved = json.loads(Path(client.last_response_files[0]).read_text())
+    assert saved["requests_observed"] == 2                       # the old request is not this job's
+    assert abs(client.last_first_request_at - soon) < 0.01
+    assert 29 < saved["startup_seconds"] < 31
+
+
+def test_client_keeps_links_of_a_job_that_sent_no_request(tmp_path):
+    """A job served without any request through the tunnel (e.g. from Firecrawl's cache) must still return
+    its links once, not re-poll until the timeout (regression: KeyError 'first_request_at')."""
+    global outer
+    import json
+    import time
+    from datetime import datetime, timezone
+    log = tmp_path / "traffic.jsonl"
+    log.write_text(json.dumps({"ts": datetime.fromtimestamp(time.time() - 600, timezone.utc).isoformat(),
+                               "path": "/"}) + "\n")
+    client = FirecrawlClient(api_key="key", target_base="http://localhost:3000/",
+                             public_tunnel_url="https://abc.trycloudflare.com", prompts_dir=str(tmp_path / "p"),
+                             responses_dir=str(tmp_path / "r"), traffic_log=str(log), poll_interval_seconds=0,
+                             prompt_template_file=str(ROOT / "configs/prompts/firecrawl_agent.md"))
+    client.session = outer = _FakeSession()
+    results = client.run_agent_discovery(["http://localhost:3000/a"])
+    assert results and client.last_status == "ok"
+    saved = json.loads(Path(client.last_response_files[0]).read_text())
+    assert saved["requests_observed"] == 0 and "startup_seconds" not in saved
+    assert client.last_first_request_at is None

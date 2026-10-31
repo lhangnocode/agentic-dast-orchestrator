@@ -39,6 +39,15 @@ class ToolRun:
     duration_seconds: float = 0.0
     status: str = "ok"  # ok | failed | timeout
     error: Optional[str] = None
+    started_at: float = 0.0                    # epoch seconds when the tool was invoked
+    first_request_at: Optional[float] = None   # epoch seconds of the tool's first request at the target
+
+    @property
+    def startup_seconds(self) -> Optional[float]:
+        """Tool startup overhead: invocation -> first request at the target (None: no request observed)."""
+        if self.first_request_at is None:
+            return None
+        return round(max(0.0, self.first_request_at - self.started_at), 3)
 
 
 def _resolve_binary(binary: str) -> Optional[str]:
@@ -153,6 +162,8 @@ class ToolRegistry:
             prompt_template_file=f.get("prompt_template", "configs/prompts/firecrawl_agent.md"),
             context_file=f.get("context_file"),
             prompts_dir=f.get("prompts_dir", "output/prompts"),
+            responses_dir=f.get("responses_dir"),
+            traffic_log=f.get("traffic_log"),
             known_routes_max_chars=f.get("known_routes_max_chars", 4000),
             batch_size=f.get("batch_size", 10),
             max_credits=f.get("max_credits"),
@@ -188,6 +199,12 @@ class ToolRegistry:
         """Runs one tool; never raises (errors are reported in ToolRun.error)."""
         run = ToolRun(tool=tool, seeds=list(seeds))
         start = time.time()
+        run.started_at = start
+        wrapper = {ZAP_TRADITIONAL: self.zap, ZAP_AJAX: self.zap, ZAP_CLIENT: self.zap, WAPITI: self.wapiti,
+                   HTTP_PROBE: self.probe, FIRECRAWL: self.firecrawl}.get(tool)
+        if wrapper is not None:
+            wrapper.last_first_request_at = None
+            wrapper.run_started_at = start
         try:
             if tool == ZAP_TRADITIONAL:
                 run.results = self.zap.run_traditional_spider(seeds)
@@ -215,4 +232,7 @@ class ToolRegistry:
         if run.error:
             run.status = "failed"
         run.duration_seconds = time.time() - start
+        if wrapper is not None:
+            first = getattr(wrapper, "last_first_request_at", None)
+            run.first_request_at = first if first is not None and first >= start - 0.05 else None
         return run

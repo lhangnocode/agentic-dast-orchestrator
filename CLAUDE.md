@@ -50,7 +50,7 @@ Key boundaries:
   - The safety rules are owned by code and appended if the template drops `${constraints}`.
   - The prompt must stay ≤ 10,000 chars. Known routes are cut first, then the seed list; the context is cut only as a last resort.
   - Seeds are sent in jobs of `batch_size`. `max_credits` and `effort` go to the API when set, and `partial` results of credit-limited jobs are kept.
-  - Rendered prompts are saved by hash in `prompts_dir`.
+  - Rendered prompts are saved by hash in `prompts_dir`; each job's full API response (incl. `actions_taken`) goes to `responses_dir/<job id>.json`.
   - Without a key, or for a localhost target without `PUBLIC_TUNNEL_URL`, Firecrawl is unavailable.
 - **HTTP probe** (`tools/http_probe.py`): one GET per unknown-status URL, with no redirects followed and no `#/` routes. It is always available.
 - Time limits: `0`/`null` durations (`spider/ajax_spider/client_spider.max_duration_min`, Wapiti `max_scan_time`) mean no limit.
@@ -90,8 +90,8 @@ Every run appends JSONL events (`run_started`, `decision`, `tool_run`, `run_fini
 ### Evaluation
 
 - `evaluation/ground_truth.py`: builds pinned ground truth from each benchmark's source (Juice Shop routes with nesting plus server endpoints and auto-models; Crawlground markers; Crawl Maze expected results).
-- `evaluation/crawl_metrics.py`: run metrics (recall per kind, precision, duplicates, t50/t90, saturation time) and the mean/SD/95% t-CI aggregation.
-- `evaluation/run_benchmark.py`: repeated isolated runs. It restarts the target, **restarts the ZAP container** (a new ZAP session alone appeared to keep the Client Map, which leaked URLs between runs; `--no-zap-restart` skips this), sets a fresh Crawlground tool name, and gives each run its own output folder.
+- `evaluation/crawl_metrics.py`: run metrics (recall per kind, precision, duplicates, t50/t90, saturation time) and the mean/SD/95% t-CI aggregation. Matching is by `canonical_hash`, or by path when the ground-truth file sets `"match": "path"` (Crawlground, whose server scores any method/query on a marker path, and Crawl Maze, whose expected results are paths).
+- `evaluation/run_benchmark.py`: repeated isolated runs; `--recompute` rescores a label's existing runs without crawling. It restarts the target, **restarts the ZAP container** (a new ZAP session alone appeared to keep the Client Map, which leaked URLs between runs; `--no-zap-restart` skips this), sets a fresh Crawlground tool name, and gives each run its own output folder. A label is one configuration: re-running it appends runs (never overwrites) and writes `run_meta.json` (overrides, ZAP restart time, add-on versions). Tool startup overhead (invocation → first request at the target) is stored per tool run in `execution_history.startup_seconds` and summed in `metrics.json`; see `docs/benchmarks.md`. `--tunnel-proxy PORT` runs `tools/traffic_proxy.py` (logging reverse proxy; point the tunnel at PORT) during each run, so `tunnel_traffic.jsonl` lists Firecrawl's requests. Each run also keeps its resolved `config.json` and `tool_runs/<iter>-<tool>.json` traces (written by the loop when `logging.tool_runs_dir` is set); a profile's `access_log_container` saves the target's access log (`target_access.log`, metric `server_resources_requested`).
 
 The Juice Shop ground truth still needs its manual `reachable` review. Protocol and threats to validity: `docs/benchmarks.md`. The old `evaluation/benchmark_runner.py` + `ground_truth/avideo_routes.json` (`make evaluate`) predate the current normalizer.
 

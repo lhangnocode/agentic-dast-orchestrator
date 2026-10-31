@@ -144,6 +144,8 @@ class StateStore:
                 "error": "TEXT",
                 "rule_id": "TEXT",                     # which stage/rule triggered the run
                 "frontier_fingerprint": "TEXT",        # tool's pending frontier right after the run
+                "started_at": "REAL",                  # epoch seconds when the orchestrator invoked the tool
+                "startup_seconds": "REAL",             # invocation -> first request at the target (NULL: none seen)
             })
 
             # Tools added later get PENDING coverage rows for endpoints that already exist
@@ -549,8 +551,9 @@ class StateStore:
                     iteration, chosen_tool, reasoning, target_seeds,
                     endpoints_before, endpoints_after, new_endpoints_discovered,
                     marginal_gain, tool_duration_seconds, requests_sent,
-                    raw_results, seeds_count, status, error, rule_id, frontier_fingerprint
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    raw_results, seeds_count, status, error, rule_id, frontier_fingerprint,
+                    started_at, startup_seconds
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 record["iteration"],
                 record["chosen_tool"],
@@ -568,5 +571,7 @@ class StateStore:
                 record.get("error"),
                 record.get("rule_id"),
                 record.get("frontier_fingerprint"),
+                record.get("started_at"),
+                record.get("startup_seconds"),
             ))
             conn.commit()

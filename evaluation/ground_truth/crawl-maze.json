@@ -2,6 +2,7 @@
   "benchmark": "crawl-maze",
   "version": "2a0dd0a75e39925ded887bcd25016e8b3ce0f2b3",
   "base_url": "http://localhost:8090/",
+  "match": "path",
   "entries": [
     {
       "canonical_key": "GET /javascript/frameworks/angular/event-handler.found",

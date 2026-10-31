@@ -7,6 +7,7 @@ URLs with a client-side fragment route (`/#/…`), which never reach the server.
 """
 
 import logging
+import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
@@ -26,6 +27,7 @@ class HttpProbe:
         self.verify_tls = verify_tls
         self.last_request_count = 0
         self.last_status = "ok"
+        self.last_first_request_at = None
 
     @staticmethod
     def probe_target(url: str) -> bool:
@@ -50,10 +52,12 @@ class HttpProbe:
 
     def run(self, urls: List[str]) -> List[Dict[str, Any]]:
         self.last_status = "ok"
+        self.last_first_request_at = None
         targets = [u for u in dict.fromkeys(urls) if self.probe_target(u)]
         self.last_request_count = len(targets)
         if not targets:
             return []
+        self.last_first_request_at = time.time()   # requests start immediately: no setup before the first GET
         with ThreadPoolExecutor(max_workers=min(self.max_workers, len(targets))) as pool:
             results = [r for r in pool.map(self._probe, targets) if r]
         failed = len(targets) - len(results)

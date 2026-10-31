@@ -84,6 +84,14 @@ def _watchdog_seconds(max_duration_min: Optional[float], grace_sec: int) -> Opti
     return max_duration_min * 60 + grace_sec if max_duration_min else None
 
 
+def _sent_at(msg: Dict[str, Any]) -> Optional[float]:
+    """Time ZAP sent the message (API field `timestamp`, epoch milliseconds), in epoch seconds."""
+    try:
+        return int(msg.get("timestamp")) / 1000.0
+    except (TypeError, ValueError):
+        return None
+
+
 def _within(start: float, timeout: Optional[float]) -> bool:
     return timeout is None or time.time() - start < timeout
 
@@ -117,6 +125,8 @@ class ZapWrapper:
         self._browser_login_attempted = False
         self.last_request_count = 0
         self.last_status = "ok"  # ok | timeout (per run)
+        self.last_first_request_at: Optional[float] = None   # epoch s of the run's first message to the target
+        self.run_started_at: Optional[float] = None          # set by ToolRegistry.run before each tool run
         self.auth_headers: Dict[str, str] = {}
         self._client: Optional[ZAPv2] = None
 
@@ -531,6 +541,7 @@ class ZapWrapper:
         """
         discovered: List[Dict[str, Any]] = []
         self.last_request_count = 0
+        self.last_first_request_at = None
         if not self.is_alive():
             return discovered
 
@@ -555,6 +566,12 @@ class ZapWrapper:
                         # Placeholder ZAP creates for Sites-tree parent nodes ("HTTP/1.0 0"): never sent
                         continue
                     self.last_request_count += 1
+                    sent = _sent_at(msg)
+                    # the history offset can include a message of the previous run stored late: not ours
+                    if self.run_started_at is not None and sent is not None and sent < self.run_started_at:
+                        sent = None
+                    if sent is not None and (self.last_first_request_at is None or sent < self.last_first_request_at):
+                        self.last_first_request_at = sent
                     if not is_static_asset(urlparse(item["url"]).path):
                         discovered.append(item)
 

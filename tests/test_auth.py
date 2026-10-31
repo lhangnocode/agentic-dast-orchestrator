@@ -58,11 +58,11 @@ def test_prepare_auth_unresolved_placeholder_disables_auth():
 def test_wapiti_command_carries_auth(monkeypatch, tmp_path):
     captured = {}
 
-    def fake_run(cmd, **kwargs):
+    def fake_run(self, cmd, env, timeout):
         captured["cmd"] = cmd
-        return subprocess.CompletedProcess(cmd, 0, "", "")
+        return 0, ""
 
-    monkeypatch.setattr("tools.wapiti_wrapper.subprocess.run", fake_run)
+    monkeypatch.setattr("tools.wapiti_wrapper.WapitiWrapper._run_streaming", fake_run)
     wapiti = WapitiWrapper(session_db_path=str(tmp_path / "s.db"), report_path=str(tmp_path / "r.json"),
                            log_path=str(tmp_path / "w.log"),
                            headers={"Authorization": "Bearer jwt"}, cookies={"token": "jwt"})

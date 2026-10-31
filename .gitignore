@@ -36,6 +36,8 @@ output/experiments/
 output/zap/
 output/benchmarks/
 output/prompts/
+output/firecrawl_responses/
+output/tunnel_traffic*.jsonl
 output/*.out
 output/cloudflared.log
 .pytest_cache/

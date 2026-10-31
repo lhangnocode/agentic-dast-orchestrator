@@ -2,6 +2,7 @@
   "benchmark": "crawlground",
   "version": "7c7ba5931345bb8bd3a7cc2d5187f156ec0db512",
   "base_url": "http://localhost:3456/",
+  "match": "path",
   "entries": [
     {
       "canonical_key": "GET /score/buttons/01-html-button",

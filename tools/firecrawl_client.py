@@ -51,6 +51,8 @@ class FirecrawlClient:
         prompt_template_file: Optional[str] = None,
         context_file: Optional[str] = None,
         prompts_dir: Optional[str] = "output/prompts",
+        responses_dir: Optional[str] = None,
+        traffic_log: Optional[str] = None,
         known_routes_max_chars: int = 4000,
         batch_size: int = 10,
         max_credits: Optional[int] = None,
@@ -61,6 +63,10 @@ class FirecrawlClient:
         prompt_template_file / context_file: prompt template and per-target application context.
         known_routes_max_chars: budget for the "already known" summary inside the prompt.
         max_credits / effort: passed to the Agent API when set (API defaults otherwise).
+        responses_dir: when set, every job's final API response (links, actions_taken, status...) is
+        saved there as <job id>.json together with its seeds and prompt hash.
+        traffic_log: JSONL log of the logging proxy behind the tunnel (tools/traffic_proxy.py). When set,
+        each job's first observed request (and request count) is read from it: Firecrawl's startup time.
         fallback_routes_file: optional JSON list of URLs replayed when Firecrawl cannot run
         (no API key / unreachable). Only for offline experiments; leave unset for real runs.
         """
@@ -78,6 +84,9 @@ class FirecrawlClient:
         self.prompt_template_file = prompt_template_file
         self.context_file = context_file
         self.prompts_dir = prompts_dir
+        self.responses_dir = responses_dir
+        self.traffic_log = traffic_log
+        self.last_first_request_at: Optional[float] = None
         self.known_routes_max_chars = known_routes_max_chars
         self.batch_size = max(1, batch_size or 1)
         self.max_credits = max_credits
@@ -85,6 +94,7 @@ class FirecrawlClient:
         # Set by the orchestrator: callable(max_chars) -> summary of what is already discovered
         self.known_routes_provider = None
         self.last_prompt_files: List[str] = []
+        self.last_response_files: List[str] = []
         self.last_status = "ok"  # ok | failed | timeout
         self.session = self._create_session()
 
@@ -154,6 +164,7 @@ class FirecrawlClient:
         """
         self.last_status = "ok"
         self.last_prompt_files = []
+        self.last_response_files = []
         seeds = [s for s in dict.fromkeys(seeds) if s]
         if self.max_seeds:
             seeds = seeds[: self.max_seeds]
@@ -196,6 +207,7 @@ class FirecrawlClient:
         logger.info(f"[FIRECRAWL] Job {number}/{total}: {len(seeds)} seed(s), prompt {len(prompt.text)} chars "
                     f"(sha256 {prompt.sha256[:12]}{', saved to ' + str(saved) if saved else ''}).")
         logger.debug(f"[FIRECRAWL] Prompt:\n{prompt.text}")
+        submitted = time.time()
         try:
             resp = self.session.post(self.agent_endpoint, headers=self._headers(), json=payload, timeout=30)
             if resp.status_code not in (200, 201, 202):
@@ -210,15 +222,54 @@ class FirecrawlClient:
                 return []
 
             logger.info(f"[FIRECRAWL] Job started with ID: {job_id}. Polling for completion...")
-            return self._poll_job(job_id)
+            meta = {"job_id": job_id, "job": number, "jobs": total, "seeds": seeds,
+                    "prompt_sha256": prompt.sha256, "submitted_at": submitted}
+            return self._poll_job(job_id, meta)
         except Exception as e:
             logger.error(f"[FIRECRAWL] Request exception: {e}")
             self.last_status = "failed"
             return self._load_fallback_routes()
 
-    def _poll_job(self, job_id: str) -> List[Dict[str, Any]]:
+    def _save_response(self, meta: Dict[str, Any], outcome: str, data: Optional[Dict[str, Any]]) -> None:
+        """Keeps the whole API answer (incl. actions_taken), which the results only use `links` of."""
+        try:
+            traffic = self._job_traffic(meta.get("submitted_at"))
+        except Exception as e:   # never let bookkeeping lose a finished job's results
+            logger.warning(f"[FIRECRAWL] Could not read the traffic log for job {meta.get('job_id')}: {e}")
+            traffic = {}
+        meta = {**meta, **traffic}
+        first = traffic.get("first_request_at")   # absent when the job sent no request through the tunnel
+        if first is not None and (self.last_first_request_at is None or first < self.last_first_request_at):
+            self.last_first_request_at = first
+        if not self.responses_dir:
+            return
+        try:
+            out = Path(self.responses_dir)
+            out.mkdir(parents=True, exist_ok=True)
+            path = out / f"{meta['job_id']}.json"
+            record = {**meta, "finished_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                      "outcome": outcome, "response": data}
+            path.write_text(json.dumps(record, indent=2, ensure_ascii=False), encoding="utf-8")
+            self.last_response_files.append(str(path))
+        except Exception as e:
+            logger.warning(f"[FIRECRAWL] Could not save the response of job {meta.get('job_id')}: {e}")
+
+    def _job_traffic(self, since: Optional[float]) -> Dict[str, Any]:
+        """Requests the proxy behind the tunnel saw since the job was submitted (jobs run one at a time)."""
+        if not self.traffic_log or since is None:
+            return {}
+        from tools.traffic_proxy import read_traffic, record_time
+        times = [t for t in (record_time(r) for r in read_traffic(self.traffic_log)) if t is not None and t >= since]
+        if not times:
+            return {"requests_observed": 0}
+        first = min(times)
+        return {"first_request_at": first, "startup_seconds": round(first - since, 3), "requests_observed": len(times)}
+
+    def _poll_job(self, job_id: str, meta: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         elapsed = 0
         poll_url = f"{self.agent_endpoint}/{job_id}"
+        meta = meta or {"job_id": job_id}
+        data: Optional[Dict[str, Any]] = None
 
         while elapsed < self.poll_timeout_seconds:
             try:
@@ -229,8 +280,12 @@ class FirecrawlClient:
                     logger.debug(f"[FIRECRAWL] Poll [{elapsed}s] status={status}")
 
                     if status == "completed":
-                        links = (data.get("data") or {}).get("links", [])
-                        logger.info(f"[FIRECRAWL] Job completed. Found {len(links)} links.")
+                        result = data.get("data") or {}
+                        links = result.get("links", [])
+                        actions = result.get("actions_taken") or []
+                        logger.info(f"[FIRECRAWL] Job completed. Found {len(links)} links, "
+                                    f"{len(actions)} action(s) reported.")
+                        self._save_response(meta, "completed", data)
                         return [self._as_result(self._from_cloud_url(link)) for link in links if isinstance(link, str)]
 
                     if status in ("failed", "cancelled"):
@@ -239,6 +294,7 @@ class FirecrawlClient:
                         logger.warning(f"[FIRECRAWL] Job ended with status: {status} "
                                        f"({data.get('stopReason') or 'no reason'}); {len(partial)} partial link(s).")
                         self.last_status = "failed"
+                        self._save_response(meta, status, data)
                         return [self._as_result(self._from_cloud_url(link)) for link in partial if isinstance(link, str)]
             except Exception as e:
                 logger.warning(f"[FIRECRAWL] Error polling job {job_id}: {e}")
@@ -248,6 +304,7 @@ class FirecrawlClient:
 
         logger.warning(f"[FIRECRAWL] Polling stopped after {elapsed}s without results.")
         self.last_status = "timeout"
+        self._save_response(meta, "poll_timeout", data)   # last poll answer, if any
         return []
 
     def _load_fallback_routes(self) -> List[Dict[str, Any]]:

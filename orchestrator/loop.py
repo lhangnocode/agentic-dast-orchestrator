@@ -64,6 +64,8 @@ class AdaptiveOrchestrator:
             self.tools.firecrawl.known_routes_provider = self.store.get_known_routes_summary
         self.run_log = RunLog(config.get("logging", {}).get("run_events_file", "output/logs/run_events.jsonl"))
         self.output_dir = Path(config.get("output", {}).get("dir", "output"))
+        # Optional per-tool-run trace (seeds, raw output, new endpoints, every tool's queue afterwards)
+        self.trace_dir = config.get("logging", {}).get("tool_runs_dir")
 
     # ------------------------------------------------------------------ setup
     def seed_initial_target(self) -> None:
@@ -176,15 +178,18 @@ class AdaptiveOrchestrator:
         for action in plan:
             run = runs_by_tool[action.tool]
             before = self.store.get_total_endpoints_count()
-            new = self._ingest(run, iteration)
-            self._record(run, iteration, before, new, action.reason, rule_id=action.rule_id)
+            new_keys = self._ingest(run, iteration)
+            self._record(run, iteration, before, len(new_keys), action.reason, rule_id=action.rule_id)
+            if self.trace_dir:
+                self._write_trace(run, iteration, action, new_keys)
             runs.append(run)
         return runs
 
     # ------------------------------------------------------------------ state updates
-    def _ingest(self, run: ToolRun, iteration: int) -> int:
-        """Normalizes a tool run into the store and marks what the tool has now visited."""
-        new = 0
+    def _ingest(self, run: ToolRun, iteration: int) -> List[str]:
+        """Normalizes a tool run into the store and marks what the tool has now visited.
+        Returns the canonical keys that were new to the store."""
+        new_keys: List[str] = []
         visited_hashes = []
         for item in run.results:
             norm = normalize_endpoint(
@@ -198,7 +203,7 @@ class AdaptiveOrchestrator:
                 continue
             norm["content_type"] = item.get("content_type", "")
             if self.store.insert_or_update_endpoint(norm, current_iteration=iteration):
-                new += 1
+                new_keys.append(norm["canonical_key"])
             visited_hashes.append(norm["canonical_hash"])
 
         for seed in run.seeds:
@@ -208,11 +213,13 @@ class AdaptiveOrchestrator:
         self.store.mark_hashes_processed(visited_hashes, run.tool, iteration)
 
         logger.info(
-            f"[{run.tool}] {len(run.results)} raw result(s) -> {new} new canonical endpoint(s) | "
-            f"requests: {run.requests_sent} | {run.duration_seconds:.1f}s | status: {run.status}"
+            f"[{run.tool}] {len(run.results)} raw result(s) -> {len(new_keys)} new canonical endpoint(s) | "
+            f"requests: {run.requests_sent} | {run.duration_seconds:.1f}s"
+            + (f" (startup {run.startup_seconds:.1f}s)" if run.startup_seconds is not None else "")
+            + f" | status: {run.status}"
             + (f" | error: {run.error}" if run.error else "")
         )
-        return new
+        return new_keys
 
     def _record(self, run: ToolRun, iteration: int, endpoints_before: int, new: int, reasoning: str,
                 rule_id: str) -> None:
@@ -234,9 +241,32 @@ class AdaptiveOrchestrator:
             "status": run.status,
             "error": run.error,
             "frontier_fingerprint": self.store.frontier_fingerprint(run.tool),
+            "started_at": round(run.started_at, 3) if run.started_at else None,
+            "startup_seconds": run.startup_seconds,
         }
         self.store.record_iteration(record)
         self.run_log.event("tool_run", **{k: v for k, v in record.items() if k not in ("target_seeds", "reasoning")})
+
+    def _write_trace(self, run: ToolRun, iteration: int, action: Action, new_keys: List[str]) -> None:
+        """One JSON file per tool run: what went in, what came out, and the pipeline state afterwards."""
+        stats = self.store.get_tool_stats()
+        queues = {t: int(self.store.frontier_fingerprint(t).split(":", 1)[0]) for t in self.tools.available_tools()}
+        trace = {
+            "iteration": iteration, "tool": run.tool, "rule_id": action.rule_id, "reason": action.reason,
+            "focus": action.focus, "seeds": run.seeds, "started_at": run.started_at,
+            "first_request_at": run.first_request_at, "startup_seconds": run.startup_seconds,
+            "duration_seconds": run.duration_seconds, "requests_sent": run.requests_sent,
+            "status": run.status, "error": run.error,
+            "raw_results": [{k: r.get(k) for k in ("url", "method", "status_code", "content_type", "source")}
+                            for r in run.results],
+            "new_endpoints": new_keys,
+            "endpoints_total_after": self.store.get_total_endpoints_count(),
+            "pending_frontier_after": queues,
+            "processed_after": {t: s.get("PROCESSED", 0) for t, s in stats.items()},
+        }
+        path = Path(self.trace_dir) / f"{iteration:02d}-{run.tool}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(trace, indent=2, ensure_ascii=False), encoding="utf-8")
 
     # ------------------------------------------------------------------ export
     def export_results(self) -> Dict[str, Any]:

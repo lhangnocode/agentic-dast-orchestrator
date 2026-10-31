@@ -145,6 +145,7 @@
       "prompt_template": "configs/prompts/firecrawl_agent.md",
       "context_file": "configs/contexts/juice-shop.md",
       "prompts_dir": "output/prompts",
+      "responses_dir": "output/firecrawl_responses",
       "known_routes_max_chars": 4000,
       "batch_size": 10,
       "max_seeds": null,

@@ -80,3 +80,26 @@ def test_zap_message_parsing_skips_placeholders_and_assets():
     placeholder = zap._parse_message({"requestHeader": "GET http://host.docker.internal:3000/rest HTTP/1.1",
                                       "responseHeader": "HTTP/1.0 0"}, "zap_traditional_spider")
     assert placeholder["status_code"] == 0
+
+
+def test_wapiti_times_first_crawled_resource(tmp_path):
+    import sys
+    import time
+    from tools.wapiti_wrapper import WapitiWrapper
+    w = WapitiWrapper(session_db_path=str(tmp_path / "s.db"), report_path=str(tmp_path / "r.json"),
+                      log_path=str(tmp_path / "w.log"))
+    log = tmp_path / "w.log"
+    log.write_text("[+] GET http://old-run/ (0)\n")          # an earlier run's line does not count
+    script = (f"import time; f = open({str(log)!r}, 'a'); f.write('Wapiti 3.3.2\\n'); f.flush(); "
+              "time.sleep(0.5); f.write('[+] GET http://localhost:3456/ (0)\\n'); f.flush(); time.sleep(0.3)")
+    start = time.time()
+    code, _ = w._run_streaming([sys.executable, "-c", script], env=None, timeout=10)
+    assert code == 0 and w.last_first_request_at is not None
+    assert 0.45 <= w.last_first_request_at - start < 0.75   # the banner line does not count
+
+
+def test_tool_run_startup_seconds():
+    from tools.registry import ToolRun
+    run = ToolRun(tool="x", seeds=[], started_at=100.0, first_request_at=102.5)
+    assert run.startup_seconds == 2.5
+    assert ToolRun(tool="x", seeds=[], started_at=100.0).startup_seconds is None

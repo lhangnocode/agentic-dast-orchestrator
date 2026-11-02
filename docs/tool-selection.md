@@ -1,14 +1,14 @@
 # Tool-selection algorithm
 
 How the orchestrator decides which crawler runs next, written as a procedure. It describes the code as of
-2026-10-27 (`orchestrator/loop.py`, `orchestrator/rules.py`, `storage/state_store.py`). No LLM is involved:
+2026-11-02 (R2 removed; the run-04 example below predates that but R2 never fired in it) (`orchestrator/loop.py`, `orchestrator/rules.py`, `storage/state_store.py`). No LLM is involved:
 every decision is a deterministic function of what is stored in the SQLite state store.
 
 ## Terms
 
 | Term | Meaning |
 |---|---|
-| **Tool** | One crawler action: `zap_traditional_spider`, `zap_client_spider` (or `zap_ajax_spider`), `wapiti_form_crawl`, `firecrawl_navigate`, `http_probe`. |
+| **Tool** | One crawler action: `zap_traditional_spider`, `zap_client_spider`, `wapiti_form_crawl`, `firecrawl_navigate`, `http_probe`. |
 | **Engine** | The program behind a tool: `zap`, `wapiti`, `firecrawl`, `http` (the part of the tool name before the first `_`). Tools of one engine share state, so they never run at the same time. |
 | **Iteration** | One round of the loop. It runs **at most one tool per engine**, the engines in parallel. One iteration therefore contains 1–4 **tool runs**. |
 | **Endpoint** | A normalized URL (`canonical_key`, e.g. `GET /test/html/body/a/href.found`). IDs, hashes and query values are generalized, so `/item/1` and `/item/2` are one endpoint. |
@@ -62,8 +62,8 @@ Repeat steps 3–5 until a stop condition holds.
        content type HTML/XHTML/unknown, or a `#/` client route. Ordered 2xx first, then by the iteration
        that found them. Each endpoint is given as a concrete URL a tool actually observed, not as the
        generalized template.
-   - `frontier_changed` = `runs > 0` **and** `current_fingerprint ≠ stored_fingerprint` **and** the frontier
-     is not empty.
+   - `frontier_changed` = (`runs = 0` **or** `current_fingerprint ≠ stored_fingerprint`) **and** the frontier
+     is not empty. `runs = 0` only happens for a tool the stages left out; it then starts on its frontier.
 
    Note: the fingerprint covers the tool's whole pending list, while the frontier of a page-like tool is the
    page-like part of it. A new non-page URL can therefore change the fingerprint, and the tool then runs on
@@ -73,7 +73,7 @@ Repeat steps 3–5 until a stop condition holds.
 
 ```
 actions = {}                                   # at most one per engine
-for rule in [R1, R2, R3, R4, R5, R6, R7]:      # priority order; rules in rules.disabled_rules are skipped
+for rule in [R1, R3, R4, R5, R6, R7]:          # priority order (R2 removed); rules in rules.disabled_rules are skipped
     for tool in snapshot.tools:                # order of step 3.2
         engine = engine_of(tool)
         if engine in actions:                  continue   # this engine already has an action this round
@@ -86,7 +86,6 @@ if actions is empty: stop, termination = "saturation"
 | Rule | Fires for a tool when | Seeds |
 |---|---|---|
 | **R1 retry** | its last run ended `failed` or `timeout`, `consecutive_failures ≤ max_retries` (default 1), and it had seeds | the same seeds again |
-| **R2 first run** | it never ran, no fixed stage covers it, and it is not the probe | `base_seeds` |
 | **R3 browser spider** | it is the configured browser spider and `frontier_changed` | its frontier |
 | **R4 link spider** | it is the ZAP traditional spider and `frontier_changed` | its frontier |
 | **R5 form crawler** | it is Wapiti and `frontier_changed` | its frontier |

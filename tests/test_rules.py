@@ -8,7 +8,6 @@ from orchestrator.rules import (FIRECRAWL, HTTP_PROBE, WAPITI, ZAP_AJAX, ZAP_CLI
                                 RuleSettings, Snapshot, ToolState, build_snapshot, select_actions)
 from storage.state_store import StateStore
 
-BASE = ["http://localhost:3000/"]
 
 
 def state(tool, runs=1, last_status="ok", stored="1:a", current="1:a", frontier=(), failures=0,
@@ -19,8 +18,8 @@ def state(tool, runs=1, last_status="ok", stored="1:a", current="1:a", frontier=
                      frontier=list(frontier))
 
 
-def snap(*states, staged=(ZAP_TRADITIONAL, ZAP_CLIENT, WAPITI, FIRECRAWL)):
-    return Snapshot(iteration=3, base_seeds=BASE, tools={s.tool: s for s in states}, staged_tools=set(staged))
+def snap(*states):
+    return Snapshot(iteration=3, tools={s.tool: s for s in states})
 
 
 GREW = dict(stored="1:a", current="2:b", frontier=["http://localhost:3000/new"])
@@ -33,8 +32,9 @@ CASES = [
      [state(WAPITI, last_status="timeout", failures=1)], [(WAPITI, "R1_retry")]),
     ("R1 exhausted -> no retry",
      [state(WAPITI, last_status="failed", failures=2)], []),
-    ("R2 tool outside the stages never ran",
-     [state(WAPITI, runs=0)], []),  # Wapiti is staged -> no R2
+    ("tool that never ran (left out of the stages) starts on its frontier",
+     [state(WAPITI, runs=0, current="2:b", frontier=["http://localhost:3000/"])], [(WAPITI, "R5_form_crawler")]),
+    ("never ran but no usable seeds -> nothing", [state(ZAP_CLIENT, runs=0, frontier=[])], []),
     ("R3 browser frontier changed", [state(ZAP_CLIENT, **GREW)], [(ZAP_CLIENT, "R3_browser_spider")]),
     ("R4 link spider frontier changed", [state(ZAP_TRADITIONAL, **GREW)], [(ZAP_TRADITIONAL, "R4_link_spider")]),
     ("R5 wapiti frontier changed", [state(WAPITI, **GREW)], [(WAPITI, "R5_form_crawler")]),
@@ -60,9 +60,9 @@ def test_rule_table(desc, states, expected):
     assert sorted((a.tool, a.rule_id) for a in actions) == sorted(expected)
 
 
-def test_first_run_rule_for_unstaged_tool():
-    actions = select_actions(snap(state(WAPITI, runs=0), staged=(ZAP_TRADITIONAL,)), RuleSettings())
-    assert [(a.tool, a.rule_id, a.seeds) for a in actions] == [(WAPITI, "R2_first_run", BASE)]
+def test_rule_r2_is_gone():
+    from orchestrator.rules import RULE_ORDER, RULES
+    assert "R2_first_run" not in RULE_ORDER and "R2_first_run" not in RULES
 
 
 def test_retry_reuses_last_seeds():
@@ -93,12 +93,12 @@ def test_build_snapshot_from_store_detects_growth():
         store.record_iteration({"iteration": 1, "chosen_tool": ZAP_TRADITIONAL, "endpoints_before": 0,
                                 "endpoints_after": 1, "new_endpoints_discovered": 1, "marginal_gain": 1.0,
                                 "frontier_fingerprint": store.frontier_fingerprint(ZAP_TRADITIONAL)})
-        s1 = build_snapshot(store, [ZAP_TRADITIONAL], settings, BASE, {ZAP_TRADITIONAL}, 2)
+        s1 = build_snapshot(store, [ZAP_TRADITIONAL], settings, 2)
         assert select_actions(s1, settings) == []                       # nothing new for it
 
         store.insert_or_update_endpoint(normalize_endpoint("http://localhost:3000/bravo", source_tool=WAPITI,
                                                            status_code=200), 2)
-        s2 = build_snapshot(store, [ZAP_TRADITIONAL], settings, BASE, {ZAP_TRADITIONAL}, 3)
+        s2 = build_snapshot(store, [ZAP_TRADITIONAL], settings, 3)
         [a] = select_actions(s2, settings)
         assert a.rule_id == "R4_link_spider" and "http://localhost:3000/bravo" in a.seeds
 

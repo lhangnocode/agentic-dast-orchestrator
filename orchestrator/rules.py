@@ -7,7 +7,6 @@ Deterministic rule engine that picks the next crawl actions (no LLM).
 Each rule closes a capability gap (see docs/tool-capabilities.md):
 
   R1 retry          last run of a tool failed/timed out and retries are left -> same tool, same seeds
-  R2 first_run      an enabled tool that the fixed stages did not run has never run -> base URL
   R3 browser_spider browser spider's frontier changed since its last run -> new page-like URLs
   R4 link_spider    ZAP traditional spider's frontier changed -> new URLs
   R5 form_crawler   Wapiti's frontier changed -> new page-like URLs
@@ -18,7 +17,9 @@ Rules are evaluated per engine (zap / wapiti / firecrawl / http) in the order ab
 match wins, so each round runs at most one action per engine (engines run in parallel lanes).
 "Frontier changed" compares the tool's current pending-frontier fingerprint with the one
 stored right after its last run, which guarantees termination on a surface that stops growing.
-No action for any engine = saturation.
+A tool that has never run (left out of the fixed stages) counts as changed, so R3-R6 also start it.
+No action for any engine = saturation. (R2 "first run" was removed on 2026-11-02: the stages run every
+tool once, so it never fired.)
 """
 
 from dataclasses import dataclass, field
@@ -34,7 +35,7 @@ WAPITI = "wapiti_form_crawl"
 FIRECRAWL = "firecrawl_navigate"
 HTTP_PROBE = "http_probe"
 
-RULE_ORDER = ("R1_retry", "R2_first_run", "R3_browser_spider", "R4_link_spider",
+RULE_ORDER = ("R1_retry", "R3_browser_spider", "R4_link_spider",
               "R5_form_crawler", "R6_ui_agent", "R7_probe")
 
 # Which seeds each tool can use: browsers/agents and Wapiti want pages, not JSON or files
@@ -59,15 +60,14 @@ class ToolState:
 
     @property
     def frontier_changed(self) -> bool:
-        return self.runs > 0 and self.current_fingerprint != self.stored_fingerprint and bool(self.frontier)
+        # never ran = changed: a tool the stages left out starts on its (whole) frontier
+        return (self.runs == 0 or self.current_fingerprint != self.stored_fingerprint) and bool(self.frontier)
 
 
 @dataclass(frozen=True)
 class Snapshot:
     iteration: int
-    base_seeds: List[str]
     tools: Dict[str, ToolState]         # only selectable, available tools
-    staged_tools: Set[str]              # tools the fixed stages already cover
     surface: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -110,7 +110,7 @@ def tool_frontier(store: StateStore, tool: str) -> List[str]:
 
 
 def build_snapshot(store: StateStore, available: Iterable[str], settings: RuleSettings,
-                   base_seeds: List[str], staged_tools: Set[str], iteration: int) -> Snapshot:
+                   iteration: int) -> Snapshot:
     available = set(available)
     last_runs = store.get_last_runs()
     run_counts = store.get_tool_run_counts()
@@ -129,8 +129,7 @@ def build_snapshot(store: StateStore, available: Iterable[str], settings: RuleSe
             current_fingerprint=store.frontier_fingerprint(tool),
             frontier=tool_frontier(store, tool),
         )
-    return Snapshot(iteration=iteration, base_seeds=list(base_seeds), tools=tools,
-                    staged_tools=set(staged_tools),
+    return Snapshot(iteration=iteration, tools=tools,
                     surface=classify_surface(store.get_surface_profile(), settings.spa_html_page_max))
 
 
@@ -151,12 +150,6 @@ def _r1_retry(t: ToolState, snap: Snapshot, s: RuleSettings) -> Optional[Action]
     return None
 
 
-def _r2_first_run(t: ToolState, snap: Snapshot, s: RuleSettings) -> Optional[Action]:
-    if t.runs == 0 and t.tool not in snap.staged_tools and t.tool != HTTP_PROBE:
-        return Action(t.tool, snap.base_seeds, "R2_first_run", "enabled tool not covered by the stages has never run")
-    return None
-
-
 def _grew(rule_id: str, tool_filter, reason: str, focus: str = ""):
     def rule(t: ToolState, snap: Snapshot, s: RuleSettings) -> Optional[Action]:
         if tool_filter(t.tool, s) and t.frontier_changed:
@@ -173,7 +166,6 @@ def _r7_probe(t: ToolState, snap: Snapshot, s: RuleSettings) -> Optional[Action]
 
 RULES = {
     "R1_retry": _r1_retry,
-    "R2_first_run": _r2_first_run,
     "R3_browser_spider": _grew("R3_browser_spider", lambda tool, s: tool == s.browser_spider,
                                "browser spider: new page-like URLs since its last run"),
     "R4_link_spider": _grew("R4_link_spider", lambda tool, s: tool == ZAP_TRADITIONAL,

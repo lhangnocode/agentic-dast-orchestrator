@@ -96,7 +96,6 @@ class AdaptiveOrchestrator:
         rule_counts: Dict[str, int] = {}
         requests_sent = 0
         iteration = 0
-        staged: set = set()
 
         # Fixed stages: stage 1 starts from the base URL, later stages from everything found so far
         for index, stage in enumerate(self.stages, start=1):
@@ -113,7 +112,6 @@ class AdaptiveOrchestrator:
             for run in self._run_plan(plan, iteration):
                 requests_sent += run.requests_sent
                 rule_counts[f"stage{index}"] = rule_counts.get(f"stage{index}", 0) + 1
-            staged.update(tools)
 
         # Rule rounds until saturation or a safety ceiling
         termination = "saturation"
@@ -121,7 +119,7 @@ class AdaptiveOrchestrator:
             if iteration >= self.max_iterations:
                 termination = "max_iterations"
                 break
-            snapshot = build_snapshot(self.store, available, self.rule_settings, base_seeds, staged, iteration + 1)
+            snapshot = build_snapshot(self.store, available, self.rule_settings, iteration + 1)
             actions = select_actions(snapshot, self.rule_settings)
             if not actions:
                 break

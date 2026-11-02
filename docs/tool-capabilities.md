@@ -30,12 +30,13 @@ All signals are computed from persisted data (`storage/state_store.py`); none ne
 
 ## Rules and the capabilities they rely on
 
-Evaluated per engine (zap / wapiti / firecrawl / http) in this order; the first match wins.
+Evaluated per engine (zap / wapiti / firecrawl / http) in this order; the first match wins. R2 (first run of
+a tool the stages left out) was removed on 2026-11-02: it never fired, because the stages run every tool once.
+A tool that has never run now counts as "frontier changed", so R3–R6 start it.
 
 | Rule | Condition | Action | Capability relied on |
 |---|---|---|---|
 | R1 retry | Last run `failed`/`timeout` and attempts ≤ `max_retries` | Same tool, same seeds | Failure modes above are mostly transient (timeouts, cloud jobs) |
-| R2 first_run | Enabled tool not covered by the fixed stages has never run | Tool on base URL + `seed_urls` | Every tool's baseline from the entry point |
 | R3 browser_spider | Browser spider frontier changed | Client Spider (or AJAX, `browser_spider`) on new page-like URLs | Only browser tools execute client-side routing and DOM events |
 | R4 link_spider | Link spider frontier changed | ZAP traditional on new URLs | Cheapest way to follow server-rendered links from new pages |
 | R5 form_crawler | Wapiti frontier changed | Wapiti on new page-like URLs | Only Wapiti extracts form parameters |

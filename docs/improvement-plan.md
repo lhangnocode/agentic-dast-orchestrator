@@ -18,6 +18,9 @@ Crawlground series. Decisions still open are listed at the end. The algorithm th
 | P0: offline replay | open; only Crawl Maze run-04 has partial data for it (see 3.6) | |
 | Eval: new labels | open; needs new Firecrawl credits | |
 
+Decisions of 2026-11-03 that change the plan: the tunnel log is offline-only (3.2, 3.3, F5); Wapiti always
+runs headless and keeps `#` seeds (3.4, 3.5, 3.7).
+
 Changes made outside this plan:
 
 - **R2 "first run" removed** (2026-11-02, `36bd93c`). It fired in none of the 30 recorded runs, because the
@@ -116,7 +119,8 @@ Why this was not enough (AngularJS trap `/javascript/frameworks/angularjs#/!/#%2
   | run-04 | 4–18 | 1,547 s (26 min) | 7, 694 s | 7 |
 
 - **Seeds a tool can't use:** a `#…` fragment is never sent to the server, so for the ZAP traditional spider
-  and Wapiti a trap URL is the same request as the page they already crawled.
+  a trap URL is the same request as the page it already crawled. (Corrected 2026-11-03: headless Wapiti does
+  load the fragment, see 3.4; its trap re-runs are for Rule B to stop.)
 - **No unproductive-streak check:** tools with several zero-yield runs in a row still run on the next change.
 - **The stop was luck:** run-02 ended when the trap moved to `/#/…` and stopped producing variants, not
   because a guard caught it.
@@ -188,15 +192,31 @@ is still to do. The original proposal, kept for reference:
   - add `Sec-Fetch-Dest` / `Sec-Fetch-Mode` to the proxy log to tell page loads from background requests;
   - use the Referer to check `from_page` of interaction URLs.
 - **Limitation:** verification exists only for localhost targets behind the logging proxy.
+- **Role (decided 2026-11-03):** the tunnel log is an **offline audit only** (this accuracy metric, the P0
+  replay). It never decides a coverage state at runtime, because production and external scans have no
+  logging proxy. See A0.
 
 ### 3.3 A0: truthful "visited" (prerequisite for C and F)
 
 - Coverage states per tool:
   - `PENDING`: not yet given to the tool;
-  - `SEEDED`: handed over, no proof of a visit;
-  - `VISITED`: the tool returned a status for it, or the tunnel log proves a Firecrawl visit;
+  - `SEEDED`: handed over, no evidence of a visit in the tool's output;
+  - `VISITED`: the tool's own output shows a visit;
   - `SEEN`: only extracted.
-- Client Map: use ZAP's `visited` flag. Firecrawl `links` become `SEEN`. Seeds of failed runs stay `SEEDED`
+- **Evidence per tool (runtime, tool output only):**
+
+  | Tool | `VISITED` when | `SEEN` when |
+  |---|---|---|
+  | ZAP traditional spider, HTTP probe | a message/response with a status | – |
+  | ZAP Client Spider | ZAP history message with a status; Client Map node with `visited` (absent flag = visited, to verify) | Client Map node with `visited: false`, component `href`s |
+  | Wapiti (headless) | `responses.status_code` in its session DB. A `#` seed: its fragment-less page has a response in that run (Wapiti does not store routes, see 3.4; that the route rendered is assumed, not shown) | – |
+  | Firecrawl | listed in `visited_urls`, or in `interaction_urls` (with `interaction = true`) | listed in `seen_urls`; old `links` (`unspecified`) |
+
+- **Firecrawl is trusted at runtime (decided 2026-11-03):** its payload sets the state directly; the tunnel
+  log does not. Risk: Firecrawl's lists are self-reported (in the old format, 116 of 329 reported paths were
+  never requested). A false `VISITED` keeps a seed from being offered again; a false interaction raises a seed
+  to level 1. The P2 accuracy metric measures both per benchmark and is reported as a threat to validity.
+- A Firecrawl seed that appears in none of its three lists stays `SEEDED`. Seeds of failed runs stay `SEEDED`
   (R1 still retries them).
 - The frontier keeps today's behaviour (`PENDING` only), so this is mostly bookkeeping; C and F read the new
   states.
@@ -204,12 +224,27 @@ is still to do. The original proposal, kept for reference:
 ### 3.4 Rule A: same request for this tool
 
 - `request_key(url, tool)`:
-  - drop the fragment for tools that never send it (ZAP traditional, Wapiti, probe);
+  - drop the fragment **only for tools that never load it**: the ZAP traditional spider and the HTTP probe
+    (the probe already skips `#` routes);
+  - **keep the fragment** for the Client Spider, Firecrawl and Wapiti (decided 2026-11-03);
   - resolve `/./` and `/../`;
   - drop default ports.
 - A pending seed whose key is already done for that tool is skipped. The fingerprint is computed on the same
   filtered list, so a skipped seed cannot trigger a re-run.
-- Expected effect: the ZAP traditional and Wapiti re-runs triggered by trap variants (section 2.4) do not fire.
+- **Wapiti runs headless, always (decided 2026-11-03):** `tools.wapiti.headless` is fixed to `hidden` (it is
+  already the default; the option `no` is to be removed, together with the wrapper branch that drops `#` seeds
+  when headless is off). Verified in Wapiti 3.3.2's code:
+  - `-s <url#route>` keeps the fragment (`Request(start_url)`), and the headless explorer navigates to
+    `url_with_fragment` and parses links with `allow_fragments=True`, so Wapiti does explore hash routes;
+  - its session DB stores only the `path`, so **routes never come back in Wapiti's output**: in Crawl Maze
+    run-04 its 8 runs got 35 `#` seeds and returned 0 `#` URLs (247 DB paths, none with `#`). What a route
+    seed yields is the server traffic it triggers (pages, XHR, forms);
+  - `-u` must not contain a fragment (`is_valid_endpoint`), so `#` seeds always go in `-s`.
+- Expected effect: the ZAP traditional re-runs triggered by trap variants (section 2.4) do not fire. **Wapiti's
+  trap re-runs are no longer stopped by A** (run-04: 7 re-runs, 694 s, 0 new); Rule B must stop them, so B is
+  a prerequisite for Wapiti's savings.
+- Risk inside one Wapiti run: its explorer treats fragment variants as different requests, so a hash trap can
+  also grow inside Wapiti, bounded by its `depth`. Not observed so far (re-runs took about 97 s each).
 - Open choice: resolve `/./` in the normalizer (correct identity, ground truth regenerated) or only in
   `request_key`.
 - Risk: low.
@@ -225,6 +260,8 @@ is still to do. The original proposal, kept for reference:
     generations in a row.
 - Trap URLs are stored with `trap_reason` (not deleted), kept out of every frontier and fingerprint, and
   precision is reported with and without them.
+- **B is the only guard against fragment traps** for the tools that keep fragments (Client Spider, Wapiti,
+  Firecrawl); A no longer strips fragments for Wapiti.
 - Expected effect on Crawl Maze: the AngularJS line stops after its first generation, so saturation around
   iteration 5 instead of 12 or 18. The P0 replay confirms this before implementation.
 - Risk: low.
@@ -239,7 +276,7 @@ is still to do. The original proposal, kept for reference:
   |---|---|
   | Excluded | trap (B) or same request as a done URL for this tool (A) |
   | 1 – high | first URL of a new page group, **or** a page with forms/buttons no browser tool explored, **or** a URL Firecrawl reached only by interaction (`firecrawl_kind = interaction`) |
-  | 2 | handled only by tools without JavaScript (ZAP traditional, probe) |
+  | 2 | handled only by tools without JavaScript (ZAP traditional, probe); JavaScript tools are the Client Spider, headless Wapiti and Firecrawl |
   | 3 | opened by a browser tool, has outgoing links |
   | 4 – low | leaf (opened by a browser tool, no outgoing links) or most of its links already known |
 
@@ -279,7 +316,7 @@ is still to do. The original proposal, kept for reference:
   | G4 | Client Map export overwritten every run (`output/zap/client_map.yaml`) | copy it into the run folder after each Client Spider run |
   | G5 | Wapiti session DB flushed on every Wapiti run | copy `session.db` per Wapiti run |
   | G6 | PROCESSED ≠ visited | A0 |
-  | G7 | path templates too fine to group pages (readable slugs are kept) | page group = (method, parent folder of the path template, query keys) – **to confirm** |
+  | G7 | path templates too fine to group pages (readable slugs are kept) | page group = (method, parent folder of the path template, query keys) – **decided 2026-11-03** |
 
 - **Edge cases:** browsers never send the fragment in `Referer`, so links between `#/` routes come only from
   the Client Map tree; "no links" seen only by the traditional spider is not a leaf (JavaScript links);
@@ -299,13 +336,28 @@ is still to do. The original proposal, kept for reference:
   - Expensive tools use the level for selection (D, F).
 - **Code:** `orchestrator/seed_scoring.py` (pure functions), features built in `build_snapshot`, settings
   in `orchestrator.seed_scoring`.
+- **Scope (agreed 2026-11-03):** coarse tiers first, then ordering inside a tier in steps. With maximum recall
+  and no budget, ordering inside a tier changes *when* resources are found (t50/t90), not *whether*, unless
+  something cuts the list (level-4 skip, F4 stop, a credit cap). All ordering is a fixed sort on readable keys,
+  no weights; each step sits behind a config switch.
+
+  | Step | Content | Measured by |
+  |---|---|---|
+  | 1 | P0a data capture (G1–G5) | tests |
+  | 2 | Coarse tiers + fixed tie-break: level → page group (round-robin) → status class → discovery order; replay: baseline, Run A, Run B | recall lost, Firecrawl jobs/credits/time |
+  | 3 | Parent yield as a tie-break key (needs G3) | t50/t90, recall under a credit cap |
+  | 4 | Structural de-duplication (page shape from Client Map components or Wapiti bodies) as an optional filter, off by default | recall lost vs. seeds removed; high risk on Crawl Maze, whose test pages look alike |
+
+  HTTP feedback needs no new work: status is the tie-break, content type selects page-like seeds, form
+  density is level 1; error rate stays out on purpose.
 
 ### 3.7 Rule D: re-runs sized to the new seeds
 
 - A first run keeps scope `domain`.
 - Re-runs triggered by R4 and R5:
   - ZAP: `spider.scan(seed, recurse=False, subtreeOnly=True)` per seed, with a small depth;
-  - Wapiti: `-u <seed> --scope folder` (or `page`) per seed group instead of `-u base_url`.
+  - Wapiti: `-u <seed> --scope folder` (or `page`) per seed group instead of `-u base_url`. `-u` cannot hold a
+    fragment, so a `#` seed keeps `-u` = its fragment-less page and goes in `-s`.
 - Needs a short spike first: how Wapiti scopes extra `-s` seeds relative to `-u`, and ZAP's `subtreeOnly`.
 - Risk: medium. A full re-crawl could reach pages only through new server state; check Crawlground and Juice
   Shop runs for re-runs that found something new.
@@ -331,8 +383,8 @@ is still to do. The original proposal, kept for reference:
 4. **F4 window stop, only after ordering:** after a warm-up of 3 jobs, stop submitting when the last 2 jobs
    found nothing new while earlier jobs did, and all remaining seeds are level 3 or lower. Skipped seeds are
    marked *deferred*, not done.
-5. **F5 visit check (traffic used for verification only):** a seed counts as visited by Firecrawl only if
-   the tunnel log shows it was requested; unvisited seeds are offered once more, then given up.
+5. **F5 unvisited seeds (revised 2026-11-03, no tunnel log):** a seed that appears in none of Firecrawl's
+   three lists stays `SEEDED` and is offered once more, then given up. The tunnel log only audits this offline.
 
 Trade-off: with max recall and no budget, F saves time only if Firecrawl may skip low-value seeds for good.
 If deferred seeds always get a final run, the savings disappear.
@@ -344,8 +396,8 @@ If deferred seeds always get a final run, the savings disappear.
 | 0 | Finish the paused Crawl Maze runs on the current code | **done** 2026-10-27 |
 | P0a | Data capture for scoring: G4, G5 (keep raw data per run), G1, G2, G3 (components, link graph) | none |
 | P0 | Offline replay on existing runs: rebuild each run's frontiers, apply A, B, C, E, F step by step, and report per rule: seeds removed, tool runs avoided, estimated time saved, expected resources lost. Seeds are linked to what they produced through traces, the ZAP history and (offline only) tunnel Referers | none |
-| P1 | T (runtime and memory reporting), A0, A, B, with tests and docs; regenerate ground truth if the normalizer changes | none until evaluation |
-| P2 | Firecrawl schema and prompt (**done**, simplified), F5 visit checks, accuracy metric | evaluation only |
+| P1 | T (runtime and memory reporting), A0, A, B, Wapiti headless fixed, with tests and docs; regenerate ground truth if the normalizer changes | none until evaluation |
+| P2 | Firecrawl schema and prompt (**done**, simplified), offline accuracy metric (tunnel log) | evaluation only |
 | P3 | Link graph, C, then D, E, F behind config flags | evaluation only |
 | Eval | New labels (`full-pipeline-v2`, then one-rule-off variants) on Crawl Maze, Crawlground and Juice Shop; old runs kept | yes, ask first |
 
@@ -354,8 +406,8 @@ Credits: the current Firecrawl key has about 188 left; full-pipeline/run-04 repo
 
 ## 5. Decisions still open (recommendation first)
 
-1. **A0 and F5:** use the tunnel log to decide whether Firecrawl visited a seed, and offer unvisited seeds
-   once more? Yes. This is verification, consistent with "traffic is not discovery".
+1. ~~**A0 and F5:** use the tunnel log to decide whether Firecrawl visited a seed?~~ **Decided 2026-11-03:**
+   no. Firecrawl's payload sets the state at runtime; the tunnel log is an offline audit only (3.2, 3.3).
 2. **Rule A:** resolve `/./` in the normalizer (ground truth regenerated) or only in `request_key`? In the
    normalizer.
 3. **Rule B:** keep trap URLs flagged, or drop them? Keep them flagged and out of every frontier.
@@ -364,8 +416,12 @@ Credits: the current Firecrawl key has about 188 left; full-pipeline/run-04 repo
    resources.
 6. **Rule F:** may Firecrawl permanently skip low-value seeds? Decide after the P0 Run A vs. Run B comparison.
 7. **Memory and credit logging (T):** add it before the next benchmark round? Yes.
-8. **Page group (G7):** method + parent folder of the path template + query keys? Yes.
-9. **Order:** data capture (P0a) before the replay, or replay run-04 now with partial data? P0a first.
+8. ~~**Page group (G7)**~~ **Decided 2026-11-03:** (method, parent folder of the path template, query keys).
+9. ~~**Order**~~ **Decided 2026-11-03:** P0a data capture and link-graph ingestion before the replay.
+10. ~~**Rule A for Wapiti:** drop fragments?~~ **Decided 2026-11-03:** no. Wapiti always runs headless and
+    keeps `#` seeds; fragment traps are Rule B's job (3.4).
+11. ~~**Wapiti `#` seed → VISITED**~~ **Decided 2026-11-03:** visited when its fragment-less page got a
+    response in that Wapiti run, documented as an assumption (Wapiti cannot report the route).
 
 ## 6. Other open items
 

@@ -18,7 +18,7 @@ from urllib.parse import urlencode, urlparse, urlunparse
 from zapv2 import ZAPv2
 
 from normalization.patterns import is_static_asset
-from tools.client_map import parse_client_map
+from tools.client_map import client_map_links, parse_client_map, parse_client_map_tree
 
 logger = logging.getLogger("orchestrator.zap")
 
@@ -107,6 +107,9 @@ class ZapWrapper:
         self._browser_login_attempted = False
         self.last_request_count = 0
         self.last_status = "ok"  # ok | timeout (per run)
+        # Per run (reset by ToolRegistry.run): link edges {parent_url, child_url, kind} and raw files to keep
+        self.last_links: List[Dict[str, Any]] = []
+        self.last_artifacts: Dict[str, str] = {}
         self.last_first_request_at: Optional[float] = None   # epoch s of the run's first message to the target
         self.run_started_at: Optional[float] = None          # set by ToolRegistry.run before each tool run
         self.auth_headers: Dict[str, str] = {}
@@ -446,7 +449,13 @@ class ZapWrapper:
             return []
 
         with open(host_path, encoding="utf-8", errors="replace") as f:
-            urls = parse_client_map(f)
+            lines = f.readlines()
+        urls = parse_client_map(lines)
+        # The export is overwritten by the next run: the loop copies it into the run's artifacts
+        self.last_artifacts["client_map.yaml"] = str(host_path)
+        for link in client_map_links(parse_client_map_tree(lines)):
+            self.last_links.append({**link, "parent_url": self.from_zap_url(link["parent_url"]),
+                                    "child_url": self.from_zap_url(link["child_url"])})
         found = []
         for url in urls:
             url = self.from_zap_url(url)
@@ -499,6 +508,9 @@ class ZapWrapper:
                         self.last_first_request_at = sent
                     if not is_static_asset(urlparse(item["url"]).path):
                         discovered.append(item)
+                        if item.get("referer"):
+                            self.last_links.append({"parent_url": item["referer"], "child_url": item["url"],
+                                                    "method": item["method"], "kind": "referer"})
 
                 if len(chunk) < page_size:
                     break
@@ -522,6 +534,12 @@ class ZapWrapper:
         method = parts[0].upper()
         url = self.from_zap_url(parts[1])
 
+        referer = ""
+        for line in lines[1:]:
+            if line.lower().startswith("referer:"):
+                referer = self.from_zap_url(line.split(":", 1)[1].strip())
+                break
+
         status_code = 0
         content_type = ""
         res_lines = res_header.splitlines()
@@ -540,4 +558,5 @@ class ZapWrapper:
             "status_code": status_code,
             "content_type": content_type,
             "source": source,
+            "referer": referer,
         }

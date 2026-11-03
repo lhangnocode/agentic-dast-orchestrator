@@ -66,6 +66,9 @@ class WapitiWrapper:
         self.last_request_count = 0
         self.last_status = "ok"  # ok | failed | timeout
         self.last_first_request_at: Optional[float] = None
+        # Per run (reset by ToolRegistry.run): link edges and raw files to keep
+        self.last_links: List[Dict[str, Any]] = []
+        self.last_artifacts: Dict[str, str] = {}
 
         self.session_db_path.parent.mkdir(parents=True, exist_ok=True)
         self.report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -210,6 +213,8 @@ class WapitiWrapper:
             return []
 
         discovered: List[Dict[str, Any]] = []
+        # The session DB is flushed by the next Wapiti run: the loop copies it into the run's artifacts
+        self.last_artifacts["session.db"] = str(db_file)
         try:
             conn = sqlite3.connect(str(db_file))
             conn.row_factory = sqlite3.Row
@@ -217,7 +222,7 @@ class WapitiWrapper:
 
             # Query paths and responses
             cursor.execute("""
-                SELECT path_id, path, method, enctype, response_id
+                SELECT path_id, path, method, enctype, response_id, depth, referer
                 FROM paths
             """)
             paths_rows = [dict(r) for r in cursor.fetchall()]
@@ -264,6 +269,10 @@ class WapitiWrapper:
                     "source": "wapiti_form_crawl",
                     "params": [pr["name"] for pr in path_params if pr.get("name")]
                 })
+                # Link edge: the page Wapiti found this request on (often empty in headless mode)
+                if req.get("referer"):
+                    self.last_links.append({"parent_url": req["referer"], "child_url": url, "method": method,
+                                            "kind": "referer", "depth": req.get("depth")})
 
         except Exception as e:
             logger.error(f"[WAPITI] Failed to extract from session DB: {e}")

@@ -155,6 +155,26 @@ class StateStore:
                     SELECT canonical_hash, ?, 'PENDING', 0 FROM endpoints
                 """, (tool,))
 
+            # 5. Link graph: which page led to which endpoint, per tool and evidence kind.
+            # Hashes are canonical hashes (a `#/route` has its own); the raw URLs keep the fragment.
+            # No foreign keys: a Referer page can be an endpoint the store does not hold (e.g. a static file).
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS endpoint_links (
+                    parent_hash TEXT NOT NULL,
+                    child_hash TEXT NOT NULL,
+                    tool TEXT NOT NULL,
+                    kind TEXT NOT NULL,
+                    parent_url TEXT NOT NULL,
+                    child_url TEXT NOT NULL,
+                    depth INTEGER,
+                    first_seen_iteration INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (parent_hash, child_hash, tool, kind)
+                );
+            """)
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_links_parent ON endpoint_links(parent_hash);")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_links_child ON endpoint_links(child_hash);")
+
             # Indices for rapid querying
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_endpoints_path ON endpoints(path_template);")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_tool_coverage_lookup ON tool_coverage(tool_name, status);")
@@ -460,6 +480,34 @@ class StateStore:
             cursor.execute("SELECT * FROM endpoints ORDER BY path_template ASC")
             rows = cursor.fetchall()
             return [dict(r) for r in rows]
+
+    def add_links(self, links: List[Dict[str, Any]], iteration: int) -> int:
+        """Stores link edges ({parent_hash, child_hash, tool, kind, parent_url, child_url, depth}).
+        An edge already known keeps its first iteration. Returns the number of new edges."""
+        if not links:
+            return 0
+        with self._get_connection() as conn:
+            before = conn.execute("SELECT COUNT(*) FROM endpoint_links").fetchone()[0]
+            conn.executemany("""
+                INSERT OR IGNORE INTO endpoint_links
+                    (parent_hash, child_hash, tool, kind, parent_url, child_url, depth, first_seen_iteration)
+                VALUES (:parent_hash, :child_hash, :tool, :kind, :parent_url, :child_url, :depth, :iteration)
+            """, [{**{"depth": None}, **link, "iteration": iteration} for link in links])
+            after = conn.execute("SELECT COUNT(*) FROM endpoint_links").fetchone()[0]
+            return after - before
+
+    def get_links(self, parent_hash: Optional[str] = None, child_hash: Optional[str] = None,
+                  tool: Optional[str] = None, kind: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Link edges, optionally filtered by either end, tool or kind."""
+        where, args = [], []
+        for column, value in (("parent_hash", parent_hash), ("child_hash", child_hash), ("tool", tool),
+                              ("kind", kind)):
+            if value is not None:
+                where.append(f"{column} = ?")
+                args.append(value)
+        sql = "SELECT * FROM endpoint_links" + (" WHERE " + " AND ".join(where) if where else "")
+        with self._get_connection() as conn:
+            return [dict(r) for r in conn.execute(sql + " ORDER BY first_seen_iteration, rowid", args)]
 
     def get_tool_stats(self) -> Dict[str, Dict[str, int]]:
         """Returns counts of PENDING / PROCESSED / FAILED for each tool."""

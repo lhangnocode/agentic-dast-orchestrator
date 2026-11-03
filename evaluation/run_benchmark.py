@@ -88,6 +88,7 @@ def run_config(base: Dict[str, Any], profile: Dict[str, Any], overrides: List[st
     config.setdefault("storage", {})["sqlite_db"] = f"{rd}/state.db"
     config.setdefault("logging", {})["run_events_file"] = f"{rd}/run_events.jsonl"
     config["logging"]["tool_runs_dir"] = f"{rd}/tool_runs"
+    config["logging"]["artifacts_dir"] = f"{rd}/artifacts"
     config.setdefault("output", {})["dir"] = rd
     w = config.setdefault("tools", {}).setdefault("wapiti", {})
     w.update(session_file=f"{rd}/wapiti/session.db", report_file=f"{rd}/wapiti/report.json",

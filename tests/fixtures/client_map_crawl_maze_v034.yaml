@@ -1,0 +1,105 @@
+- node: "ClientMap"
+  visited: false
+  children:
+  - node: "http://host.docker.internal:8090"
+    visited: false
+    children:
+    - node: "html"
+      visited: false
+      children:
+      - node: "body"
+        visited: false
+        children:
+        - node: "form"
+          visited: false
+          children:
+          - node: "/"
+            components:
+            - nodeType: "Node Added"
+              href: "http://host.docker.internal:8090/html/body/form/action-get.html"
+              text: "action-get.html"
+              id: ""
+              tagName: "A"
+              formId: 0
+            - nodeType: "Node Added"
+              href: "http://host.docker.internal:8090/html/body/form/action-post.html"
+              text: "action-post.html"
+              id: ""
+              tagName: "A"
+              formId: 0
+            - nodeType: "Node Added"
+              href: "http://host.docker.internal:8090/html/body/form/button/"
+              text: "button/"
+              id: ""
+              tagName: "A"
+              formId: 0
+          - node: "action-get.html"
+            Redirect: "http://host.docker.internal:8090/html/body/form/action-get.html/"
+            components:
+              children:
+            - node: "/"
+              components:
+              - nodeType: "Node Added"
+                href: "http://host.docker.internal:8090/html/body/form/action-get.html/"
+                text: ""
+                id: ""
+                tagName: "FORM"
+                formId: 0
+              - nodeType: "Node Added"
+                href: "http://host.docker.internal:8090/html/body/form/action-get.html/"
+                text: "test"
+                id: ""
+                tagName: "INPUT"
+                tagType: "text"
+                formId: 0
+          - node: "action-post.html"
+            Redirect: "http://host.docker.internal:8090/html/body/form/action-post.html/"
+            components:
+              children:
+            - node: "/"
+              components:
+              - nodeType: "Node Added"
+                href: "http://host.docker.internal:8090/html/body/form/action-post.html/"
+                text: ""
+                id: ""
+                tagName: "FORM"
+                formId: 0
+              - nodeType: "Node Added"
+                href: "http://host.docker.internal:8090/html/body/form/action-post.html/"
+                text: "test"
+                id: ""
+                tagName: "INPUT"
+                tagType: "text"
+                formId: 0
+          - node: "button"
+            visited: false
+            children:
+            - node: "/"
+              components:
+              - nodeType: "Node Added"
+                href: "http://host.docker.internal:8090/html/body/form/button/formaction.html"
+                text: "formaction.html"
+                id: ""
+                tagName: "A"
+                formId: 0
+            - node: "formaction.html"
+              Redirect: "http://host.docker.internal:8090/html/body/form/button/formaction.html/"
+              components:
+                children:
+              - node: "/"
+                components:
+                - nodeType: "Node Added"
+                  href: "http://host.docker.internal:8090/html/body/form/button/formaction.html/?"
+                  text: "CLICKME"
+                  id: ""
+                  tagName: "BUTTON"
+                  formId: 0
+                - nodeType: "Node Added"
+                  href: "http://host.docker.internal:8090/html/body/form/button/formaction.html/"
+                  text: "CLICKME"
+                  id: "test"
+                  tagName: "FORM"
+                  formId: 0
+        - node: "frameset"
+          visited: false
+          children:

@@ -14,6 +14,7 @@ is never re-seeded with pages it already visited. No LLM is involved in tool sel
 
 import json
 import logging
+import shutil
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -66,6 +67,8 @@ class AdaptiveOrchestrator:
         self.output_dir = Path(config.get("output", {}).get("dir", "output"))
         # Optional per-tool-run trace (seeds, raw output, new endpoints, every tool's queue afterwards)
         self.trace_dir = config.get("logging", {}).get("tool_runs_dir")
+        # Optional copies of raw tool files that the tool's next run overwrites (Client Map, Wapiti session DB)
+        self.artifacts_dir = config.get("logging", {}).get("artifacts_dir")
 
     # ------------------------------------------------------------------ setup
     def seed_initial_target(self) -> None:
@@ -177,8 +180,9 @@ class AdaptiveOrchestrator:
             before = self.store.get_total_endpoints_count()
             new_keys = self._ingest(run, iteration)
             self._record(run, iteration, before, len(new_keys), action.reason, rule_id=action.rule_id)
+            saved = self._save_artifacts(run, iteration) if self.artifacts_dir else {}
             if self.trace_dir:
-                self._write_trace(run, iteration, action, new_keys)
+                self._write_trace(run, iteration, action, new_keys, saved)
             runs.append(run)
         return runs
 
@@ -208,15 +212,50 @@ class AdaptiveOrchestrator:
             if norm:
                 visited_hashes.append(norm["canonical_hash"])
         self.store.mark_hashes_processed(visited_hashes, run.tool, iteration)
+        new_links = self.store.add_links(self._link_rows(run), iteration)
 
         logger.info(
             f"[{run.tool}] {len(run.results)} raw result(s) -> {len(new_keys)} new canonical endpoint(s) | "
             f"requests: {run.requests_sent} | {run.duration_seconds:.1f}s"
             + (f" (startup {run.startup_seconds:.1f}s)" if run.startup_seconds is not None else "")
+            + f" | links: {len(run.links)} ({new_links} new)"
             + f" | status: {run.status}"
             + (f" | error: {run.error}" if run.error else "")
         )
         return new_keys
+
+    def _link_rows(self, run: ToolRun) -> List[Dict[str, Any]]:
+        """Normalizes both ends of every link edge the tool reported. Edges with an end the normalizer drops
+        (other host, static asset, junk) are skipped, and so are Referer self-loops."""
+        rows: Dict[tuple, Dict[str, Any]] = {}
+        for link in run.links:
+            parent = normalize_endpoint(link.get("parent_url", ""), profile=self.profile)
+            child = normalize_endpoint(link.get("child_url", ""), method=link.get("method", "GET"),
+                                       profile=self.profile)
+            if not parent or not child:
+                continue
+            kind = link.get("kind", "unknown")
+            if kind == "referer" and parent["canonical_hash"] == child["canonical_hash"]:
+                continue
+            key = (parent["canonical_hash"], child["canonical_hash"], kind)
+            rows.setdefault(key, {"parent_hash": key[0], "child_hash": key[1], "tool": run.tool, "kind": kind,
+                                  "parent_url": link["parent_url"], "child_url": link["child_url"],
+                                  "depth": link.get("depth")})
+        return list(rows.values())
+
+    def _save_artifacts(self, run: ToolRun, iteration: int) -> Dict[str, str]:
+        """Copies the run's raw files (e.g. the Client Map export, Wapiti's session DB) before the tool's next
+        run overwrites them: <artifacts_dir>/<iteration>-<tool>-<name>."""
+        saved: Dict[str, str] = {}
+        for name, source in run.artifacts.items():
+            target = Path(self.artifacts_dir) / f"{iteration:02d}-{run.tool}-{name}"
+            try:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+                saved[name] = str(target)
+            except OSError as e:
+                logger.warning(f"[{run.tool}] Could not keep {name} ({source}): {e}")
+        return saved
 
     def _record(self, run: ToolRun, iteration: int, endpoints_before: int, new: int, reasoning: str,
                 rule_id: str) -> None:
@@ -244,7 +283,8 @@ class AdaptiveOrchestrator:
         self.store.record_iteration(record)
         self.run_log.event("tool_run", **{k: v for k, v in record.items() if k not in ("target_seeds", "reasoning")})
 
-    def _write_trace(self, run: ToolRun, iteration: int, action: Action, new_keys: List[str]) -> None:
+    def _write_trace(self, run: ToolRun, iteration: int, action: Action, new_keys: List[str],
+                     artifacts: Optional[Dict[str, str]] = None) -> None:
         """One JSON file per tool run: what went in, what came out, and the pipeline state afterwards."""
         stats = self.store.get_tool_stats()
         queues = {t: int(self.store.frontier_fingerprint(t).split(":", 1)[0]) for t in self.tools.available_tools()}
@@ -257,6 +297,8 @@ class AdaptiveOrchestrator:
             "raw_results": [{k: r.get(k) for k in ("url", "method", "status_code", "content_type", "source")}
                             for r in run.results],
             "new_endpoints": new_keys,
+            "links": len(run.links),
+            "artifacts": artifacts or {},
             "endpoints_total_after": self.store.get_total_endpoints_count(),
             "pending_frontier_after": queues,
             "processed_after": {t: s.get("PROCESSED", 0) for t, s in stats.items()},

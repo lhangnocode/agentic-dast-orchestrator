@@ -152,6 +152,7 @@
   "logging": {
     "log_level": "INFO",
     "log_file": "output/logs/orchestrator.log",
-    "run_events_file": "output/logs/run_events.jsonl"
+    "run_events_file": "output/logs/run_events.jsonl",
+    "artifacts_dir": "output/logs/artifacts"
   }
 }

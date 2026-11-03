@@ -40,6 +40,10 @@ class ToolRun:
     error: Optional[str] = None
     started_at: float = 0.0                    # epoch seconds when the tool was invoked
     first_request_at: Optional[float] = None   # epoch seconds of the tool's first request at the target
+    # Link edges the tool observed: {parent_url, child_url, kind[, depth]} (Referer, DOM components, redirects)
+    links: List[Dict[str, Any]] = field(default_factory=list)
+    # Raw files the tool leaves behind that its next run overwrites: {name: path}; the loop copies them
+    artifacts: Dict[str, str] = field(default_factory=dict)
 
     @property
     def startup_seconds(self) -> Optional[float]:
@@ -202,6 +206,8 @@ class ToolRegistry:
         if wrapper is not None:
             wrapper.last_first_request_at = None
             wrapper.run_started_at = start
+            wrapper.last_links = []
+            wrapper.last_artifacts = {}
         try:
             if tool == ZAP_TRADITIONAL:
                 run.results = self.zap.run_traditional_spider(seeds)
@@ -227,6 +233,8 @@ class ToolRegistry:
             run.status = "failed"
         run.duration_seconds = time.time() - start
         if wrapper is not None:
+            run.links = list(getattr(wrapper, "last_links", None) or [])
+            run.artifacts = dict(getattr(wrapper, "last_artifacts", None) or {})
             first = getattr(wrapper, "last_first_request_at", None)
             run.first_request_at = first if first is not None and first >= start - 0.05 else None
         return run

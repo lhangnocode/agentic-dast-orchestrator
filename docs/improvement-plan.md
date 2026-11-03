@@ -14,6 +14,7 @@ Crawlground series. Decisions still open are listed at the end. The algorithm th
 | P2: Firecrawl schema and prompt | done 2026-10-31, **simplified** (three flat lists, no `from_page`, no action log; context files removed; `batch_size` 10) | `caf212b` |
 | P2: accuracy metric, `Sec-Fetch-*` in the proxy log, Referer check | open | |
 | T: runtime, memory and credit reporting | open | |
+| P0a: data capture (G1–G5) | done 2026-11-03: Client Map tree parser, ZAP Referer, Wapiti referer/depth, `endpoint_links`, per-run copies of the Client Map and Wapiti DB | |
 | A0, rules A, B, C, D, E, F | open (C: design agreed, see 3.6) | |
 | P0: offline replay | open; only Crawl Maze run-04 has partial data for it (see 3.6) | |
 | Eval: new labels | open; needs new Firecrawl credits | |
@@ -318,6 +319,15 @@ is still to do. The original proposal, kept for reference:
   | G6 | PROCESSED ≠ visited | A0 |
   | G7 | path templates too fine to group pages (readable slugs are kept) | page group = (method, parent folder of the path template, query keys) – **decided 2026-11-03** |
 
+- **P0a findings (2026-11-03):**
+  - Client Map, run-04 export: 354 edges, 348 kept after normalization (204 `dom:a`, 84 `redirect`,
+    30 `dom:input`, 18 `dom:button`, 12 `dom:form`). Nodes with components (pages) never carry a `visited`
+    flag and path-only nodes carry `visited: false`, which supports "absent = visited".
+  - Wapiti's `paths.referer` is mostly empty in headless mode: 21 of 247 paths in run-04's last Wapiti run.
+    Wapiti contributes few edges; leaf detection relies on the Client Map and ZAP Referers.
+  - The 0.33 layout (Juice Shop fixture) has components without `tagName`, so its edges are `dom:unknown`
+    and carry no interaction evidence.
+  - Edges never add endpoints: P0a does not change what a run discovers.
 - **Edge cases:** browsers never send the fragment in `Referer`, so links between `#/` routes come only from
   the Client Map tree; "no links" seen only by the traditional spider is not a leaf (JavaScript links);
   the Client Map `visited` flag appears only as `false` (251 nodes) and is absent on 247 nodes, which probably
@@ -394,7 +404,7 @@ If deferred seeds always get a final run, the savings disappear.
 | Phase | Content | Runs / credits |
 |---|---|---|
 | 0 | Finish the paused Crawl Maze runs on the current code | **done** 2026-10-27 |
-| P0a | Data capture for scoring: G4, G5 (keep raw data per run), G1, G2, G3 (components, link graph) | none |
+| P0a | Data capture for scoring: G4, G5 (keep raw data per run), G1, G2, G3 (components, link graph). **Done** 2026-11-03 | none |
 | P0 | Offline replay on existing runs: rebuild each run's frontiers, apply A, B, C, E, F step by step, and report per rule: seeds removed, tool runs avoided, estimated time saved, expected resources lost. Seeds are linked to what they produced through traces, the ZAP history and (offline only) tunnel Referers | none |
 | P1 | T (runtime and memory reporting), A0, A, B, Wapiti headless fixed, with tests and docs; regenerate ground truth if the normalizer changes | none until evaluation |
 | P2 | Firecrawl schema and prompt (**done**, simplified), offline accuracy metric (tunnel log) | evaluation only |

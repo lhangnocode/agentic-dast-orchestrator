@@ -51,7 +51,8 @@ Per run the runner:
    (`state.db`, `run_events.jsonl`, `orchestrator.log`, `prompts/`, `firecrawl_responses/`, endpoint exports,
    the resolved `config.json`, and `tool_runs/<iteration>-<tool>.json`: one trace per tool run with its rule
    and reason, input URLs, raw output, new endpoints, timing/startup and every tool's pending-frontier size and
-   visited count afterwards),
+   visited count afterwards), and `artifacts/<iteration>-<tool>-<file>`: copies of raw files the tool's next
+   run would overwrite (the Client Map export `client_map.yaml`, Wapiti's `session.db`; from 2026-11-03 on),
    and, for a profile with `access_log_container` (Crawl Maze), saves the target's own access log for the run
    to `target_access.log`,
 5. writes `metrics.json` and `run_meta.json` (overrides, ZAP restart time, ZAP add-on versions); after all runs

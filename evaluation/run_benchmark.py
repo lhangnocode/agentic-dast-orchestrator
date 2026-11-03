@@ -2,15 +2,14 @@
 Benchmark runner: repeated, isolated crawls of one benchmark target + metrics.
 
   python -m evaluation.run_benchmark --benchmark juice-shop --runs 5 --label client-spider
-  python -m evaluation.run_benchmark --benchmark juice-shop --runs 5 --label ajax \\
-         --set orchestrator.rules.browser_spider=zap_ajax_spider \\
-         --set orchestrator.stages='[["zap_traditional_spider","zap_ajax_spider","wapiti_form_crawl"],["firecrawl_navigate"]]'
+  python -m evaluation.run_benchmark --benchmark juice-shop --runs 5 --label no-firecrawl \\
+         --set tools.firecrawl.enabled=false
 
 Per run: the target container is restarted (fresh application state), ZAP gets a new empty session,
 Crawlground gets a new tool name (fresh server-side scores), and the orchestrator writes everything
 (state.db, run_events.jsonl, logs, prompts, endpoints) to output/benchmarks/<benchmark>/<label>/run-NN/.
 Metrics per run go to metrics.json; summary.json / summary.md hold mean ± 95% CI over the runs.
-Run configurations to compare (e.g. Client vs AJAX Spider) as separate labels, alternating their order.
+Run configurations to compare (e.g. with vs without Firecrawl) as separate labels, alternating their order.
 
 With --tunnel-proxy PORT, a logging reverse proxy (tools/traffic_proxy.py) listens on PORT during each run
 and forwards to the target; point the tunnel at it (cloudflared tunnel --url http://localhost:PORT).
@@ -142,7 +141,7 @@ def main(argv: List[str] = None) -> int:
     parser.add_argument("--runs", type=int, default=5)
     parser.add_argument("--label", default="default", help="name of the configuration being measured")
     parser.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
-                        help="config override, e.g. orchestrator.rules.browser_spider=zap_ajax_spider")
+                        help="config override, e.g. tools.firecrawl.enabled=false")
     parser.add_argument("--config", default=str(ROOT / "configs" / "app_config.json"))
     parser.add_argument("--no-reset", action="store_true", help="do not restart the target between runs")
     parser.add_argument("--no-zap-restart", action="store_true",
@@ -254,7 +253,7 @@ def zap_addon_versions(zap) -> Dict[str, str]:
     """Versions of the ZAP add-ons the crawl depends on (ZAP auto-updates add-ons when a container is created)."""
     try:
         return {a["id"]: a["version"] for a in zap.client.autoupdate.installed_addons
-                if a.get("id") in ("client", "spider", "spiderAjax", "authhelper", "commonlib", "network", "selenium")}
+                if a.get("id") in ("client", "spider", "authhelper", "commonlib", "network", "selenium")}
     except Exception as e:
         return {"error": str(e)}
 TRAFFIC_FILE = "tunnel_traffic.jsonl"

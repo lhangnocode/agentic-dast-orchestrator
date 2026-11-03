@@ -36,11 +36,6 @@ admin without crafted requests"), and keep the reviewed file under version contr
 # one configuration, 5 isolated repetitions
 python -m evaluation.run_benchmark --benchmark juice-shop --runs 5 --label client-spider
 
-# the same with the AJAX Spider as browser spider (A/B)
-python -m evaluation.run_benchmark --benchmark juice-shop --runs 5 --label ajax-spider \
-  --set orchestrator.rules.browser_spider=zap_ajax_spider \
-  --set 'orchestrator.stages=[["zap_traditional_spider","zap_ajax_spider","wapiti_form_crawl"],["firecrawl_navigate"]]'
-
 # without Firecrawl
 python -m evaluation.run_benchmark --benchmark crawlground --runs 5 --label no-firecrawl \
   --set tools.firecrawl.enabled=false
@@ -124,7 +119,7 @@ start as `tool_duration_seconds`) to the tool's **first request at the target**.
 
 | Tool | First request observed as |
 |---|---|
-| ZAP traditional spider / Client Spider / AJAX Spider | Earliest `timestamp` (time sent, ms) of the run's messages to the target in ZAP's history |
+| ZAP traditional spider / Client Spider | Earliest `timestamp` (time sent, ms) of the run's messages to the target in ZAP's history |
 | Wapiti | First `[+] <METHOD> <url>` line of its output (printed after the fetch: + one local round trip) |
 | Firecrawl | First request in the tunnel traffic log after the job was submitted (needs `--tunnel-proxy`) |
 | HTTP probe | When the first GET is sent |

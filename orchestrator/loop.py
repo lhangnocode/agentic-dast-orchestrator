@@ -87,8 +87,7 @@ class AdaptiveOrchestrator:
         logger.info(f"[INIT] Available tools: {available or 'none'} (run id {self.run_log.run_id})")
         self.run_log.event("run_started", base_url=self.base_url, available_tools=available, stages=self.stages,
                            parallel=self.parallel, max_iterations=self.max_iterations,
-                           rules={"browser_spider": self.rule_settings.browser_spider,
-                                  "max_retries": self.rule_settings.max_retries,
+                           rules={"max_retries": self.rule_settings.max_retries,
                                   "max_runs_per_tool": self.rule_settings.max_runs_per_tool,
                                   "disabled_rules": sorted(self.rule_settings.disabled_rules)})
 

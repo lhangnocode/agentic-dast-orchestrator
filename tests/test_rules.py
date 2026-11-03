@@ -4,7 +4,7 @@ import tempfile
 import pytest
 
 from normalization.normalizer import normalize_endpoint
-from orchestrator.rules import (FIRECRAWL, HTTP_PROBE, WAPITI, ZAP_AJAX, ZAP_CLIENT, ZAP_TRADITIONAL,
+from orchestrator.rules import (FIRECRAWL, HTTP_PROBE, WAPITI, ZAP_CLIENT, ZAP_TRADITIONAL,
                                 RuleSettings, Snapshot, ToolState, build_snapshot, select_actions)
 from storage.state_store import StateStore
 
@@ -77,10 +77,10 @@ def test_ceiling_and_disabled_rules():
     assert select_actions(snap(state(WAPITI, **GREW)), RuleSettings(disabled_rules={"R5_form_crawler"})) == []
 
 
-def test_browser_spider_is_configurable():
-    s = snap(state(ZAP_AJAX, **GREW), state(ZAP_CLIENT, **GREW))
-    actions = select_actions(s, RuleSettings(browser_spider=ZAP_AJAX))
-    assert [(a.tool, a.rule_id) for a in actions] == [(ZAP_AJAX, "R3_browser_spider")]
+def test_ajax_spider_is_gone():
+    from tools.registry import ALL_TOOLS
+    assert "zap_ajax_spider" not in ALL_TOOLS
+    assert "zap_ajax_spider" not in RuleSettings().selectable_tools()
 
 
 def test_build_snapshot_from_store_detects_growth():

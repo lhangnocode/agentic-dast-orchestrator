@@ -1,8 +1,34 @@
 # Improvement plan: runtime reporting, Firecrawl evidence, crawl storms, seed selection
 
-Status: **proposal, nothing implemented yet** (2026-10-30). It compiles the findings and proposals discussed
-after the Crawl Maze and Crawlground series. Decisions still open are listed at the end.
-The algorithm the plan changes is described in `docs/tool-selection.md`.
+Status (2026-11-03): **partly implemented.** Phase 0 and a simplified P2 (Firecrawl schema and prompt) are
+done; every rule (A0, A–F), runtime reporting (T) and the offline replay (P0) are still open. See
+*Implementation status* below. The plan compiles the findings and proposals discussed after the Crawl Maze and
+Crawlground series. Decisions still open are listed at the end. The algorithm the plan changes is described in
+`docs/tool-selection.md`.
+
+## Implementation status
+
+| Item | Status | Commit / note |
+|---|---|---|
+| Phase 0: finish the Crawl Maze series | done 2026-10-27 | `5ba0da1` |
+| P2: Firecrawl schema and prompt | done 2026-10-31, **simplified** (three flat lists, no `from_page`, no action log; context files removed; `batch_size` 10) | `caf212b` |
+| P2: accuracy metric, `Sec-Fetch-*` in the proxy log, Referer check | open | |
+| T: runtime, memory and credit reporting | open | |
+| A0, rules A, B, C, D, E, F | open (C: design agreed, see 3.6) | |
+| P0: offline replay | open; only Crawl Maze run-04 has partial data for it (see 3.6) | |
+| Eval: new labels | open; needs new Firecrawl credits | |
+
+Changes made outside this plan:
+
+- **R2 "first run" removed** (2026-11-02, `36bd93c`). It fired in none of the 30 recorded runs, because the
+  fixed stages run every tool once. A tool that has never run now counts as "frontier changed", so R3–R6 start
+  a tool the stages leave out. Rule numbers are kept so old logs stay comparable.
+- **Early Crawlground test runs deleted** (2026-10-31): `smoke`, `no-firecrawl`, `firecrawl-smoke`,
+  `with-firecrawl` (one run each, 2026-10-12/13, made before ZAP was restarted between runs; none was part of
+  a series summary).
+- **AJAX Spider removed** (2026-11-03): wrapper code, the `ajax_spider` and `orchestrator.rules.browser_spider`
+  settings, the tool name, its docker-compose option, docs and tests. The Client Spider is the only browser
+  spider. It was not part of any benchmark series.
 
 ## 1. Baseline these changes are measured against
 
@@ -146,7 +172,8 @@ pages are detected from the link graph).
 
 **Done 2026-10-31 (simplified):** context files removed; schema = three flat lists `visited_urls`,
 `interaction_urls`, `seen_urls`, without `{action, from_page}` details or an action log, to save credits;
-`batch_size` stays 10. The traffic-based accuracy metric below is still to do.
+`batch_size` stays 10. Each ingested result carries `firecrawl_kind`. The traffic-based accuracy metric below
+is still to do. The original proposal, kept for reference:
 
 - **Schema:** replace `links` with
   - `visited_urls`: pages actually loaded;
@@ -206,6 +233,17 @@ pages are detected from the link graph).
 
 - **Approach:** deterministic and explainable. Each seed gets a level 1–4 plus a list of reasons; no learned
   weights.
+- **Levels (agreed 2026-11-02):**
+
+  | Level | When |
+  |---|---|
+  | Excluded | trap (B) or same request as a done URL for this tool (A) |
+  | 1 – high | first URL of a new page group, **or** a page with forms/buttons no browser tool explored, **or** a URL Firecrawl reached only by interaction (`firecrawl_kind = interaction`) |
+  | 2 | handled only by tools without JavaScript (ZAP traditional, probe) |
+  | 3 | opened by a browser tool, has outgoing links |
+  | 4 – low | leaf (opened by a browser tool, no outgoing links) or most of its links already known |
+
+  Level 1 takes precedence over level 4: a page with no links but a button is not a leaf.
 - **Features** (from tool output only, never from tunnel traffic):
 
   | Feature | Signal | Data | Effect |
@@ -221,6 +259,41 @@ pages are detected from the link graph).
 
 - **New data:** `endpoint_links(parent_hash, child_hash, tool, kind)`, filled from the ZAP history Referer,
   the Client Map tree and Wapiti's crawl data.
+- **Where the evidence comes from today** (checked 2026-11-02 on Crawl Maze run-04):
+
+  | Signal | ZAP traditional | ZAP Client Spider | Wapiti | Firecrawl |
+  |---|---|---|---|---|
+  | Page group | request URL | node URL | `paths.path` + `params` | the three lists |
+  | Forms/buttons | no (bodies not kept) | Client Map `components.tagName` BUTTON/INPUT/FORM, `formId` (**dropped by the parser**) | `paths.method`/`enctype`, `params`, `responses.body` | no |
+  | Reached by interaction | – | derivable from Client Map BUTTON components | – | `interaction_urls` (new runs only) |
+  | Visited by a JavaScript tool | – | ZAP history status; Client Map `visited` (ignored) | – | `visited_urls` (self-reported) |
+  | Outgoing links / leaf | `Referer` in `requestHeader` (**dropped**) | component `href`s per node (**parent relation dropped**) | `paths.referer`, `depth` | no `from_page` |
+
+- **Data gaps to close before scoring:**
+
+  | # | Gap | Fix |
+  |---|---|---|
+  | G1 | Client Map parser keeps hrefs only | return per node: URL, parent, `visited`, components (`tagName`, `href`, `formId`) |
+  | G2 | ZAP `Referer` dropped in `_parse_message` | keep it as a link edge |
+  | G3 | no link table | `endpoint_links`, filled from G1, G2 and Wapiti `paths.referer` |
+  | G4 | Client Map export overwritten every run (`output/zap/client_map.yaml`) | copy it into the run folder after each Client Spider run |
+  | G5 | Wapiti session DB flushed on every Wapiti run | copy `session.db` per Wapiti run |
+  | G6 | PROCESSED ≠ visited | A0 |
+  | G7 | path templates too fine to group pages (readable slugs are kept) | page group = (method, parent folder of the path template, query keys) – **to confirm** |
+
+- **Edge cases:** browsers never send the fragment in `Referer`, so links between `#/` routes come only from
+  the Client Map tree; "no links" seen only by the traditional spider is not a leaf (JavaScript links);
+  the Client Map `visited` flag appears only as `false` (251 nodes) and is absent on 247 nodes, which probably
+  means visited (to verify); redirects (Client Map `Redirect`, 3xx `Location`) are link edges too;
+  `interaction_urls` is Firecrawl's own claim (the P2 accuracy metric measures how reliable it is).
+- **Level-4 seeds for Firecrawl (agreed 2026-11-02):** compare in the replay
+  - **Run A:** skip level 4 for good;
+  - **Run B:** defer level 4 and send it in one final batch before termination;
+
+  on expected resources lost vs. jobs, credits and time. Replay limits: only Crawl Maze run-04 kept its Client
+  Map; no old run has ZAP Referers or Firecrawl kinds; attribution of a find to a seed uses the tunnel Referer
+  (offline analysis only); the replay cannot show how Firecrawl behaves with a different seed mix, so live runs
+  confirm the result.
 - **Use:**
   - Cheap tools (ZAP traditional, probe) are only ranked, never filtered.
   - Expensive tools use the level for selection (D, F).
@@ -269,9 +342,10 @@ If deferred seeds always get a final run, the savings disappear.
 | Phase | Content | Runs / credits |
 |---|---|---|
 | 0 | Finish the paused Crawl Maze runs on the current code | **done** 2026-10-27 |
+| P0a | Data capture for scoring: G4, G5 (keep raw data per run), G1, G2, G3 (components, link graph) | none |
 | P0 | Offline replay on existing runs: rebuild each run's frontiers, apply A, B, C, E, F step by step, and report per rule: seeds removed, tool runs avoided, estimated time saved, expected resources lost. Seeds are linked to what they produced through traces, the ZAP history and (offline only) tunnel Referers | none |
 | P1 | T (runtime and memory reporting), A0, A, B, with tests and docs; regenerate ground truth if the normalizer changes | none until evaluation |
-| P2 | Firecrawl schema and prompt, F5 visit checks, accuracy metric | evaluation only |
+| P2 | Firecrawl schema and prompt (**done**, simplified), F5 visit checks, accuracy metric | evaluation only |
 | P3 | Link graph, C, then D, E, F behind config flags | evaluation only |
 | Eval | New labels (`full-pipeline-v2`, then one-rule-off variants) on Crawl Maze, Crawlground and Juice Shop; old runs kept | yes, ask first |
 
@@ -285,16 +359,16 @@ Credits: the current Firecrawl key has about 188 left; full-pipeline/run-04 repo
 2. **Rule A:** resolve `/./` in the normalizer (ground truth regenerated) or only in `request_key`? In the
    normalizer.
 3. **Rule B:** keep trap URLs flagged, or drop them? Keep them flagged and out of every frontier.
-4. **Rule C:** fixed levels or a weighted sum? Fixed levels.
+4. ~~**Rule C:** fixed levels or a weighted sum?~~ **Decided:** fixed levels (definitions in 3.6).
 5. **Rule E:** allow it despite the max-recall goal? Only if the P0 replay shows no loss of expected
    resources.
-6. **Rule F:** may Firecrawl permanently skip low-value seeds? Decide after the P0 numbers.
+6. **Rule F:** may Firecrawl permanently skip low-value seeds? Decide after the P0 Run A vs. Run B comparison.
 7. **Memory and credit logging (T):** add it before the next benchmark round? Yes.
+8. **Page group (G7):** method + parent folder of the path template + query keys? Yes.
+9. **Order:** data capture (P0a) before the replay, or replay run-04 now with partial data? P0a first.
 
 ## 6. Other open items
 
-- Commit the uncommitted work (tool-run traces, access-log metric, Crawl Maze path matching, Firecrawl
-  zero-traffic fix, summary scripts, docs). Ask before committing.
 - Juice Shop benchmark and the manual `reachable` review of its ground truth.
 - `client_spider.per_seed_max_duration_min` for runs with many seeds.
 - Pin ZAP add-on versions (they are recorded per run in `run_meta.json`).

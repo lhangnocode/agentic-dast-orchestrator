@@ -1,5 +1,5 @@
 """
-OWASP ZAP Wrapper for Traditional Spider and Ajax Spider (crawl-only, no active scan).
+OWASP ZAP Wrapper for the Traditional Spider and the Client Spider (crawl-only, no active scan).
 Extracts discovered endpoints from the ZAP message history via the ZAPv2 API.
 
 Each run only returns the messages produced by that run (history offset), restricted
@@ -36,22 +36,6 @@ DEFAULT_SPIDER_OPTIONS = {
     "post_form": False,          # never submit POST forms during discovery (avoids state changes)
     "poll_interval_sec": 2,
 }
-
-DEFAULT_AJAX_OPTIONS = {
-    "browser_id": "firefox-headless",
-    "number_of_browsers": 2,
-    "max_crawl_depth": 5,
-    "max_crawl_states": 0,       # 0 = unlimited
-    "max_duration_min": 3,       # per seed, enforced by ZAP; 0/None = until the crawl finishes
-    "event_wait_ms": 1000,       # time for SPA frameworks to render after an event
-    "reload_wait_ms": 1000,
-    "click_default_elems": True,
-    "click_elems_once": True,
-    "random_inputs": True,
-    "max_seeds": None,           # None = every seed gets a browser pass
-    "poll_interval_sec": 3,
-}
-
 
 DEFAULT_CLIENT_OPTIONS = {
     "browser_id": "firefox-headless",
@@ -104,7 +88,6 @@ class ZapWrapper:
         target_base: str = "http://localhost/",
         target_host_alias: str = "",
         spider_options: Optional[Dict[str, Any]] = None,
-        ajax_options: Optional[Dict[str, Any]] = None,
         client_options: Optional[Dict[str, Any]] = None,
         client_map_export: Optional[Dict[str, Any]] = None,
     ):
@@ -117,7 +100,6 @@ class ZapWrapper:
         self.target_base = target_base
         self.target_host_alias = target_host_alias
         self.spider_options = {**DEFAULT_SPIDER_OPTIONS, **(spider_options or {})}
-        self.ajax_options = {**DEFAULT_AJAX_OPTIONS, **(ajax_options or {})}
         self.client_options = {**DEFAULT_CLIENT_OPTIONS, **(client_options or {})}
         self.client_map_export = {**DEFAULT_CLIENT_MAP_EXPORT, **(client_map_export or {})}
         self.client_spider_user: Optional[tuple] = None  # (context name, user name) once browser login works
@@ -131,7 +113,7 @@ class ZapWrapper:
         self._client: Optional[ZAPv2] = None
 
     def set_auth(self, headers: Dict[str, str], cookies: Dict[str, str]) -> None:
-        """Headers/cookies ZAP adds to every request to the target (spider and Ajax browser traffic)."""
+        """Headers/cookies ZAP adds to every request to the target (spider and browser traffic)."""
         self.auth_headers = dict(headers)
         if cookies:
             self.auth_headers["Cookie"] = "; ".join(f"{k}={v}" for k, v in cookies.items())
@@ -292,26 +274,6 @@ class ZapWrapper:
             except Exception as e:
                 logger.debug(f"[ZAP] Could not apply spider option via {setter.__name__}: {e}")
 
-    def _apply_ajax_options(self) -> None:
-        o = self.ajax_options
-        a = self.client.ajaxSpider
-        for setter, value in (
-            (a.set_option_browser_id, o["browser_id"]),
-            (a.set_option_number_of_browsers, o["number_of_browsers"]),
-            (a.set_option_max_crawl_depth, o["max_crawl_depth"]),
-            (a.set_option_max_crawl_states, o["max_crawl_states"]),
-            (a.set_option_max_duration, o["max_duration_min"] or 0),
-            (a.set_option_event_wait, o["event_wait_ms"]),
-            (a.set_option_reload_wait, o["reload_wait_ms"]),
-            (a.set_option_click_default_elems, o["click_default_elems"]),
-            (a.set_option_click_elems_once, o["click_elems_once"]),
-            (a.set_option_random_inputs, o["random_inputs"]),
-        ):
-            try:
-                setter(value)
-            except Exception as e:
-                logger.debug(f"[ZAP] Could not apply ajax option via {setter.__name__}: {e}")
-
     def _apply_client_options(self) -> None:
         o = self.client_options
         c = self.client.clientSpider
@@ -406,43 +368,6 @@ class ZapWrapper:
                 pass
 
         return self.collect_messages(start=offset, source="zap_traditional_spider")
-
-    def run_ajax_spider(self, seeds: List[str]) -> List[Dict[str, Any]]:
-        """
-        Runs the ZAP Ajax Spider (real headless browser) on up to `max_seeds` seeds.
-        This is the main SPA crawler: it executes JS, clicks elements and follows client routes.
-        """
-        if not self.is_alive():
-            logger.warning("[ZAP] Daemon not reachable. Skipping Ajax Spider.")
-            return []
-
-        self.last_status = "ok"
-        self._apply_ajax_options()
-        self._apply_auth()
-        offset = self._message_count()
-        o = self.ajax_options
-        selected = list(dict.fromkeys(seeds))
-        if o["max_seeds"]:
-            selected = selected[: o["max_seeds"]]
-        timeout_sec = _watchdog_seconds(o["max_duration_min"], 60)
-        logger.info(f"[ZAP] Ajax Spider on {len(selected)} seed(s) with {o['number_of_browsers']} browser(s)...")
-
-        for seed in selected:
-            try:
-                self.client.ajaxSpider.scan(self.to_zap_url(seed))
-                start = time.time()
-                while _within(start, timeout_sec):
-                    if str(self.client.ajaxSpider.status).lower() != "running":
-                        break
-                    time.sleep(o["poll_interval_sec"])
-                else:
-                    self.last_status = "timeout"
-                    logger.warning(f"[ZAP] Ajax Spider timed out on {seed}; stopping it.")
-                    self.client.ajaxSpider.stop()
-            except Exception as e:
-                logger.error(f"[ZAP] Error running Ajax Spider on {seed}: {e}")
-
-        return self.collect_messages(start=offset, source="zap_ajax_spider")
 
     def run_client_spider(self, seeds: List[str]) -> List[Dict[str, Any]]:
         """

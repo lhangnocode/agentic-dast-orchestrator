@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 # Tool names of the coverage matrix (mirror orchestrator.decision_schema.ToolActionEnum)
-CRAWL_TOOLS = ("zap_traditional_spider", "zap_ajax_spider", "zap_client_spider", "wapiti_form_crawl",
+CRAWL_TOOLS = ("zap_traditional_spider", "zap_client_spider", "wapiti_form_crawl",
                "firecrawl_navigate")
 
 # Legacy / short source labels mapped onto coverage-matrix tool names

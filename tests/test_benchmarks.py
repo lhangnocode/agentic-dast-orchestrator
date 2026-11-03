@@ -135,10 +135,10 @@ def test_aggregate_mean_sd_ci():
 def test_run_config_isolates_every_output(tmp_path):
     base = {"target": {"base_url": "http://x/"}, "tools": {"wapiti": {"binary": "wapiti"}}}
     profile = {"config": {"target": {"base_url": "http://localhost:3456/"}, "auth": {"enabled": False}}}
-    cfg = run_config(base, profile, ["orchestrator.rules.browser_spider=zap_ajax_spider",
+    cfg = run_config(base, profile, ["orchestrator.rules.max_retries=0",
                                      "orchestrator.max_iterations=5"], tmp_path)
     assert cfg["target"]["base_url"] == "http://localhost:3456/"
-    assert cfg["orchestrator"] == {"rules": {"browser_spider": "zap_ajax_spider"}, "max_iterations": 5}
+    assert cfg["orchestrator"] == {"rules": {"max_retries": 0}, "max_iterations": 5}
     for value in (cfg["storage"]["sqlite_db"], cfg["logging"]["run_events_file"], cfg["output"]["dir"],
                   cfg["tools"]["wapiti"]["session_file"], cfg["tools"]["firecrawl"]["prompts_dir"],
                   cfg["tools"]["firecrawl"]["responses_dir"]):

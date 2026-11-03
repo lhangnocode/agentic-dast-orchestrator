@@ -22,12 +22,11 @@ from tools.zap_wrapper import ZapWrapper
 logger = logging.getLogger("orchestrator.tools")
 
 ZAP_TRADITIONAL = "zap_traditional_spider"
-ZAP_AJAX = "zap_ajax_spider"
 ZAP_CLIENT = "zap_client_spider"
 WAPITI = "wapiti_form_crawl"
 FIRECRAWL = "firecrawl_navigate"
 HTTP_PROBE = "http_probe"
-ALL_TOOLS = (ZAP_TRADITIONAL, ZAP_AJAX, ZAP_CLIENT, WAPITI, FIRECRAWL, HTTP_PROBE)
+ALL_TOOLS = (ZAP_TRADITIONAL, ZAP_CLIENT, WAPITI, FIRECRAWL, HTTP_PROBE)
 
 
 @dataclass
@@ -114,7 +113,6 @@ class ToolRegistry:
             target_base=base_url,
             target_host_alias=zap_cfg.get("target_host_alias", ""),
             spider_options=zap_cfg.get("spider"),
-            ajax_options=zap_cfg.get("ajax_spider"),
             client_options=zap_cfg.get("client_spider"),
             client_map_export=zap_cfg.get("client_map_export"),
         )
@@ -182,7 +180,7 @@ class ToolRegistry:
         available = []
         zap_up = self.zap.is_alive()
         if zap_up:
-            available += [ZAP_TRADITIONAL, ZAP_AJAX, ZAP_CLIENT]
+            available += [ZAP_TRADITIONAL, ZAP_CLIENT]
         else:
             logger.warning("[TOOLS] ZAP daemon unreachable: ZAP spiders unavailable (run `make up`).")
         if _resolve_binary(self.wapiti.binary_path):
@@ -199,7 +197,7 @@ class ToolRegistry:
         run = ToolRun(tool=tool, seeds=list(seeds))
         start = time.time()
         run.started_at = start
-        wrapper = {ZAP_TRADITIONAL: self.zap, ZAP_AJAX: self.zap, ZAP_CLIENT: self.zap, WAPITI: self.wapiti,
+        wrapper = {ZAP_TRADITIONAL: self.zap, ZAP_CLIENT: self.zap, WAPITI: self.wapiti,
                    HTTP_PROBE: self.probe, FIRECRAWL: self.firecrawl}.get(tool)
         if wrapper is not None:
             wrapper.last_first_request_at = None
@@ -207,9 +205,6 @@ class ToolRegistry:
         try:
             if tool == ZAP_TRADITIONAL:
                 run.results = self.zap.run_traditional_spider(seeds)
-                run.requests_sent, run.status = self.zap.last_request_count, self.zap.last_status
-            elif tool == ZAP_AJAX:
-                run.results = self.zap.run_ajax_spider(seeds)
                 run.requests_sent, run.status = self.zap.last_request_count, self.zap.last_status
             elif tool == ZAP_CLIENT:
                 run.results = self.zap.run_client_spider(seeds)

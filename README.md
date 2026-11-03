@@ -22,7 +22,7 @@ The **Agentic DAST Orchestrator** is an autonomous crawler orchestration framewo
           ▼                         ▼                         ▼
   ┌───────────────┐         ┌───────────────┐         ┌───────────────┐
   │ Firecrawl     │         │ OWASP ZAP     │         │ Wapiti        │
-  │ Cloud Agent   │         │ Spider & Ajax │         │ Form Crawler  │
+  │ Cloud Agent   │         │ Spider/Client │         │ Form Crawler  │
   └───────────────┘         └───────────────┘         └───────────────┘
           │                         │                         │
           └─────────────────────────┼─────────────────────────┘
@@ -76,7 +76,7 @@ agentic-dast-orchestrator/
 │   └── safety_firewall.py       # Scope / logout / SSRF filtering of seeds
 ├── storage/state_store.py       # SQLite: endpoints, provenance, coverage matrix, history
 ├── tools/
-│   ├── zap_wrapper.py           # ZAP traditional / Client / AJAX spiders, browser login
+│   ├── zap_wrapper.py           # ZAP traditional spider and Client Spider, browser login
 │   ├── client_map.py            # Client Map export parser
 │   ├── wapiti_wrapper.py        # Wapiti crawl-only
 │   ├── firecrawl_client.py      # Firecrawl Agent (batched jobs)

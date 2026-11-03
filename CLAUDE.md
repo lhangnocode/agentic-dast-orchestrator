@@ -44,7 +44,7 @@ Key boundaries:
 - **ZAP** runs in Docker. `tools.zap.target_host_alias` (`host.docker.internal`) rewrites localhost seeds for ZAP, and results are mapped back. Every run reads only the history after its own start offset, filtered to the target origin. `HTTP/1.0 0` placeholder messages are ignored.
   - Traditional spider: seeds are primed into the Sites tree, then one recursive scan per origin runs. `post_form: false`.
   - **Client Spider** (`client` add-on, alpha in ZAP 2.17.0): one scan per seed. After the run, the Client Map is exported to `/zap/wrk` (volume → `output/zap`) and parsed by `tools/client_map.py`. That parser is **line/indent-based** because ZAP can export invalid YAML; the fixture with the broken region is `tests/fixtures/client_map_juice_shop.yaml`. The Client Map is the only ZAP source of `#/` routes. `client_spider.per_seed_max_duration_min` caps each scan when a run has several seeds.
-  - The AJAX Spider remains selectable (`orchestrator.rules.browser_spider`, plus the stage list).
+  - The AJAX Spider was removed on 2026-11-03; the Client Spider is the only browser spider (R3).
 - **Wapiti**: `headless: "hidden"` (Playwright Firefox) is the default. Hash-route seeds are dropped when headless is off.
 - **Firecrawl**: the prompt is rendered by `tools/firecrawl_prompt.py` from `configs/prompts/firecrawl_agent.md` (sections 1–8, `string.Template.safe_substitute`) plus the store's `get_known_routes_summary`. It holds no per-target hints (the per-target context files were removed on 2026-10-31).
   - The response schema (`DiscoveredLinksSchema`) has three lists: `visited_urls`, `interaction_urls`, `seen_urls`. All are ingested; each result carries `firecrawl_kind` (visited / interaction / seen; `unspecified` for the old `links` field). It is Firecrawl's own account, not verified.
@@ -54,7 +54,7 @@ Key boundaries:
   - Rendered prompts are saved by hash in `prompts_dir`; each job's full API response goes to `responses_dir/<job id>.json`.
   - Without a key, or for a localhost target without `PUBLIC_TUNNEL_URL`, Firecrawl is unavailable.
 - **HTTP probe** (`tools/http_probe.py`): one GET per unknown-status URL, with no redirects followed and no `#/` routes. It is always available.
-- Time limits: `0`/`null` durations (`spider/ajax_spider/client_spider.max_duration_min`, Wapiti `max_scan_time`) mean no limit.
+- Time limits: `0`/`null` durations (`spider/client_spider.max_duration_min`, Wapiti `max_scan_time`) mean no limit.
 
 ### Canonical endpoint identity
 

@@ -138,9 +138,9 @@ def test_frontier_returns_concrete_urls_and_filters_sources():
                           ("http://localhost/docs/intro", "zap_traditional_spider")]:
             store.insert_or_update_endpoint(normalize_endpoint(url, source_tool=tool), 1)
 
-        frontier = store.get_pending_frontier("zap_ajax_spider", limit=None)
+        frontier = store.get_pending_frontier("zap_client_spider", limit=None)
         assert "http://localhost/api/Products/7" in frontier        # real URL, not .../{id}
         assert not any("{" in u for u in frontier)
 
-        only_wapiti = store.get_pending_frontier("zap_ajax_spider", limit=None, sources=["wapiti_form_crawl"])
+        only_wapiti = store.get_pending_frontier("zap_client_spider", limit=None, sources=["wapiti_form_crawl"])
         assert only_wapiti == ["http://localhost/api/Products/7"]

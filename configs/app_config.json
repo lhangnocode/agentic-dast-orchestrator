@@ -51,7 +51,6 @@
       ]
     ],
     "rules": {
-      "browser_spider": "zap_client_spider",
       "max_retries": 1,
       "max_runs_per_tool": 10,
       "disabled_rules": [],
@@ -83,19 +82,6 @@
         "parse_robots_txt": true,
         "process_form": true,
         "post_form": false
-      },
-      "ajax_spider": {
-        "browser_id": "firefox-headless",
-        "number_of_browsers": 2,
-        "max_crawl_depth": 5,
-        "max_crawl_states": 0,
-        "max_duration_min": 0,
-        "event_wait_ms": 1000,
-        "reload_wait_ms": 1000,
-        "click_default_elems": true,
-        "click_elems_once": true,
-        "random_inputs": true,
-        "max_seeds": null
       },
       "client_spider": {
         "browser_id": "firefox-headless",

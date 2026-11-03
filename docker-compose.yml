@@ -32,7 +32,6 @@ services:
         -config api.addrs.addr.name=.*
         -config api.addrs.addr.regex=true
         -config api.key=${ZAP_API_KEY:-changeme}
-        -config ajaxSpider.browserId=firefox-headless
     volumes:
       # Shared with the orchestrator: ZAP writes the Client Map export here (tools.zap.client_map_export)
       - ./output/zap:/zap/wrk

@@ -7,7 +7,7 @@ Deterministic rule engine that picks the next crawl actions (no LLM).
 Each rule closes a capability gap (see docs/tool-capabilities.md):
 
   R1 retry          last run of a tool failed/timed out and retries are left -> same tool, same seeds
-  R3 browser_spider browser spider's frontier changed since its last run -> new page-like URLs
+  R3 browser_spider ZAP Client Spider's frontier changed since its last run -> new page-like URLs
   R4 link_spider    ZAP traditional spider's frontier changed -> new URLs
   R5 form_crawler   Wapiti's frontier changed -> new page-like URLs
   R6 ui_agent       Firecrawl's frontier changed -> new page-like URLs
@@ -29,7 +29,6 @@ from orchestrator.policy import classify_surface
 from storage.state_store import StateStore
 
 ZAP_TRADITIONAL = "zap_traditional_spider"
-ZAP_AJAX = "zap_ajax_spider"
 ZAP_CLIENT = "zap_client_spider"
 WAPITI = "wapiti_form_crawl"
 FIRECRAWL = "firecrawl_navigate"
@@ -39,7 +38,7 @@ RULE_ORDER = ("R1_retry", "R3_browser_spider", "R4_link_spider",
               "R5_form_crawler", "R6_ui_agent", "R7_probe")
 
 # Which seeds each tool can use: browsers/agents and Wapiti want pages, not JSON or files
-PAGE_LIKE_TOOLS = {ZAP_CLIENT, ZAP_AJAX, WAPITI, FIRECRAWL}
+PAGE_LIKE_TOOLS = {ZAP_CLIENT, WAPITI, FIRECRAWL}
 
 
 def engine_of(tool: str) -> str:
@@ -82,7 +81,6 @@ class Action:
 
 @dataclass
 class RuleSettings:
-    browser_spider: str = ZAP_CLIENT    # or zap_ajax_spider (A/B, rollback)
     max_retries: int = 1
     max_runs_per_tool: int = 10
     disabled_rules: Set[str] = field(default_factory=set)
@@ -92,7 +90,6 @@ class RuleSettings:
     def from_config(cls, config: Dict[str, Any]) -> "RuleSettings":
         r = config.get("orchestrator", {}).get("rules", {})
         return cls(
-            browser_spider=r.get("browser_spider", ZAP_CLIENT),
             max_retries=r.get("max_retries", 1),
             max_runs_per_tool=r.get("max_runs_per_tool", 10),
             disabled_rules=set(r.get("disabled_rules", [])),
@@ -100,7 +97,7 @@ class RuleSettings:
         )
 
     def selectable_tools(self) -> List[str]:
-        return [ZAP_TRADITIONAL, self.browser_spider, WAPITI, FIRECRAWL, HTTP_PROBE]
+        return [ZAP_TRADITIONAL, ZAP_CLIENT, WAPITI, FIRECRAWL, HTTP_PROBE]
 
 
 def tool_frontier(store: StateStore, tool: str) -> List[str]:
@@ -166,7 +163,7 @@ def _r7_probe(t: ToolState, snap: Snapshot, s: RuleSettings) -> Optional[Action]
 
 RULES = {
     "R1_retry": _r1_retry,
-    "R3_browser_spider": _grew("R3_browser_spider", lambda tool, s: tool == s.browser_spider,
+    "R3_browser_spider": _grew("R3_browser_spider", lambda tool, s: tool == ZAP_CLIENT,
                                "browser spider: new page-like URLs since its last run"),
     "R4_link_spider": _grew("R4_link_spider", lambda tool, s: tool == ZAP_TRADITIONAL,
                             "link spider: new URLs since its last run"),
